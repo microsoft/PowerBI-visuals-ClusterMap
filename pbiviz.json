@@ -1,0 +1,23 @@
+{
+  "visual": {
+    "name": "VisualTemplate",
+    "displayName": "Visual Template",
+    "guid": "TemplateVisual1642123423151",
+    "visualClassName": "VisualTemplate",
+    "version": "0.0.1",
+    "description": "ESSEX Visual Template",
+    "supportUrl": "",
+    "gitHubUrl": ""
+  },
+  "author": {
+    "name": "",
+    "email": ""
+  },
+  "apiVersion": "1.1.0",
+  "assets": {
+    "icon": "assets/icon.png"
+  },
+  "style": "style/visual.scss",
+  "capabilities": "capabilities.json",
+  "output": "dist/essexVisualTemplate.pbiviz"
+}

@@ -1,0 +1,12 @@
+{
+  "compilerOptions": {
+    "target": "es5",
+    "sourceMap": true,
+    "types": ["mocha", "sinon-chai", "requirejs"],
+    "experimentalDecorators": true
+  },
+  "compileOnSave": false,
+  "exclude": [
+    "node_modules"
+  ]
+}
