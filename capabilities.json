@@ -1,37 +1,114 @@
 {
   "dataRoles": [
     {
-      "displayName": "Category Data",
-      "name": "category",
-      "kind": 0
-    },
-    {
-      "displayName": "Measure Data",
-      "name": "measure",
-      "kind": 1
+      "name": "PersonaGroup",
+      "kind": 0,
+      "displayName": "Group Id"
+    }, {
+      "name": "ReferenceName",
+      "kind": 0,
+      "displayName": "Label"
+    }, {
+      "name": "ReferenceCount",
+      "kind": 1,
+      "displayName": "Count"
+    }, {
+      "name": "ReferenceImageUrl",
+      "kind": 0,
+      "displayName": "Image Url"
+    }, {
+      "name": "ReferenceLinkTo",
+      "kind": 0,
+      "displayName": "Related To"
+    }, {
+      "name": "ReferenceLinkWeight",
+      "kind": 0,
+      "displayName": "Relatedness Strength"
     }
   ],
-  "dataViewMappings": [
-    {
-      "categorical": {
-        "categories": {
-          "for": {
-            "in": "category"
-          },
-          "dataReductionAlgorithm": {
-            "top": {}
-          }
+  "dataViewMappings": [{
+    "conditions": [
+      {
+        "PersonaGroup": {"max": 1},
+        "ReferenceName": {"max": 1},
+        "ReferenceCount": {"max": 1},
+        "ReferenceDocumentID": {"max": 1},
+        "ReferenceImageUrl": {"max": 4},
+        "ReferenceLinkTo": {"max": 1},
+        "ReferenceLinkWeight": {"max": 1}
+      }
+    ],
+    "categorical": {
+      "categories": {
+        "for": {"in": "PersonaGroup"},
+        "dataReductionAlgorithm": {"window": {"count": 5000}}
+      },
+      "values": {
+        "select": [
+          {"for": {"in": "ReferenceName"}},
+          {"for": {"in": "ReferenceCount"}},
+          {"for": {"in": "ReferenceImageUrl"}},
+          {"for": {"in": "ReferenceLinkTo"}},
+          {"for": {"in": "ReferenceLinkWeight"}}
+        ],
+        "dataReductionAlgorithm": {"window": {"count": 5000}}
+      },
+      "rowCount": {
+        "preferred": {
+          "min": 5000,
+          "max": 20000
         },
-        "values": {
-          "select": [
-            {
-              "bind": {
-                "to": "measure"
-              }
-            }
-          ]
+        "supported": {
+          "min": 0,
+          "max": 50000
         }
       }
     }
-  ]
+  }],
+
+  "objects": {
+    "presentation": {
+      "displayName": "Presentation",
+      "properties": {
+        "initialCount": {
+          "displayName": "Max Cluster Count",
+          "description": "The maximum number of clusters to display.",
+          "type": {
+            "numeric": true
+          }
+        },
+        "layout": {
+          "displayName": "Layout",
+          "description": "Defines how the clusters are positioned on the screen.",
+          "type": {
+            "enumeration": [
+              {"value": "orbital", "displayName": "Spiral"},
+              {"value": "cola", "displayName": "Relational"}
+            ]
+          }
+        },
+        "imageBlur": {
+          "displayName": "Blur",
+          "description": "Defines if the background images in clusters should be blurred.",
+          "type": {
+            "bool": true
+          }
+        }
+      }
+    },
+    "dataLoading": {
+      "displayName": "Data Loading",
+      "properties": {
+        "maxDataRows": {
+          "displayName": "Max Data Rows",
+          "description": "The maximum number of data rows to load from the original data",
+          "type": {
+            "numeric": true
+          }
+        }
+      }
+    }
+  },
+
+  "supportsHighlight": true
 }
