@@ -1,7 +1,14 @@
 'use strict';
 
 const path = require('path');
+const cp = require('child_process');
+const crypto = require('crypto');
 const pbiviz = require(path.join(process.cwd(), 'pbiviz.json'));
+const packageJson = require(path.join(process.cwd(), 'package.json'));
+
+const userName = cp.execSync('whoami').toString();
+const userHash = crypto.createHash('md5').update(userName).digest('hex');
+console.log('User Hash: ' + userHash);
 
 const patchAPI = function (version) {
     /* source code must be ES 5 */
@@ -87,7 +94,7 @@ function pbivizPluginTemplate (pbiviz) {
                     name: '${pbiviz.visual.guid}',
                     displayName: '${pbiviz.visual.name}',
                     class: '${pbiviz.visual.visualClassName}',
-                    version: '${pbiviz.visual.version}',
+                    version: '${packageJson.version}',
                     apiVersion: ${pbiviz.apiVersion ? `'${pbiviz.apiVersion}'` : undefined },
                     capabilities: {}, // will be overridden by capabilities.json (needed for debug visual for somehow)
                     create: function (/*options*/) {
@@ -97,6 +104,10 @@ function pbivizPluginTemplate (pbiviz) {
                     },
                     custom: true
                 };
+
+                /* save version number to visual */
+                ${pbiviz.visual.visualClassName}.__essex_build_info__ = '${packageJson.version} ${Date.now()} [${userHash}]';
+                Object.defineProperty(${pbiviz.visual.visualClassName}.prototype, '__essex_build_info__', { get: function() { return ${pbiviz.visual.visualClassName}.__essex_build_info__; } } );
 
                 /* ESSEX API Patcher */
                 ${pbiviz.visual.visualClassName}.prototype.__essex_visual__ = true;
