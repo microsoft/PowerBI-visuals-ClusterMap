@@ -1,6 +1,6 @@
 {
   "name": "@uncharted/personas",
-  "version": "0.4.22",
+  "version": "0.4.23",
   "description": "personas",
   "main": "dist/uncharted.personas.js",
   "scripts": {
