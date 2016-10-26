@@ -1,6 +1,6 @@
 const webpack = require('webpack');
 const path = require('path');
-const ENTRY = './src/VisualMain.ts';
+const ENTRY = './src/ClusterMap.ts';
 const regex = path.normalize(ENTRY).replace(/\\/g, '\\\\').replace(/\./g, '\\.');
 
 module.exports = {
