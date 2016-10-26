@@ -1,6 +1,6 @@
 {
-  "name": "essex-powerbi-template",
-  "version": "1.0.0",
+  "name": "ClusterMap",
+  "version": "0.5.0",
   "description": "PowerBI custom visual.",
   "main": "src/index.js",
   "scripts": {
@@ -23,10 +23,7 @@
   "license": "MIT",
   "privateSubmodules": {
     "@uncharted/personas": "0.4.22",
-    "uncharted-facets": "2.3.0",
-    "@uncharted/stories.common": "0.1.7",
-    "@uncharted/strippets": "0.4.6",
-    "@uncharted/thumbnails": "0.3.6"
+    "@uncharted/stories.common": "0.1.7"
   },
   "devDependencies": {
     "@types/jquery": "^2.0.33",
