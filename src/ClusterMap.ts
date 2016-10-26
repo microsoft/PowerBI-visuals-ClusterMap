@@ -19,6 +19,7 @@ import SelectionId = powerbi.extensibility.ISelectionId;
 import {IPersonasData, IPersonasOptions, IPersonasSubSelection, IPersonasVisualConfiguration} from './interfaces';
 
 import * as $ from 'jquery';
+import * as _ from 'lodash';
 
 const Personas = require('@uncharted/personas/src/Personas');
 const Persona = require('@uncharted/personas/src/personas.persona');
