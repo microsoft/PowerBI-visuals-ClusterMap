@@ -30,11 +30,6 @@ const DOCUMENT_REQUEST_COUNT = 5000;
 
 export default class ClusterMap implements IVisual {
 
-    public static LAYOUT_TYPES: IEnumType = powerbi.createEnumType([
-        {value: 'orbital', displayName: 'Spiral'},
-        {value: 'cola', displayName: 'Relational'},
-    ]);
-
     private static LOAD_MORE_PERSONAS_STEP = 5;
     private static MAX_PERSONAS_DEFAULT = 20;
     private static MAX_PROPERTIES_DEFAULT = 5;
@@ -56,7 +51,7 @@ export default class ClusterMap implements IVisual {
 
     private element:JQuery;
     private inSandbox:boolean;
-    private settings = $.extend({}, ClusterMap.DEFAULT_SETTINGS);
+    private settings = $.extend(true, {}, ClusterMap.DEFAULT_SETTINGS);
     private host:IVisualHostServices;
     private personas:any;
     private $personas:JQuery;
@@ -138,6 +133,36 @@ export default class ClusterMap implements IVisual {
                 this.mCountText.remove();
             }
         };
+    }
+
+    public destroy(): void {
+        if (this.personas) {
+            this.personas.layoutSystem.invalidate();
+            this.personas.layoutSystem.removeAllObjects();
+            this.personas.layoutSystem.remove();
+
+            this.personas.unregisterEvents();
+        }
+
+        if (this.otherPersona) {
+            this.otherPersona.invalidate();
+            this.otherPersona = null;
+        }
+
+        if (this.autoZoomTimerId !== null) {
+            clearTimeout(this.autoZoomTimerId);
+            this.autoZoomTimerId = null;
+        }
+
+        this.$personas.remove();
+        this.$personas = null;
+
+        this.subSelectionData = null;
+        this.serializedData = null;
+        this.dataView = null;
+        this.data = null;
+        this.selectionManager = null;
+        this.host = null;
     }
 
     public update(options:VisualUpdateOptions) {
@@ -479,19 +504,12 @@ export default class ClusterMap implements IVisual {
                     count = isNaN(count) ? 0 : count;
 
                     const idColumnMetadata = (metadata.columns[personaIdColIndex] as any);
-                    let idType = 'text';
-                    if (idColumnMetadata.type.integer) {
-                        idType = 'integer';
-                    } else if (idColumnMetadata.type.numeric) {
-                        idType = 'double';
-                    }
-
                     const memoIndex = _.findIndex(memo.counts, m => m.id === personaId);
                     if (memoIndex < 0) {
                         memo.counts.push({
                             id: personaId,
                             count: count,
-                            selection: SQExprBuilder.equal((metadata.columns[personaIdColIndex] as any).expr, SQExprBuilder[idType](personaId))
+                            selection: SQExprBuilder.equal(idColumnMetadata.expr, SQExprBuilder.typedConstant(personaId, idColumnMetadata.type))
                         });
                     } else if (this.hasDocumentList) {
                         memo.counts[memoIndex].count += count;
