@@ -1,6 +1,7 @@
 const webpack = require('webpack');
 const path = require('path');
 const ENTRY = './src/VisualMain.ts';
+const regex = path.normalize(ENTRY).replace(/\\/g, '\\\\').replace(/\./g, '\\.');
 
 module.exports = {
     entry: ENTRY,
@@ -11,8 +12,8 @@ module.exports = {
     module: {
         loaders: [
             {
-              test: new RegExp(ENTRY),
-              loader: path.join(__dirname, 'bin', 'pbiPluginLoader'),
+                test: new RegExp(regex),
+                loader: path.join(__dirname, 'bin', 'pbiPluginLoader'),
             },
             {
                 test: /\.ts?$/,
@@ -26,4 +27,4 @@ module.exports = {
             "lodash": "_"
         },
     ]
-}
+};
