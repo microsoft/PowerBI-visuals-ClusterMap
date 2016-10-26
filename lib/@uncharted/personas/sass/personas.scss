@@ -1,0 +1,105 @@
+@import "fonts";
+
+/* latin */
+@font-face {
+  font-family: 'Oswald';
+  font-style: normal;
+  font-weight: 400;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2212, U+2215, U+E0FF, U+EFFD, U+F000;
+  src: $oswald400Font format('woff');
+}
+@font-face {
+  font-family: 'Oswald';
+  font-style: normal;
+  font-weight: 700;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2212, U+2215, U+E0FF, U+EFFD, U+F000;
+  src: $oswald700Font format('woff');
+}
+
+
+.personas {
+  .prsnas_entity {
+    stroke: #CEC3B8;
+    stroke-width: 3px;
+    fill: #F8F6F3;
+
+  }
+
+  .selected {
+    stroke: #2ab3e4;
+    stroke-width: 8px;
+  }
+
+  .unselected {
+    stroke: #CEC3B8;
+    stroke-width: 3px;
+  }
+
+  .prsnas_main {
+    stroke-width: 3px;
+    stroke: #FFFFFF;
+  }
+
+  .prsnas_name {
+    fill: $default_font_color;
+    font-family: $default_font;
+    font-size: 16px;
+  }
+
+  .prsnas_namecontainer {
+    fill-opacity: 0.5;
+  }
+
+.prsnas_count {
+  fill: $default_font_color;
+  font-family: 'Oswald', sans-serif;
+  font-weight: normal;
+  font-size: 24px;
+}
+
+  .prsnas_totalcount {
+    font-family: $default_font;
+    fill: $default_font_color;
+    font-size: 14px;
+  }
+
+  .prsnas_nopointer {
+    pointer-events: none;
+  }
+
+  .prsnas_zoom_controls {
+    fill: white;
+    stroke: #ccc;
+    stroke-width: 1px;
+    cursor: pointer;
+
+    .control_label {
+      fill: #222;
+      font-family: FontAwesome;
+      font-size: 12px;
+      stroke: none;
+    }
+  }
+
+  .seed_count {
+    fill: #99847A;
+    font-family: $default_font;
+    font-size: 16px;
+  }
+
+  .seed_value {
+    fill: #0F0F0F;
+    font-family: $default_font;
+    font-size: 14px;
+    font-weight: bold;
+  }
+
+  .unselectable {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+  }
+}

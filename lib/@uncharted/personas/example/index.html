@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Personas Example</title>
+    <link rel="stylesheet" href="font-awesome.css">
+    <link rel="stylesheet" href="personas.css">
+
+    <script type="text/javascript" src="uncharted.personas.dependencies.js"></script>
+    <script type="text/javascript" src="uncharted.personas.js"></script>
+    <script type="text/javascript" src="sampledata.js"></script>
+</head>
+<body>
+<svg id="personas-panel" width="100%" height="600" version="1.1"  xmlns="http://www.w3.org/2000/svg"></svg>
+<a id="moreData" href="javascript:void(0);">load more data...</a><br />
+<a id="subSelectPersonas01" href="javascript:void(0);">sub-select 3 personas...</a><br />
+<a id="subSelectPersonas02" href="javascript:void(0);">sub-select 3 personas and keep previous selection...</a><br />
+<a id="orbitalLayout" href="javascript:void(0);">Set layout type to "orbital"</a><br />
+<a id="colaLayout" href="javascript:void(0);">Set layout type to "cola" (Force graph)</a><br />
+<a id="setZoom" href="javascript:void(0);">Set Current Zoom Level</a><br />
+<a id="logZoom" href="javascript:void(0);">Log Current Zoom Level</a><br />
+
+<script type="text/javascript">
+    $(function() {
+        var data = getSampleData();
+        var options = {
+            autoGenerateIconMap: false,
+            entityIcons: getIconMap(),
+            // to disable visual effects on sub selection
+            Persona: {
+                config: {
+                    transitionsDuration: 300,
+                    subSelect: {
+                        blur: false,
+                        gray: false
+                    }
+                }
+            }
+        };
+
+        Uncharted.Personas.asJQueryPlugin();
+        $("#personas-panel").personas(options);
+        $("#personas-panel").personas("loaddata", data);
+
+        var moreDataLink = document.getElementById("moreData");
+        moreDataLink.onclick = function() {
+            $("#personas-panel").personas("loaddata", getExtraSampleData(), true);
+            return false;
+        };
+
+        var subSelectLink01 = document.getElementById("subSelectPersonas01");
+        subSelectLink01.onclick = function() {
+            $("#personas-panel").personas("subselect", getSubSelectData01());
+            return false;
+        };
+
+        var subSelectLink02 = document.getElementById("subSelectPersonas02");
+        subSelectLink02.onclick = function() {
+            $("#personas-panel").personas("subselect", getSubSelectData02(), true);
+            return false;
+        };
+
+        var orbitalLink = document.getElementById("orbitalLayout");
+        orbitalLink.onclick = function() {
+            $("#personas-panel").personas("setlayouttype", "orbital");
+            return false;
+        };
+
+        var colaLink = document.getElementById("colaLayout");
+        colaLink.onclick = function() {
+            $("#personas-panel").personas("setlayouttype", "cola");
+            return false;
+        };
+
+        var setZoomLink = document.getElementById("setZoom");
+        setZoomLink.onclick = function() {
+            $("#personas-panel").personas("setZoom", 1.4);
+        };
+
+        var logZoomLink = document.getElementById("logZoom");
+        logZoomLink.onclick = function() {
+            $("#personas-panel").personas("getZoom", function(currentZoomLevel) {
+                console.log(currentZoomLevel);
+            });
+        };
+    });
+</script>
+
+</body>
+</html>
