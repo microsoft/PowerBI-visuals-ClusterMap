@@ -1,4 +1,6 @@
+.npmrc
 .idea
 .tmp
 node_modules
 typings
+dist
