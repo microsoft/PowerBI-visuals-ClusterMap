@@ -22,7 +22,7 @@ const buildPackageJson = {
             file: `resources/${ pbivizJson.visual.guid }.pbiviz.json`,
         }
     ],
-    visual: pbivizJson.visual,
+    visual: Object.assign(pbivizJson.visual, { version: packageJson.version }),
     metadata: {
         pbivizjson: {
             resourceId: 'rId0'
