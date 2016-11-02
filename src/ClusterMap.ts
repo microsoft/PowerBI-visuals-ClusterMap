@@ -110,29 +110,6 @@ export default class ClusterMap implements IVisual {
         Persona.prototype.removeAllAppendedGauges = function () {
             this.mGauge.updateBar(_personasPersona_barId, 0, true);
         };
-
-        /* hack the blur TODO: implement in the personas component */
-        // const oldBlur = Persona.prototype._blur; // not used
-        const _t = this;
-        Persona.prototype._blur = function (amount) {
-            let originalMaxAmount = this.mVisualFocusBlurAmount;
-            let progress = (amount / originalMaxAmount);
-            let contrastTargetValue = 0.8;
-            let brightnessTargetValue = 0.5;
-            let contrast = Snap.filter.contrast(1 - (progress * contrastTargetValue));
-            let brightness = Snap.filter.brightness(1 + (progress * brightnessTargetValue));
-            return contrast + brightness;
-        };
-
-        /* hack the label so it doesn't present the total count */
-        const oldOnEnter = PersonasLabel.prototype.onEnter;
-        PersonasLabel.prototype.onEnter = function () {
-            oldOnEnter.call(this);
-            this.mTotalCountText.remove();
-            if (this.count === '1') {
-                this.mCountText.remove();
-            }
-        };
     }
 
     public destroy(): void {
