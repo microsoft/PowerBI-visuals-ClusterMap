@@ -22,7 +22,7 @@
   "author": "Uncharted Software Inc.",
   "license": "MIT",
   "privateSubmodules": {
-    "@uncharted/personas": "0.4.23",
+    "@uncharted/personas": "0.5.1",
     "@uncharted/stories.common": "0.1.7"
   },
   "devDependencies": {
