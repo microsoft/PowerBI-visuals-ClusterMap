@@ -316,6 +316,8 @@ export default class ClusterMap implements IVisual {
                                 autoGenerateFallbackColors: false,
                                 fallbackBackgroundColor: '#777777',
                                 registerWindowResize: false,
+                                displayTotalCountLabel: false,
+                                displayLabelsAtOneCount: false
                             },
                         },
                         hooks: {
