@@ -45,10 +45,6 @@ import * as $ from 'jquery';
 import * as _ from 'lodash';
 
 const Personas = require('@uncharted/personas/src/Personas');
-const Persona = require('@uncharted/personas/src/personas.persona');
-const PersonasGauge = require('@uncharted/personas/src/personas.persona.gauge.js');
-const PersonasLabel = require('@uncharted/personas/src/personas.persona.label.js');
-const Snap = require('snapsvg');
 const DOCUMENT_REQUEST_COUNT = 5000;
 
 export default class ClusterMap implements IVisual {
@@ -91,6 +87,7 @@ export default class ClusterMap implements IVisual {
     private dataView:DataView;
     private hasLinks:boolean;
     private hasDocumentList:boolean;
+    private hasBuckets:boolean;
     private serializedData = null;
     private subSelectionData = null;
     private ignoreSelectionNextUpdate = false;
@@ -120,23 +117,6 @@ export default class ClusterMap implements IVisual {
         this.maxPersonas = ClusterMap.MAX_PERSONAS_DEFAULT;
         this.maxProperties = ClusterMap.MAX_PROPERTIES_DEFAULT;
         this.showOther = true;
-
-        /* hack the persona gauges */
-        const _personasPersona_barId = '__uniqueBarId__';
-        const _personasGauge_addBar = PersonasGauge.prototype.addBar;
-        PersonasGauge.prototype.addBar = function (id, progress, color) {
-            _personasGauge_addBar.call(this, _personasPersona_barId, 0, '#00bad3'); // do nothing
-        };
-
-        /* hack the persona `appendGauge` and `removeAllAppendedGauges` functions */
-        Persona.prototype.appendGauge = function (bars) {
-            /* we should only ever get one bar here */
-            this.mGauge.updateBar(_personasPersona_barId, bars[0].percent, true);
-        };
-
-        Persona.prototype.removeAllAppendedGauges = function () {
-            this.mGauge.updateBar(_personasPersona_barId, 0, true);
-        };
     }
 
     public destroy(): void {
@@ -324,7 +304,8 @@ export default class ClusterMap implements IVisual {
                                 fallbackBackgroundColor: '#777777',
                                 registerWindowResize: false,
                                 displayTotalCountLabel: false,
-                                displayLabelsAtOneCount: false
+                                displayLabelsAtOneCount: false,
+                                renderSubSelectionBackground: false
                             },
                         },
                         hooks: {
@@ -372,19 +353,7 @@ export default class ClusterMap implements IVisual {
                 this.ignoreSelectionNextUpdate = false;
             } else {
                 if (this.subSelectionData) {
-                    /* convert the data to the internal format */
-                    const selectionData = {};
-                    for (let i = 0, n = this.subSelectionData.length; i < n; ++i) {
-                        const personaData = this.subSelectionData[i];
-                        selectionData[personaData.personaId] = {
-                            computePercentages: true,
-                            bars: [{
-                                color: personaData.color,
-                                count: personaData.count,
-                            }],
-                        };
-                    }
-                    this.personas.subSelectPersonasMultiGauge(selectionData, false);
+                    this.personas.subSelectPersonas(this.subSelectionData, false);
                     if (!this.inSandbox) {
                         (<JQuery>(<any>this.$personas).find('[filter^="url("]', '[FILTER^="url("]')).each((index, element)=> {
                             const currentUrl = $(element).attr('filter');
@@ -396,7 +365,7 @@ export default class ClusterMap implements IVisual {
                         });
                     }
                 } else {
-                    this.personas.subSelectPersonasMultiGauge(null, false);
+                    this.personas.subSelectPersonas(null, false);
                 }
             }
         } else if (this.personas) {
@@ -431,6 +400,9 @@ export default class ClusterMap implements IVisual {
             const referenceCountColIndex = _.findIndex(metadata.columns, c => {
                 return c.roles['ReferenceCount'];
             });
+            const referenceBucketColIndex = _.findIndex(metadata.columns, c => {
+                return c.roles['ReferenceBucket'];
+            });
             const referenceDocumentsColIndex = _.findIndex(metadata.columns, c => {
                 return c.roles['ReferenceDocumentID'];
             });
@@ -452,9 +424,10 @@ export default class ClusterMap implements IVisual {
 
             this.hasLinks = (referenceLinkToColIndex >= 0);
             this.hasDocumentList = (referenceDocumentsColIndex >= 0);
+            this.hasBuckets = (referenceBucketColIndex >= 0);
 
             if (highlights && this.personas) {
-                const subSelectionData = new Array<IPersonasSubSelection>();
+                const subSelectionData: IPersonasSubSelection = {};
                 const rows = referencesDv.rows;
                 const documents = [];
                 highlights.forEach((highlight: number, index: number) => {
@@ -471,28 +444,38 @@ export default class ClusterMap implements IVisual {
                                 this.data.aggregates.other.metadata.personaIds.indexOf(personaId) >= 0) {
                                 personaId = Personas.OTHER_PERSONA_DEFAULT_ID;
                             }
-                            let personaIndex = _.findIndex(subSelectionData, data => data.personaId === personaId);
-                            if (personaIndex < 0) {
-                                personaIndex = subSelectionData.length;
-                                subSelectionData.push({
-                                    personaId: personaId,
-                                    count: 0,
-                                    color: '#00bad3'
-                                });
+
+                            if (!subSelectionData[personaId]) {
+                                this._addSubselectionInfo(subSelectionData, personaId, [highlight]);
+                            } else {
+                                const oldData = subSelectionData[personaId];
+                                const counts = oldData.bars.map(bar => bar.count);
+                                counts.push(highlight);
+                                this._addSubselectionInfo(subSelectionData, personaId, counts);
                             }
 
-                            if (this.hasDocumentList) {
-                                const rawDocumentId = row[referenceDocumentsColIndex];
-                                const documentId:string = (rawDocumentId !== undefined &&
-                                rawDocumentId !== null) ?
-                                    rawDocumentId.toString() : null;
-                                if (documentId && documents.indexOf(documentId) < 0) {
-                                    subSelectionData[personaIndex].count += highlight;
-                                    documents.push(documentId);
-                                }
-                            } else {
-                                subSelectionData[personaIndex].count = highlight;
-                            }
+                            //let personaIndex = _.findIndex(subSelectionData, data => data.personaId === personaId);
+                            //if (personaIndex < 0) {
+                            //    personaIndex = subSelectionData.length;
+                            //    subSelectionData.push({
+                            //        personaId: personaId,
+                            //        count: 0,
+                            //        color: this.settings.presentation.selectedColor.solid.color
+                            //    });
+                            //}
+                            //
+                            //if (this.hasDocumentList) {
+                            //    const rawDocumentId = row[referenceDocumentsColIndex];
+                            //    const documentId:string = (rawDocumentId !== undefined &&
+                            //    rawDocumentId !== null) ?
+                            //        rawDocumentId.toString() : null;
+                            //    if (documentId && documents.indexOf(documentId) < 0) {
+                            //        subSelectionData[personaIndex].count += highlight;
+                            //        documents.push(documentId);
+                            //    }
+                            //} else {
+                            //    subSelectionData[personaIndex].count = highlight;
+                            //}
                         }
                     }
                 });
@@ -513,18 +496,16 @@ export default class ClusterMap implements IVisual {
                     count = isNaN(count) ? 0 : count;
 
                     const idColumnMetadata = (metadata.columns[personaIdColIndex] as any);
-                    const memoIndex = _.findIndex(memo.counts, m => m.id === personaId);
+                    const memoIndex = _.findIndex(memo, m => m.id === personaId);
                     if (memoIndex < 0) {
-                        memo.counts.push({
+                        memo.push({
                             id: personaId,
                             count: count,
                             selection: SQExprBuilder.equal(idColumnMetadata.expr, SQExprBuilder.typedConstant(personaId, idColumnMetadata.type))
                         });
-                    } else if (this.hasDocumentList) {
-                        memo.counts[memoIndex].count += count;
+                    } else {
+                        memo[memoIndex].count += count;
                     }
-
-                    memo.totalCount += count;
 
                     /* hijack the loop here to generate the links if needed, that way we have all links! */
                     if (referenceLinkToColIndex >= 0) {
@@ -552,11 +533,11 @@ export default class ClusterMap implements IVisual {
                 }
 
                 return memo;
-            }, {counts: [], totalCount: 0});
+            }, []);
 
 
             // retrieve the top X personas, ordered by count.
-            const sortedPersonas = personaCounts.counts.sort((a, b) => b.count - a.count);
+            const sortedPersonas = personaCounts.sort((a, b) => b.count - a.count);
             let entityRefs:any[] = [];
 
             const personaInfos:any[] = [];
@@ -594,10 +575,14 @@ export default class ClusterMap implements IVisual {
                     if (otherPersonaId === personaId) {
                         /* extract the entity ref info */
                         const rawRefId = row[referenceNameColIndex];
-                        const refId:string = (rawRefId !== undefined && rawRefId !== null) ? rawRefId.toString() : null;
+                        let refId:string = (rawRefId !== undefined && rawRefId !== null) ? rawRefId.toString() : null;
                         if (refId) {
+                            if (this.hasBuckets) {
+                                refId += '_' + row[referenceBucketColIndex];
+                            }
+
                             if (!entityRefs.some(entityRef => entityRef.id === refId)) {
-                                let name = refId;
+                                let name = rawRefId.toString();
                                 if (defaultFormatter) {
                                     name = defaultFormatter.format(rawRefId);
                                 } else if (rawRefId instanceof Date) {
@@ -636,7 +621,8 @@ export default class ClusterMap implements IVisual {
                                     'entityRefId': refId,
                                     'count': 0,
                                     'formattedCount': null,
-                                    'isPrimary': false
+                                    'isPrimary': false,
+                                    'color': 'rgba(0,186,211,0)'
                                 });
                             }
 
@@ -661,7 +647,7 @@ export default class ClusterMap implements IVisual {
                                 const rawCount: string = row[referenceCountColIndex].toString();
                                 let count: number = parseInt(rawCount, 10);
                                 count = isNaN(count) ? 0 : count;
-                                properties[propertyIndex].count = count;
+                                properties[propertyIndex].count += count;
                             }
 
                             if (countFormatter) {
@@ -674,9 +660,11 @@ export default class ClusterMap implements IVisual {
                 /* if this persona's index is within the limits of personas to load, process its info */
                 if (i < this.maxPersonas) {
                     /* sort the properties */
-                    properties = properties.sort((pa, pb) => pb.count - pa.count);
+                    //properties = properties.sort((pa, pb) => pb.count - pa.count); // properties are already sorted due to uncertainty.
+                    /* color the properties */
+                    this._colorProperties(properties);
                     /* make sure we don't have more properties than the max allowed */
-                    properties = properties.slice(0, this.maxProperties);
+                    //properties = properties.slice(0, this.maxProperties);
                     /* set the first property (biggest one) as the primary property */
                     if (properties.length) {
                         properties[0].isPrimary = true;
@@ -748,22 +736,27 @@ export default class ClusterMap implements IVisual {
         return txt.value;
     }
 
-    private _addSubselectionInfo(subSelection, personaId, count) {
+    private _addSubselectionInfo(subSelection, personaId, counts) {
+        const colorCount = counts.length <= 3 ? 3 : counts.length;
+        const palette = this._colorInterpolation(this.settings.presentation.selectedColor.solid.color, colorCount, true);
         subSelection[personaId] = {
             computePercentages: true,
-            bars: [{
-                color: '#00bad3',
-                count: count
-            }]
+            bars: counts.map((count, i) => {
+                const rgb = palette[i];
+                return {
+                    color: 'rgb(' + rgb.r + ',' + rgb.g + ',' + rgb.b + ')',
+                    count: count
+                }
+            })
         };
     }
 
     private _handleOnSelectPersona(selection) {
         this.ignoreSelectionNextUpdate = !!this.subSelectionData;
+        const selectionId = selection.id;
+        let persona = this.personas.findPersona(selectionId);
 
         if (selection.selected) {
-            const selectionId = selection.id;
-            let persona = this.personas.findPersona(selectionId);
             const subSelection:any = {};
 
             if (selectionId === Personas.OTHER_PERSONA_DEFAULT_ID) {
@@ -773,7 +766,7 @@ export default class ClusterMap implements IVisual {
                     };
                     this.host.onSelect(selectArgs);
                     persona = this.otherPersona;
-                    this._addSubselectionInfo(subSelection, selectionId, persona.data.totalCount);
+                    this._addSubselectionInfo(subSelection, selectionId, [persona.data.totalCount]);
                 }
             } else {
                 const personaInfo = this.data.aggregates.personas[selectionId];
@@ -783,7 +776,7 @@ export default class ClusterMap implements IVisual {
                     };
                     this.host.onSelect(selectArgs);
 
-                    this._addSubselectionInfo(subSelection, selectionId, persona.data.totalCount);
+                    this._addSubselectionInfo(subSelection, selectionId, persona.data.properties.map(property => property.count));
 
                     if (this.hasDocumentList) {
                         const selectionDocuments = persona.data.documents;
@@ -798,7 +791,7 @@ export default class ClusterMap implements IVisual {
                                 }, 0);
 
                                 if (sharedDocuments) {
-                                    this._addSubselectionInfo(subSelection, object.personaId, sharedDocuments);
+                                    this._addSubselectionInfo(subSelection, object.personaId, [sharedDocuments]);
                                 }
                             }
                         });
@@ -806,16 +799,16 @@ export default class ClusterMap implements IVisual {
                         const links = this.personas.mSortedData.original.aggregates.links;
                         links.forEach(link => {
                             if (link.source === selectionId) {
-                                this._addSubselectionInfo(subSelection, link.target, 0);
+                                this._addSubselectionInfo(subSelection, link.target, [0]);
                             } else if (link.target === selectionId) {
-                                this._addSubselectionInfo(subSelection, link.source, 0);
+                                this._addSubselectionInfo(subSelection, link.source, [0]);
                             }
                         });
                     }
                 }
             }
 
-            this.personas.subSelectPersonasMultiGauge(subSelection, false);
+            this.personas.subSelectPersonas(subSelection, false);
             if (!this.inSandbox) {
                 (<JQuery>(<any>this.$personas).find('[filter^="url("]', '[FILTER^="url("]')).each((index, element)=> {
                     const currentUrl = $(element).attr('filter');
@@ -939,5 +932,17 @@ export default class ClusterMap implements IVisual {
         }
 
         return palette;
+    }
+
+    private _colorProperties(properties) {
+        if (this.hasBuckets) {
+            const colorCount = properties.length <= 3 ? 3 : properties.length;
+            const palette = this._colorInterpolation(this.settings.presentation.normalColor.solid.color, colorCount, false);
+
+            for (let i = 0, n = properties.length; i < n; ++i) {
+                const rgb = palette[i];
+                properties[i].color = 'rgb(' + rgb.r + ',' + rgb.g + ',' + rgb.b + ')';
+            }
+        }
     }
 }
