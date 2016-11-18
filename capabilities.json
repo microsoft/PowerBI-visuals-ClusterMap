@@ -99,6 +99,20 @@
           "type": {
             "bool": true
           }
+        },
+        "normalColor": {
+          "displayName": "Gauge Color",
+          "description": "Defined the base color for the persona's gauges.",
+          "type": {
+            "fill": { "solid": { "color": true } }
+          }
+        },
+        "selectedColor": {
+          "displayName": "Selection Color",
+          "description": "Defined the base color of the persona's gauges when selection is active.",
+          "type": {
+            "fill": { "solid": { "color": true } }
+          }
         }
       }
     },
