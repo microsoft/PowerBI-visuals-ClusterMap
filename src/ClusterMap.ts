@@ -831,4 +831,113 @@ export default class ClusterMap implements IVisual {
             this.selectionManager.clear();
         }
     }
+
+    private _RGBToHSL(rgb) {
+        const r = rgb.r / 255;
+        const g = rgb.g / 255;
+        const b = rgb.b / 255;
+
+        const max = Math.max(r, g, b);
+        const min = Math.min(r, g, b);
+
+        let h;
+        let s;
+        let l = (max + min) / 2;
+
+        if (max === min) {
+            h = s = 0; // achromatic
+        }
+        else {
+            const d = max - min;
+            s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+            switch (max) {
+                case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+                case g: h = (b - r) / d + 2; break;
+                case b: h = (r - g) / d + 4; break;
+            }
+            h /= 6;
+        }
+
+        return {
+            h: h,
+            s: s,
+            l: l
+        };
+
+    }
+
+    private _HSLToRGB(hsl){
+        const h = hsl.h;
+        const s = hsl.s;
+        const l = hsl.l;
+        let r, g, b;
+
+        if (s == 0) {
+            r = g = b = l; // achromatic
+        } else {
+            var hue2rgb = function hue2rgb(p, q, t) {
+                if(t < 0) t += 1;
+                if(t > 1) t -= 1;
+                if(t < 1/6) return p + (q - p) * 6 * t;
+                if(t < 1/2) return q;
+                if(t < 2/3) return p + (q - p) * (2/3 - t) * 6;
+                return p;
+            };
+
+            var q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+            var p = 2 * l - q;
+            r = hue2rgb(p, q, h + 1/3);
+            g = hue2rgb(p, q, h);
+            b = hue2rgb(p, q, h - 1/3);
+        }
+
+        return {
+            r: Math.round(r * 255),
+            g: Math.round(g * 255),
+            b: Math.round(b * 255)
+        };
+    }
+
+    private _colorInterpolation(color, iterations, isSelection) {
+        /* convert the color to rgb */
+        const rgb = {
+            r: parseInt(color.substr(1, 2), 16),
+            g: parseInt(color.substr(3, 2), 16),
+            b: parseInt(color.substr(5, 2), 16)
+        };
+
+        /* and then to hsl */
+        const hsl = this._RGBToHSL(rgb);
+
+        /* initial and final S and L values */
+        let iS, fS, iL, fL;
+        if (isSelection) {
+            iS = hsl.s;
+            fS = 1;
+
+            iL = Math.min(hsl.l, 0.5);
+            fL = 0.9;
+        } else {
+            iS = 0.25;
+            fS = 0.25;
+
+            iL = 0.3;
+            fL = 0.9;
+        }
+
+        const stepS = (fS - iS) / (iterations - 1 || 1);
+        const stepL = (fL - iL) / (iterations - 1 || 1);
+
+        /* compute the color palette */
+        const palette = [];
+        for (let i = 0; i < iterations; ++i) {
+            palette.push(this._HSLToRGB({
+                h: hsl.h,
+                s: iS + (stepS * i),
+                l: iL + (stepL * i)
+            }));
+        }
+
+        return palette;
+    }
 }
