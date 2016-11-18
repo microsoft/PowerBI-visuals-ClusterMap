@@ -402,11 +402,30 @@ export interface IPersonasOptions {
              */
             fallbackBackgroundColor?: string;
 
-            subSelect?: {
-                blur?: boolean;
-                gray?: boolean;
-            };
+            /**
+             * Should an effect be applied to personas that are not sub-selected.
+             */
+            subSelectEffectEnabled?: boolean;
+
+            /**
+             * Should this instance register itself to listen for window resize events.
+             */
             registerWindowResize? :boolean;
+
+            /**
+             * Should the persona label display the total count of the persona.
+             */
+            displayTotalCountLabel?: boolean;
+
+            /**
+             * Should the persona labels be displayed at all when their count is one.
+             */
+            displayLabelsAtOneCount?: boolean;
+
+            /**
+             * When sub-selected, should the gauge display a background representing the maximum count of this persona.
+             */
+            renderSubSelectionBackground?: boolean;
         };
     };
 }
