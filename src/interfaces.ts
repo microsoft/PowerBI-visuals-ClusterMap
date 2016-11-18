@@ -226,9 +226,13 @@ export interface IPersonasSelection {
 }
 
 export interface IPersonasSubSelection {
-    personaId: string;
-    count: number;
-    color: string;
+    [personaId: string]: {
+        computePercentages: boolean;
+        bars: Array<{
+            color: string;
+            count: number;
+        }>
+    }
 }
 
 /**
