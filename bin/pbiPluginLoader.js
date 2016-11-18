@@ -8,7 +8,6 @@ const packageJson = require(path.join(process.cwd(), 'package.json'));
 
 const userName = cp.execSync('whoami').toString();
 const userHash = crypto.createHash('md5').update(userName).digest('hex');
-console.log('User Hash: ' + userHash);
 
 const patchAPI = function (version) {
     /* source code must be ES 5 */

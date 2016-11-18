@@ -100,7 +100,7 @@ const startServer = () => {
     app.use('/assets', serveStatic(config.tmpDropDir));
 
     https.createServer(options, app).listen(config.server.port, (err) => {
-        console.log('Server listening on port ', config.server.port + '.');
+        console.info('Server listening on port ', config.server.port + '.');
     });
 };
 

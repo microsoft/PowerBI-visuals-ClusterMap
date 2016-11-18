@@ -86,8 +86,10 @@ function findDependencies(modPath) {
  *
  * @method cleanSymLinks
  * @param {String} modPath - The absolute path to the folder containing the objects to be linked.
+ * @returns {Promise}
  */
 function cleanSymLinks(modPath) {
+    const promises = [];
     const modulesPath = path.resolve(__dirname, '../node_modules/');
     if (fileTools.pathExists(modulesPath)) {
         fileTools.findEntriesInFolder(modPath, (fullEntry, entry) => {
@@ -95,11 +97,14 @@ function cleanSymLinks(modPath) {
             try {
                 const stats = fs.lstatSync(linkPath);
                 if (stats.isSymbolicLink()) {
-                    fs.unlinkSync(linkPath);
+                    promises.push(new Promise(resolve => {
+                        fs.unlink(linkPath, resolve);
+                    }));
                 }
             } catch (err) {}
         });
     }
+    return Promise.all(promises);
 }
 
 /**
@@ -107,8 +112,10 @@ function cleanSymLinks(modPath) {
  *
  * @method createSymLinks
  * @param {String} modPath - The absolute path to the folder containing the objects to be linked.
+ * @returns {Promise}
  */
 function createSymLinks(modPath) {
+    const promises = [];
     const modulesPath = path.resolve(__dirname, '../node_modules/');
     if (!fileTools.pathExists(modulesPath)) {
         fileTools.createFilePath(modulesPath);
@@ -118,8 +125,12 @@ function createSymLinks(modPath) {
         const linkType = fs.lstatSync(fullEntry).isDirectory() ? 'dir' : 'file';
         const linkPath = path.join(modulesPath, entry);
         const relativeSourcePath = path.relative(modulesPath, fullEntry);
-        fs.symlinkSync(relativeSourcePath, linkPath, linkType);
+
+        promises.push(new Promise( resolve => {
+            fs.symlink(relativeSourcePath, linkPath, linkType, resolve);
+        }));
     });
+    return Promise.all(promises);
 }
 
 /**
@@ -127,9 +138,10 @@ function createSymLinks(modPath) {
  *
  * @method npmInstall
  * @param {String} args - A string containing the arguments to append to the command.
+ * @returns Promise
  */
 function npmInstall(args) {
-    cp.execSync('npm install ' + args, {env: process.env, stdio: 'inherit'});
+    return new Promise(resolve => cp.exec('npm install ' + args, {env: process.env, stdio: 'inherit'}, resolve));
 }
 
 /**
@@ -139,12 +151,19 @@ function npmInstall(args) {
  */
 function main() {
     const libPath = path.resolve(__dirname, '../lib/');
-    const installArgs = findDependencies(libPath);
-    if (installArgs.length) {
-        cleanSymLinks(libPath);
-        npmInstall(installArgs);
-        createSymLinks(libPath);
-    }
+    cleanSymLinks(libPath).then(() => {
+        const installArgs = findDependencies(libPath);
+        if (installArgs.length) {
+            npmInstall(installArgs).then(() => {
+                createSymLinks(libPath);
+                return Promise.resolve(true);
+            });
+        } else {
+            createSymLinks(libPath);
+        }
+
+        return Promise.resolve(true);
+    });
 }
 
 // run the script

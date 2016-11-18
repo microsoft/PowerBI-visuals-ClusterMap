@@ -1,5 +1,4 @@
-var outputString = "";
-var regex = new RegExp("\\bnode_modules\\b");
+var regex = new RegExp("\\bpowerbi-visuals.d.ts\\b");
 
 process.stdin.setEncoding('utf8');
 process.stdin.on('readable', () => {

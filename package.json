@@ -4,7 +4,7 @@
   "description": "PowerBI custom visual.",
   "main": "src/index.js",
   "scripts": {
-    "preinstall:prereq": "npm install tar.gz mv",
+    "preinstall:prereq": "npm install tar.gz mv --save-dev",
     "preinstall:submodules": "node bin/downloadPrivateSubmodules",
     "preinstall:dependencies": "node bin/installSubmoduleDeps",
     "preinstall": "npm run clean && npm run preinstall:prereq && npm run preinstall:submodules && npm run preinstall:dependencies",
@@ -46,6 +46,7 @@
     "memory-fs": "^0.3.0",
     "mkdirp": "^0.5.1",
     "mocha": "^3.1.2",
+    "mv": "^2.1.1",
     "node-sass": "^3.10.0",
     "node-zip": "^1.1.1",
     "npm-run-all": "^3.1.0",
@@ -54,6 +55,7 @@
     "serve-static": "^1.11.1",
     "sinon": "^1.17.6",
     "sinon-chai": "^2.8.0",
+    "tar.gz": "^1.0.5",
     "ts-loader": "^0.8.2",
     "typescript": "^2.0.3",
     "webpack": "^1.13.2"

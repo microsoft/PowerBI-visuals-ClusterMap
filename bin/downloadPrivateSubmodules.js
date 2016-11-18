@@ -47,10 +47,11 @@ function downloadFile(url, dest, callback) {
             file.close(callback);
         });
     }).on('error', function(err) {
-        fs.unlink(dest);
-        if (callback) {
-            callback(err.message);
-        }
+        fs.unlink(dest, () => {
+            if (callback) {
+                callback(err.message);
+            }
+        });
     });
 }
 
@@ -181,7 +182,7 @@ function main() {
                 const currentVersion = findModuleVersion(modulePath);
                 const desiredVersion = submodules[submoduleName];
                 if (currentVersion === desiredVersion) {
-                    console.log(submoduleName + ' v.' + desiredVersion + ' already installed.');
+                    console.info(submoduleName + ' v.' + desiredVersion + ' already installed.');
                     continue;
                 } else if (currentVersion) {
                     fileTools.deleteFolder(modulePath);
@@ -192,16 +193,16 @@ function main() {
                         const tarballPath = path.join(tmpPath, 'module.tgz');
                         downloadFile(info.dist.tarball, tarballPath, function(error) {
                             if (error) {
-                                console.log(error);
+                                console.error(error);
                             } else {
                                 const extract = new targz().extract(tarballPath , tmpPath, function(err) {
                                     if(err) {
-                                        console.log(err);
+                                        console.error(err);
                                     } else {
                                         fileTools.createFilePath(modulePath);
                                         mv(path.join(tmpPath, 'package'), modulePath, function(err) {
                                             if (err) {
-                                                console.log(err);
+                                                console.error(err);
                                             }
                                         });
                                     }

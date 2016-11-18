@@ -14,7 +14,6 @@ function openCertFile() {
     const startCmd = openCmds[os.platform()];
     if (startCmd) {
         try {
-            console.log('here');
             exec(`${startCmd} "${certPath}"`);
         } catch (e) {
             console.info('Certificate path:', certPath);
