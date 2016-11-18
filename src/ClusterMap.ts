@@ -56,6 +56,8 @@ export default class ClusterMap implements IVisual {
     private static LOAD_MORE_PERSONAS_STEP = 5;
     private static MAX_PERSONAS_DEFAULT = 20;
     private static MAX_PROPERTIES_DEFAULT = 5;
+    private static GAUGE_DEFAULT_COLOR = '#41455e';
+    private static SELECTED_GAUGE_DEFAULT_COLOR = '#00bad3';
 
     /**
      * Default formatting settings
@@ -65,7 +67,9 @@ export default class ClusterMap implements IVisual {
             layout: 'cola',
             imageBlur: false,
             initialCount: ClusterMap.MAX_PERSONAS_DEFAULT,
-            loadMoreCount: ClusterMap.LOAD_MORE_PERSONAS_STEP
+            loadMoreCount: ClusterMap.LOAD_MORE_PERSONAS_STEP,
+            normalColor: { solid: { color: ClusterMap.GAUGE_DEFAULT_COLOR } },
+            selectedColor: { solid: { color: ClusterMap.SELECTED_GAUGE_DEFAULT_COLOR } }
         },
         dataLoading: {
             maxDataRows: 20000
@@ -194,12 +198,15 @@ export default class ClusterMap implements IVisual {
             if (newObjects) {
                 /* update settings */
                 if (newObjects && !_.isMatch(this.settings, newObjects)) {
+                    const oldGaugeColor = this.settings.presentation.normalColor.solid.color;
                     $.extend(true, this.settings, newObjects);
                     this.settings.presentation.initialCount = Math.max(this.settings.presentation.initialCount, 1);
                     this.settings.dataLoading.maxDataRows = Math.max(this.settings.dataLoading.maxDataRows, 1);
 
                     const maxPersonasChanged = (this.maxPersonas !== this.settings.presentation.initialCount);
                     this.maxPersonas = this.settings.presentation.initialCount;
+
+                    const normalColorChanged = (oldGaugeColor !== this.settings.presentation.normalColor.solid.color);
 
                     if (this.personas) {
                         /* set the layout type in personas */
@@ -218,8 +225,8 @@ export default class ClusterMap implements IVisual {
                             });
                         }
 
-                        /* the update was triggered by a change in the settings, retrun if the max number of personas didn't change */
-                        if (!maxPersonasChanged) {
+                        /* the update was triggered by a change in the settings, retrun if the max number of personas or the gauge color didn't change */
+                        if (!maxPersonasChanged && !normalColorChanged) {
                             return;
                         }
                     }
