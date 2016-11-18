@@ -1,6 +1,6 @@
 {
   "name": "@uncharted/personas",
-  "version": "0.5.1",
+  "version": "0.5.5",
   "description": "personas",
   "main": "dist/uncharted.personas.js",
   "scripts": {
@@ -54,7 +54,6 @@
     "bluebird": "^2.10.2",
     "font-awesome": "^4.4.0",
     "jquery": "^2.1.4",
-    "mediator-js": "^0.9.9",
     "snapsvg": "^0.4.0",
     "underscore": "^1.8.3",
     "velocity-animate": "^1.2.3",

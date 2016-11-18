@@ -35,50 +35,47 @@
             }
         };
 
-        Uncharted.Personas.asJQueryPlugin();
-        $("#personas-panel").personas(options);
-        $("#personas-panel").personas("loaddata", data);
+        var personas = new Uncharted.Personas($('#personas-panel')[0], options);
+        personas.loadData(data);
 
         var moreDataLink = document.getElementById("moreData");
         moreDataLink.onclick = function() {
-            $("#personas-panel").personas("loaddata", getExtraSampleData(), true);
+            personas.loadData(getExtraSampleData(), true);
             return false;
         };
 
         var subSelectLink01 = document.getElementById("subSelectPersonas01");
         subSelectLink01.onclick = function() {
-            $("#personas-panel").personas("subselect", getSubSelectData01());
+            personas.subSelectPersonas(getSubSelectData01());
             return false;
         };
 
         var subSelectLink02 = document.getElementById("subSelectPersonas02");
         subSelectLink02.onclick = function() {
-            $("#personas-panel").personas("subselect", getSubSelectData02(), true);
+            personas.subSelectPersonas(getSubSelectData02(), true);
             return false;
         };
 
         var orbitalLink = document.getElementById("orbitalLayout");
         orbitalLink.onclick = function() {
-            $("#personas-panel").personas("setlayouttype", "orbital");
+            personas.layoutSystemType = 'orbital';
             return false;
         };
 
         var colaLink = document.getElementById("colaLayout");
         colaLink.onclick = function() {
-            $("#personas-panel").personas("setlayouttype", "cola");
+            personas.layoutSystemType = 'cola';
             return false;
         };
 
         var setZoomLink = document.getElementById("setZoom");
         setZoomLink.onclick = function() {
-            $("#personas-panel").personas("setZoom", 1.4);
+            personas.zoom = 1.4;
         };
 
         var logZoomLink = document.getElementById("logZoom");
         logZoomLink.onclick = function() {
-            $("#personas-panel").personas("getZoom", function(currentZoomLevel) {
-                console.log(currentZoomLevel);
-            });
+            console.log(personas.zoom);
         };
     });
 </script>
