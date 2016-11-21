@@ -51,7 +51,6 @@ export default class ClusterMap implements IVisual {
 
     private static LOAD_MORE_PERSONAS_STEP = 5;
     private static MAX_PERSONAS_DEFAULT = 20;
-    private static MAX_PROPERTIES_DEFAULT = 5;
     private static GAUGE_DEFAULT_COLOR = '#41455e';
     private static SELECTED_GAUGE_DEFAULT_COLOR = '#00bad3';
 
@@ -80,7 +79,6 @@ export default class ClusterMap implements IVisual {
     private $personas:JQuery;
     private showOther:boolean;
     private maxPersonas:number;
-    private maxProperties:number;
     private selectionManager:SelectionManager;
     private data:IPersonasData;
     private otherPersona:any;
@@ -114,7 +112,6 @@ export default class ClusterMap implements IVisual {
         this.host = (this.selectionManager as any).hostServices;
 
         this.maxPersonas = ClusterMap.MAX_PERSONAS_DEFAULT;
-        this.maxProperties = ClusterMap.MAX_PROPERTIES_DEFAULT;
         this.showOther = true;
     }
 
@@ -613,8 +610,6 @@ export default class ClusterMap implements IVisual {
                     //properties = properties.sort((pa, pb) => pb.count - pa.count); // properties are already sorted due to uncertainty.
                     /* color the properties */
                     this._colorProperties(properties);
-                    /* make sure we don't have more properties than the max allowed */
-                    //properties = properties.slice(0, this.maxProperties);
                     /* set the first property (biggest one) as the primary property */
                     if (properties.length) {
                         properties[0].isPrimary = true;
