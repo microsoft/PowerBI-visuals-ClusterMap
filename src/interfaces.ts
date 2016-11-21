@@ -22,6 +22,36 @@
  */
 
 export interface IPersonas {
+
+    /**
+     * The data in this personas instance sorted by the internal heuristics.
+     * @private
+     */
+    mSortedData: any;
+
+    /**
+     * The internal viewport used by the component.
+     * @private
+     */
+    mViewport: any;
+
+    /**
+     * The internal persona used to display the "other" persona.
+     * @private
+     */
+    mOtherPersona: any;
+
+    /**
+     * Returns the internal layout system used in this personas instance.
+     * @readonly
+     */
+    layoutSystem: any;
+
+    /**
+     * Property to define the layout system type that Personas will use.
+     */
+    layoutSystemType: string;
+
     /**
      * Loads data into the Personas View
      */
@@ -46,6 +76,24 @@ export interface IPersonas {
      * Enable/Disable image blur
      */
     enableBlur(enable:boolean);
+
+    /**
+     * Automatically zooms and repositions the viewport so all its contents fit in the view while respecting the configured
+     * min and max scale values of the viewport.
+     */
+    autoZoom();
+
+    /**
+     * Resizes the component to fit within its container.
+     */
+    resize();
+
+    /**
+     * Unregisters all the events registered in the `registerEvents` function.
+     *
+     * @method unregisterEvents
+     */
+    unregisterEvents();
 }
 
 export interface IPersonasData {
@@ -135,7 +183,7 @@ export interface IPersonasData {
         /**
          * Seed personas, or personas that have the potential to become personas.
          */
-        links?: {
+        links?: Array<{
             /**
              * The id of this seed persona, must be the same as the id within the object.
              */
@@ -165,7 +213,7 @@ export interface IPersonasData {
                     count: number;
                 }>;
             }
-        };
+        }>;
 
         other?: {
             count: number;
@@ -450,4 +498,52 @@ export interface IPersonasVisualConfiguration {
      * The transform of the personas visual
      */
     transform?: string;
+}
+
+export interface IClusterMapSettings {
+    /**
+     * Visual's presentation settings.
+     */
+    presentation: {
+        /**
+         * Persona layout type.
+         */
+        layout: string;
+
+        /**
+         * Defines if persona background images should be blurred.
+         */
+        imageBlur: boolean;
+
+        /**
+         * Initial number of personas loaded in the visual, if the total number of personas is higher than this number,
+         * an "other" persona will be created to represent the data.
+         */
+        initialCount: number;
+
+        /**
+         * How many personas should be loaded when paginating.
+         */
+        loadMoreCount: number;
+
+        /**
+         * The default color for persona gauge bars.
+         */
+        normalColor: { solid: { color: string } },
+
+        /**
+         * The selected-state color for persona gauge bars.
+         */
+        selectedColor: { solid: { color: string } }
+    };
+
+    /**
+     * Data loading settings.
+     */
+    dataLoading: {
+        /**
+         * How many rows of data can be loaded at once.
+         */
+        maxDataRows: number;
+    };
 }
