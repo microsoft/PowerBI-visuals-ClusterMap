@@ -1,7 +1,7 @@
 {
   "name": "ClusterMap",
   "version": "0.5.0",
-  "description": "PowerBI custom visual.",
+  "description": "Cluster Map - PowerBI custom visual.",
   "main": "src/index.js",
   "scripts": {
     "preinstall:prereq": "npm install tar.gz mv --save-dev",
