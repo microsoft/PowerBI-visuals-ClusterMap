@@ -15,6 +15,7 @@
     "package": "node bin/packageVisual",
     "test": "karma start --color | node bin/filterErrors",
     "test:tdd": "karma start --color --tdd | node bin/filterErrors",
+    "lint": "tslint src/**/*.ts",
     "clean": "rm -rf node_modules .tmp"
   },
   "config": {},
@@ -57,6 +58,8 @@
     "sinon-chai": "^2.8.0",
     "tar.gz": "^1.0.5",
     "ts-loader": "^0.8.2",
+    "tslint": "^3.15.1",
+    "tslint-loader": "^2.1.5",
     "typescript": "^2.0.3",
     "webpack": "^1.13.2"
   },
