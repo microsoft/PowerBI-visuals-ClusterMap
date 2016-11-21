@@ -37,7 +37,6 @@
         "ReferenceName": {"max": 1},
         "ReferenceCount": {"max": 1},
         "ReferenceBucket": {"max": 1},
-        "ReferenceDocumentID": {"max": 1},
         "ReferenceImageUrl": {"max": 4},
         "ReferenceLinkTo": {"max": 1},
         "ReferenceLinkWeight": {"max": 1}

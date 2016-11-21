@@ -86,7 +86,6 @@ export default class ClusterMap implements IVisual {
     private otherPersona:any;
     private dataView:DataView;
     private hasLinks:boolean;
-    private hasDocumentList:boolean;
     private hasBuckets:boolean;
     private serializedData = null;
     private subSelectionData = null;
@@ -403,9 +402,6 @@ export default class ClusterMap implements IVisual {
             const referenceBucketColIndex = _.findIndex(metadata.columns, c => {
                 return c.roles['ReferenceBucket'];
             });
-            const referenceDocumentsColIndex = _.findIndex(metadata.columns, c => {
-                return c.roles['ReferenceDocumentID'];
-            });
             const referenceImageUrlColIndices = metadata.columns.reduce((memo, column, index) => {
                 if (column.roles['ReferenceImageUrl']) {
                     memo.push(index);
@@ -423,13 +419,11 @@ export default class ClusterMap implements IVisual {
             }
 
             this.hasLinks = (referenceLinkToColIndex >= 0);
-            this.hasDocumentList = (referenceDocumentsColIndex >= 0);
             this.hasBuckets = (referenceBucketColIndex >= 0);
 
             if (highlights && this.personas) {
                 const subSelectionData: IPersonasSubSelection = {};
                 const rows = referencesDv.rows;
-                const documents = [];
                 highlights.forEach((highlight: number, index: number) => {
                     if (highlight !== null) {
                         const row = rows[index];
@@ -453,29 +447,6 @@ export default class ClusterMap implements IVisual {
                                 counts.push(highlight);
                                 this._addSubselectionInfo(subSelectionData, personaId, counts);
                             }
-
-                            //let personaIndex = _.findIndex(subSelectionData, data => data.personaId === personaId);
-                            //if (personaIndex < 0) {
-                            //    personaIndex = subSelectionData.length;
-                            //    subSelectionData.push({
-                            //        personaId: personaId,
-                            //        count: 0,
-                            //        color: this.settings.presentation.selectedColor.solid.color
-                            //    });
-                            //}
-                            //
-                            //if (this.hasDocumentList) {
-                            //    const rawDocumentId = row[referenceDocumentsColIndex];
-                            //    const documentId:string = (rawDocumentId !== undefined &&
-                            //    rawDocumentId !== null) ?
-                            //        rawDocumentId.toString() : null;
-                            //    if (documentId && documents.indexOf(documentId) < 0) {
-                            //        subSelectionData[personaIndex].count += highlight;
-                            //        documents.push(documentId);
-                            //    }
-                            //} else {
-                            //    subSelectionData[personaIndex].count = highlight;
-                            //}
                         }
                     }
                 });
@@ -545,8 +516,7 @@ export default class ClusterMap implements IVisual {
                 'count': 0,
                 'metadata': {
                     'selection': null,
-                    'personaIds': [],
-                    'documents': []
+                    'personaIds': []
                 }
             };
 
@@ -562,7 +532,6 @@ export default class ClusterMap implements IVisual {
                 const personaId = personaValue.id;
 
                 /* information fields to extract */
-                const documents:Array<string> = [];
                 let properties:Array<any> = [];
 
                 /* iterate through all the rows */
@@ -626,29 +595,10 @@ export default class ClusterMap implements IVisual {
                                 });
                             }
 
-                            /* if the data contains document info, process it */
-                            if (this.hasDocumentList) {
-                                const rawDocumentId = row[referenceDocumentsColIndex];
-                                const documentId:string = (rawDocumentId !== undefined &&
-                                rawDocumentId !== null) ?
-                                    rawDocumentId.toString() : null;
-                                if (documentId) {
-                                    const documentIndex:number = _.findIndex(documents, d => d === documentId);
-                                    if (documentIndex < 0) {
-                                        documents.push(documentId);
-                                        /* update the property count */
-                                        const rawCount: string = row[referenceCountColIndex].toString();
-                                        let count: number = parseInt(rawCount, 10);
-                                        count = isNaN(count) ? 0 : count;
-                                        properties[propertyIndex].count += count;
-                                    }
-                                }
-                            } else {
-                                const rawCount: string = row[referenceCountColIndex].toString();
-                                let count: number = parseInt(rawCount, 10);
-                                count = isNaN(count) ? 0 : count;
-                                properties[propertyIndex].count += count;
-                            }
+                            const rawCount: string = row[referenceCountColIndex].toString();
+                            let count: number = parseInt(rawCount, 10);
+                            count = isNaN(count) ? 0 : count;
+                            properties[propertyIndex].count += count;
 
                             if (countFormatter) {
                                 properties[propertyIndex].formattedCount = countFormatter.format(properties[propertyIndex].count);
@@ -674,9 +624,8 @@ export default class ClusterMap implements IVisual {
                     const info:any = {
                         'id': personaId,
                         'properties': properties,
-                        'documents': documents,
                         'imageUrl': null,
-                        'totalCount': this.hasDocumentList ? documents.length : personaValue.count,
+                        'totalCount': personaValue.count,
                         'selection': [powerbi.data.createDataViewScopeIdentity(personaValue.selection)]
                     };
 
@@ -688,7 +637,6 @@ export default class ClusterMap implements IVisual {
 
                 } else if (this.showOther) { /* else if we the "other" persona is enabled, add the info to it */
                     otherPersonaInfo.count += personaValue.count;
-                    otherPersonaInfo.metadata.documents.push.apply(otherPersonaInfo.metadata.documents, documents);
                     otherPersonaInfo.metadata.personaIds.push(personaId);
                     if (personaValue.selection) {
                         if (otherPersonaInfo.metadata.selection) {
@@ -778,24 +726,7 @@ export default class ClusterMap implements IVisual {
 
                     this._addSubselectionInfo(subSelection, selectionId, persona.data.properties.map(property => property.count));
 
-                    if (this.hasDocumentList) {
-                        const selectionDocuments = persona.data.documents;
-                        this.personas.layoutSystem.forEach(object => {
-                            if (object.personaId && object !== persona) {
-                                const otherDocuments = object.data.documents;
-                                let sharedDocuments = selectionDocuments.reduce((count, doc) => {
-                                    if (otherDocuments.indexOf(doc) >= 0) {
-                                        count += 1;
-                                    }
-                                    return count;
-                                }, 0);
-
-                                if (sharedDocuments) {
-                                    this._addSubselectionInfo(subSelection, object.personaId, [sharedDocuments]);
-                                }
-                            }
-                        });
-                    } else if (this.hasLinks) {
+                    if (this.hasLinks) {
                         const links = this.personas.mSortedData.original.aggregates.links;
                         links.forEach(link => {
                             if (link.source === selectionId) {
