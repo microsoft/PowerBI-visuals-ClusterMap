@@ -39,7 +39,7 @@ import SQExprBuilder = powerbi.data.SQExprBuilder;
 import SelectionManager = powerbi.extensibility.ISelectionManager;
 import SelectionId = powerbi.extensibility.ISelectionId;
 
-import {IPersonasData, IPersonasOptions, IPersonasSubSelection, IPersonasVisualConfiguration} from './interfaces';
+import {IPersonas, IPersonasData, IPersonasOptions, IPersonasSubSelection, IPersonasVisualConfiguration, IClusterMapSettings} from './interfaces';
 
 import * as $ from 'jquery';
 import * as _ from 'lodash';
@@ -47,17 +47,52 @@ import * as _ from 'lodash';
 const Personas = require('@uncharted/personas/src/Personas');
 const DOCUMENT_REQUEST_COUNT = 5000;
 
+/**
+ * Cluster Map PowerBI visual class.
+ *
+ * @class ClusterMap
+ */
 export default class ClusterMap implements IVisual {
 
-    private static LOAD_MORE_PERSONAS_STEP = 5;
-    private static MAX_PERSONAS_DEFAULT = 20;
-    private static GAUGE_DEFAULT_COLOR = '#41455e';
-    private static SELECTED_GAUGE_DEFAULT_COLOR = '#00bad3';
+    /**
+     * Default number of personas to load when paginating.
+     *
+     * @type {number}
+     * @private
+     */
+    private static LOAD_MORE_PERSONAS_STEP: number = 5;
 
     /**
-     * Default formatting settings
+     * Default maximum number of personas to load.
+     *
+     * @type {number}
+     * @private
      */
-    private static DEFAULT_SETTINGS = {
+    private static MAX_PERSONAS_DEFAULT: number = 20;
+
+    /**
+     * Default color for the persona gauge bars.
+     *
+     * @type {string}
+     * @private
+     */
+    private static GAUGE_DEFAULT_COLOR: string = '#41455e';
+
+    /**
+     * Default color for the selected state of the persona gauge bars.
+     *
+     * @type {string}
+     * @private
+     */
+    private static SELECTED_GAUGE_DEFAULT_COLOR: string = '#00bad3';
+
+    /**
+     * Default Cluster Map Settings.
+     *
+     * @type {IClusterMapSettings}
+     * @private
+     */
+    private static DEFAULT_SETTINGS: IClusterMapSettings = {
         presentation: {
             layout: 'cola',
             imageBlur: false,
@@ -71,28 +106,160 @@ export default class ClusterMap implements IVisual {
         },
     };
 
-    private element:JQuery;
-    private inSandbox:boolean;
-    private settings = $.extend(true, {}, ClusterMap.DEFAULT_SETTINGS);
-    private host:IVisualHostServices;
-    private personas:any;
-    private $personas:JQuery;
-    private showOther:boolean;
-    private maxPersonas:number;
-    private selectionManager:SelectionManager;
-    private data:IPersonasData;
-    private otherPersona:any;
-    private dataView:DataView;
-    private hasLinks:boolean;
-    private hasBuckets:boolean;
-    private serializedData = null;
-    private subSelectionData = null;
-    private ignoreSelectionNextUpdate = false;
-    private hasMoreData = false;
-    private lastDataviewLength: number = 0;
-    private autoZoomTimerId = null;
+    /**
+     * The element to which the Personas component will be added.
+     *
+     * @type {JQuery}
+     * @private
+     */
+    private element: JQuery;
 
-    public static convertToLookup(data:Array<{id: string}>, assignmentFunc:Function) {
+    /**
+     * Is the visual running in sandbox mode.
+     *
+     * @type {boolean}
+     * @private
+     */
+    private inSandbox: boolean;
+
+    /**
+     * Visual's settings.
+     *
+     * @type {IClusterMapSettings}
+     * @private
+     */
+    private settings: IClusterMapSettings = $.extend(true, {}, ClusterMap.DEFAULT_SETTINGS);
+
+    /**
+     * PowerBI's host services instance.
+     *
+     * @type {IVisualHostServices}
+     * @private
+     */
+    private host: IVisualHostServices;
+
+    /**
+     * Personas component instance.
+     *
+     * @type {IPersonas}
+     * @private
+     */
+    private personas: IPersonas;
+
+    /**
+     * The element in which personas is being rendered.
+     *
+     * @type {JQuery}
+     * @private
+     */
+    private $personas: JQuery;
+
+    /**
+     * Should the "other" persona be rendered.
+     *
+     * @type {boolean}
+     * @private
+     */
+    private showOther: boolean;
+
+    /**
+     * The maximum number of personas to load.
+     *
+     * @type {number}
+     * @private
+     */
+    private maxPersonas: number;
+
+    /**
+     * PowerBI's selection manager instance.
+     *
+     * @type {SelectionManager}
+     * @private
+     */
+    private selectionManager: SelectionManager;
+
+    /**
+     * The data used by the Personas component.
+     *
+     * @type {IPersonasData}
+     * @private
+     */
+    private data: IPersonasData;
+
+    /**
+     * The “other” persona, if visible; otherwise, null.
+     *
+     * @type {any}
+     * @private
+     */
+    private otherPersona: any;
+
+    /**
+     * The data view as received by this visual in the `update` function.
+     *
+     * @type {DataView}
+     * @private
+     */
+    private dataView: DataView;
+
+    /**
+     * Whether this visual has links between personas.
+     *
+     * @type {boolean}
+     * @private
+     */
+    private hasLinks: boolean;
+
+    /**
+     * Whether this visual has buckets to split the data.
+     *
+     * @type {boolean}
+     * @private
+     */
+    private hasBuckets: boolean;
+
+    /**
+     * A JSON serialized version of the data used by the Personas component.
+     *
+     * @type {any}
+     * @private
+     */
+    private serializedData: any = null;
+
+    /**
+     * Sub-selection data, if any; otherwise, null.
+     *
+     * @type {any}
+     * @private
+     */
+    private subSelectionData: any = null;
+
+    /**
+     * Flag used to ignore the next call to the `update` function, triggered when performing sub-selection.
+     *
+     * @type {boolean}
+     * @private
+     */
+    private ignoreSelectionNextUpdate: boolean = false;
+
+    /**
+     * Whether there is more data available to be loaded by this visual.
+     *
+     * @type {boolean}
+     * @private
+     */
+    private hasMoreData: boolean = false;
+
+    /**
+     * Converts an array of data objects to a lookup table object.
+     *
+     * @method convertToLookup
+     * @param {Array<{id: string}>} data - The data array to convert.
+     * @param {Function} assignmentFunc - Callback function used to assign the array object to the lookup object.
+     * @returns {{}}
+     * @static
+     */
+    public static convertToLookup(data: Array<{id: string}>, assignmentFunc: Function): any {
         let lookup = {};
         if (data && data.length) {
             data.forEach((d) => {
@@ -102,7 +269,13 @@ export default class ClusterMap implements IVisual {
         return lookup;
     }
 
-    constructor(options:VisualConstructorOptions) {
+    /**
+     * ClusterMap class constructor.
+     *
+     * @constructor
+     * @param {VisualConstructorOptions} options - The initialization options as provided by PowerBI.
+     */
+    constructor(options: VisualConstructorOptions) {
         this.$personas = $('<svg id="personas-panel" class="personas" style="stroke: none;"></svg>');
         this.element = $(options.element).append(this.$personas);
 
@@ -115,6 +288,11 @@ export default class ClusterMap implements IVisual {
         this.showOther = true;
     }
 
+    /**
+     * ClusterMap's visualization destroy method. Called by PowerBI.
+     *
+     * @method destroy
+     */
     public destroy(): void {
         if (this.personas) {
             this.personas.layoutSystem.invalidate();
@@ -129,11 +307,6 @@ export default class ClusterMap implements IVisual {
             this.otherPersona = null;
         }
 
-        if (this.autoZoomTimerId !== null) {
-            clearTimeout(this.autoZoomTimerId);
-            this.autoZoomTimerId = null;
-        }
-
         this.$personas.remove();
         this.$personas = null;
 
@@ -145,23 +318,21 @@ export default class ClusterMap implements IVisual {
         this.host = null;
     }
 
-    public update(options:VisualUpdateOptions) {
+    /**
+     * Update function called by PowerBI when the visual or its data need to be updated.
+     *
+     * @method update
+     * @param {VisualUpdateOptions} options - Update options object as provided by PowerBI.
+     */
+    public update(options: VisualUpdateOptions): void {
         /* always set the width and height of the SVG element, solves https://msrp.visualstudio.com/Essex/_workitems?id=1870&_a=edit
          * this seems to be a browser specific bug dealing with the sizing of svg and starting drawing before the DOM has been updated
          * it seems to only appears in specific spect ratios */
         this.$personas.width(options.viewport.width);
         this.$personas.height(options.viewport.height);
-        if (options.type & powerbi.VisualUpdateType.Resize && this.personas) {
+        if (options.type & powerbi.VisualUpdateType.ResizeEnd && this.personas) {
             this.personas.resize();
-            if (this.autoZoomTimerId !== null) {
-                clearTimeout(this.autoZoomTimerId);
-                this.autoZoomTimerId = null;
-            }
-
-            this.autoZoomTimerId = setTimeout(() => {
-                this.autoZoomTimerId = null;
-                this.personas.autoZoom();
-            }, 100);
+            this.personas.autoZoom();
         }
 
         if (!(options.type & powerbi.VisualUpdateType.Data)) {
@@ -170,7 +341,7 @@ export default class ClusterMap implements IVisual {
 
         if (options.dataViews && options.dataViews.length > 0) {
             const dataView = options.dataViews[0];
-            const newObjects:any = dataView && dataView.metadata && dataView.metadata.objects;
+            const newObjects: any = dataView && dataView.metadata && dataView.metadata.objects;
             if (newObjects) {
                 /* update settings */
                 if (newObjects && !_.isMatch(this.settings, newObjects)) {
@@ -191,12 +362,12 @@ export default class ClusterMap implements IVisual {
                         this.personas.enableBlur(this.settings.presentation.imageBlur);
 
                         if (!this.inSandbox) {
-                            (<JQuery>(<any>this.$personas).find('[filter^="url("]', '[FILTER^="url("]')).each((index, element)=> {
+                            (<JQuery>(<any>this.$personas).find('[filter^="url("]', '[FILTER^="url("]')).each((index, element) => {
                                 const currentUrl = $(element).attr('filter');
                                 const filtermatch = /url\(['"]?(#[a-zA-Z0-9]+)['"]?\)/ig.exec(currentUrl);
                                 const $element = $(element);
                                 if (filtermatch && filtermatch.length > 1) {
-                                    $element.attr('filter', 'url("' + element.ownerDocument.URL + filtermatch[1] + '")')
+                                    $element.attr('filter', 'url("' + element.ownerDocument.URL + filtermatch[1] + '")');
                                 }
                             });
                         }
@@ -218,7 +389,14 @@ export default class ClusterMap implements IVisual {
         }
     }
 
-    public updateDataView(dv:DataView, append?:boolean) {
+    /**
+     * Updates the data view that represents the data for this visual.
+     *
+     * @method updateDataView
+     * @param {DataView} dv - The new DataView to use for the update.
+     * @param {boolean} append - Should the data in the data view be appended to any previously loaded data.
+     */
+    public updateDataView(dv: DataView, append?: boolean): void {
 
         // don't modify the source dataview, use a copy instead.
         const dataView = $.extend(true, {}, dv);
@@ -269,7 +447,6 @@ export default class ClusterMap implements IVisual {
 
         /* save the data view */
         this.dataView = dataView;
-        this.lastDataviewLength = currentDataViewSize;
         /* if more data should be loaded, load the data before processing it */
         this.hasMoreData = !!dataView.metadata.segment;
         /* if there's more data to load and the configured number of rows hasn't been reached, load more data */
@@ -279,14 +456,14 @@ export default class ClusterMap implements IVisual {
         }
 
         /* convert the data */
-        const data:any = this.converter(dataView);
+        const data: any = this.converter(dataView);
 
         if (data) {
             this.element.show();
-            let serializedData:string = JSON.stringify(data);
+            let serializedData: string = JSON.stringify(data);
             if (!this.serializedData || !_.isEqual(this.serializedData, serializedData)) {
                 if (!this.personas) {
-                    const personasOptions:IPersonasOptions = {
+                    const personasOptions: IPersonasOptions = {
                         autoGenerateIconMap: true,
                         Persona: {
                             layout: {
@@ -320,26 +497,26 @@ export default class ClusterMap implements IVisual {
                 this.otherPersona = this.personas.mOtherPersona;
 
                 if (!this.inSandbox) {
-                    (<JQuery>(<any>this.$personas).find('[mask^="url("]', '[MASK^="url("]')).each((index, element)=> {
+                    (<JQuery>(<any>this.$personas).find('[mask^="url("]', '[MASK^="url("]')).each((index, element) => {
                         const currentUrl = $(element).attr('mask');
                         const maskmatch = /url\(['"]?(#[a-zA-Z0-9]+)['"]?\)/ig.exec(currentUrl);
                         if (maskmatch && maskmatch.length > 1) {
-                            $(element).attr('mask', 'url("' + element.ownerDocument.URL + maskmatch[1] + '")')
+                            $(element).attr('mask', 'url("' + element.ownerDocument.URL + maskmatch[1] + '")');
                         }
                     });
-                    (<JQuery>(<any>this.$personas).find('[filter^="url("]', '[FILTER^="url("]')).each((index, element)=> {
+                    (<JQuery>(<any>this.$personas).find('[filter^="url("]', '[FILTER^="url("]')).each((index, element) => {
                         const currentUrl = $(element).attr('filter');
                         const filtermatch = /url\(['"]?(#[a-zA-Z0-9]+)['"]?\)/ig.exec(currentUrl);
                         const $element = $(element);
                         if (filtermatch && filtermatch.length > 1) {
-                            $element.attr('filter', 'url("' + element.ownerDocument.URL + filtermatch[1] + '")')
+                            $element.attr('filter', 'url("' + element.ownerDocument.URL + filtermatch[1] + '")');
                         }
                     });
-                    (<JQuery>(<any>this.$personas).find('[fill^="url("]', '[FILL^="url("]')).each((index, element)=> {
+                    (<JQuery>(<any>this.$personas).find('[fill^="url("]', '[FILL^="url("]')).each((index, element) => {
                         const currentUrl = $(element).attr('fill');
                         const fillmatch = /url\(['"]?(#[a-zA-Z0-9]+)['"]?\)/ig.exec(currentUrl);
                         if (fillmatch && fillmatch.length > 1) {
-                            $(element).attr('fill', 'url("' + element.ownerDocument.URL + fillmatch[1] + '")')
+                            $(element).attr('fill', 'url("' + element.ownerDocument.URL + fillmatch[1] + '")');
                         }
                     });
                 }
@@ -351,12 +528,12 @@ export default class ClusterMap implements IVisual {
                 if (this.subSelectionData) {
                     this.personas.subSelectPersonas(this.subSelectionData, false);
                     if (!this.inSandbox) {
-                        (<JQuery>(<any>this.$personas).find('[filter^="url("]', '[FILTER^="url("]')).each((index, element)=> {
+                        (<JQuery>(<any>this.$personas).find('[filter^="url("]', '[FILTER^="url("]')).each((index, element) => {
                             const currentUrl = $(element).attr('filter');
                             const filtermatch = /url\(['"]?(#[a-zA-Z0-9]+)['"]?\)/ig.exec(currentUrl);
                             const $element = $(element);
                             if (filtermatch && filtermatch.length > 1) {
-                                $element.attr('filter', 'url("' + element.ownerDocument.URL + filtermatch[1] + '")')
+                                $element.attr('filter', 'url("' + element.ownerDocument.URL + filtermatch[1] + '")');
                             }
                         });
                     }
@@ -373,7 +550,14 @@ export default class ClusterMap implements IVisual {
         }
     }
 
-    public converter(dataView:DataView):IPersonasData | IPersonasSubSelection[] {
+    /**
+     * Converts the data in the data view to the Personas component format.
+     *
+     * @method converter
+     * @param {DataView} dataView - The data view which will be converted.
+     * @returns {IPersonasData}
+     */
+    public converter(dataView: DataView): IPersonasData {
         const metadata = dataView.metadata;
         const referencesDv = dataView.table;
         const highlights = (dataView.categorical &&
@@ -437,12 +621,12 @@ export default class ClusterMap implements IVisual {
                             }
 
                             if (!subSelectionData[personaId]) {
-                                this._addSubselectionInfo(subSelectionData, personaId, [highlight]);
+                                this._addSubSelectionInfo(subSelectionData, personaId, [highlight]);
                             } else {
                                 const oldData = subSelectionData[personaId];
                                 const counts = oldData.bars.map(bar => bar.count);
                                 counts.push(highlight);
-                                this._addSubselectionInfo(subSelectionData, personaId, counts);
+                                this._addSubSelectionInfo(subSelectionData, personaId, counts);
                             }
                         }
                     }
@@ -453,7 +637,7 @@ export default class ClusterMap implements IVisual {
                 this.subSelectionData = null;
             }
 
-            let links:any[] = [];
+            let links: any[] = [];
             const personaCounts = referencesDv.rows.reduce((memo, row) => {
                 const rawPersonaId = row[personaIdColIndex];
                 const personaId = (rawPersonaId !== undefined && rawPersonaId !== null) ? rawPersonaId.toString() : null;
@@ -482,7 +666,7 @@ export default class ClusterMap implements IVisual {
                         if (targetId && targetId !== personaId && !links.some(link => (
                             (link.source === personaId || link.target === personaId) &&
                             (link.source === targetId || link.target === targetId)))) {
-                            const linkInfo:any = {
+                            const linkInfo: any = {
                                 source: personaId,
                                 target: targetId
                             };
@@ -506,10 +690,10 @@ export default class ClusterMap implements IVisual {
 
             // retrieve the top X personas, ordered by count.
             const sortedPersonas = personaCounts.sort((a, b) => b.count - a.count);
-            let entityRefs:any[] = [];
+            let entityRefs: any[] = [];
 
-            const personaInfos:any[] = [];
-            let otherPersonaInfo:any = {
+            const personaInfos: any[] = [];
+            let otherPersonaInfo: any = {
                 'count': 0,
                 'metadata': {
                     'selection': null,
@@ -517,7 +701,7 @@ export default class ClusterMap implements IVisual {
                 }
             };
 
-            const viz:any = powerbi.visuals;
+            const viz: any = powerbi.visuals;
             const labelFormat = metadata.columns[referenceNameColIndex].format;
             const countFormat = metadata.columns[referenceCountColIndex].format;
             const defaultFormatter = labelFormat ? viz.valueFormatter.create({format: labelFormat}) : null;
@@ -529,7 +713,7 @@ export default class ClusterMap implements IVisual {
                 const personaId = personaValue.id;
 
                 /* information fields to extract */
-                let properties:Array<any> = [];
+                let properties: Array<any> = [];
 
                 /* iterate through all the rows */
                 referencesDv.rows.forEach((row, rowIndex) => {
@@ -541,7 +725,7 @@ export default class ClusterMap implements IVisual {
                     if (otherPersonaId === personaId) {
                         /* extract the entity ref info */
                         const rawRefId = row[referenceNameColIndex];
-                        let refId:string = (rawRefId !== undefined && rawRefId !== null) ? rawRefId.toString() : null;
+                        let refId: string = (rawRefId !== undefined && rawRefId !== null) ? rawRefId.toString() : null;
                         if (refId) {
                             if (this.hasBuckets) {
                                 refId += '_' + row[referenceBucketColIndex];
@@ -580,7 +764,7 @@ export default class ClusterMap implements IVisual {
                             }
 
                             /* extract the property info */
-                            let propertyIndex:number = _.findIndex(properties, p => p.entityRefId === refId);
+                            let propertyIndex: number = _.findIndex(properties, p => p.entityRefId === refId);
                             if (propertyIndex < 0) {
                                 propertyIndex = properties.length;
                                 properties.push({
@@ -607,7 +791,7 @@ export default class ClusterMap implements IVisual {
                 /* if this persona's index is within the limits of personas to load, process its info */
                 if (i < this.maxPersonas) {
                     /* sort the properties */
-                    //properties = properties.sort((pa, pb) => pb.count - pa.count); // properties are already sorted due to uncertainty.
+                    // properties = properties.sort((pa, pb) => pb.count - pa.count); // properties are already sorted due to uncertainty.
                     /* color the properties */
                     this._colorProperties(properties);
                     /* set the first property (biggest one) as the primary property */
@@ -616,7 +800,7 @@ export default class ClusterMap implements IVisual {
                     }
 
                     /* create the persona info */
-                    const info:any = {
+                    const info: any = {
                         'id': personaId,
                         'properties': properties,
                         'imageUrl': null,
@@ -635,7 +819,7 @@ export default class ClusterMap implements IVisual {
                     otherPersonaInfo.metadata.personaIds.push(personaId);
                     if (personaValue.selection) {
                         if (otherPersonaInfo.metadata.selection) {
-                            otherPersonaInfo.metadata.selection = SQExprBuilder.or(otherPersonaInfo.metadata.selection, personaValue.selection)
+                            otherPersonaInfo.metadata.selection = SQExprBuilder.or(otherPersonaInfo.metadata.selection, personaValue.selection);
                         } else {
                             otherPersonaInfo.metadata.selection = personaValue.selection;
                         }
@@ -647,7 +831,7 @@ export default class ClusterMap implements IVisual {
                 otherPersonaInfo.metadata.selection = [powerbi.data.createDataViewScopeIdentity(otherPersonaInfo.metadata.selection)];
             }
 
-            const returnValue:any = {
+            const returnValue: IPersonasData = {
                 entityRefs: ClusterMap.convertToLookup.call(this, entityRefs, (d) => d),
                 aggregates: {
                     personas: ClusterMap.convertToLookup.call(this, personaInfos, (d) => d),
@@ -656,15 +840,19 @@ export default class ClusterMap implements IVisual {
                 }
             };
 
-            return returnValue as any;
+            return returnValue;
         }
     }
 
     /**
-     * Enumerates the instances for the objects that appear in the power bi panel
+     * Enumerates the instances for the objects that appear in the PowerBI panel.
+     *
+     * @method enumerateObjectInstances
+     * @param {EnumerateVisualObjectInstancesOptions} options - Options object containing the objects to enumerate, as provided by PowerBI.
+     * @returns {VisualObjectInstance[]}
      */
-    public enumerateObjectInstances(options:EnumerateVisualObjectInstancesOptions):VisualObjectInstance[] {
-        let instances:VisualObjectInstance[] = [{
+    public enumerateObjectInstances(options: EnumerateVisualObjectInstancesOptions): VisualObjectInstance[] {
+        let instances: VisualObjectInstance[] = [{
             selector: null,
             objectName: options.objectName,
             properties: {}
@@ -673,13 +861,30 @@ export default class ClusterMap implements IVisual {
         return instances;
     }
 
-    private _decodeText(text:string):string {
-        const txt = document.createElement('textarea');
+    /**
+     * Removes any HTML tags from `text` and returns the result.
+     *
+     * @method _decodeText
+     * @param {string} text - the text to decode.
+     * @returns {string}
+     * @private
+     */
+    private _decodeText(text: string): string {
+        const txt: HTMLTextAreaElement = document.createElement('textarea');
         txt.innerHTML = text;
         return txt.value;
     }
 
-    private _addSubselectionInfo(subSelection, personaId, counts) {
+    /**
+     * Adds the specified sub selection counts to the `subSelection` object corresponding to the given persona ID.
+     *
+     * @method _addSubSelectionInfo
+     * @param {IPersonasSubSelection} subSelection - The subselection object to modify.
+     * @param {string} personaId - The persona ID for which the counts will be added..
+     * @param {number[]} counts - An array containing the counts that will be sub-selected in the specified persona.
+     * @private
+     */
+    private _addSubSelectionInfo(subSelection: IPersonasSubSelection, personaId: string, counts: number[]): void {
         const colorCount = counts.length <= 3 ? 3 : counts.length;
         const palette = this._colorInterpolation(this.settings.presentation.selectedColor.solid.color, colorCount, true);
         subSelection[personaId] = {
@@ -689,18 +894,25 @@ export default class ClusterMap implements IVisual {
                 return {
                     color: 'rgb(' + rgb.r + ',' + rgb.g + ',' + rgb.b + ')',
                     count: count
-                }
+                };
             })
         };
     }
 
+    /**
+     * Handles the `onSelectPersona` event.
+     *
+     * @method _handleOnSelectPersona
+     * @param {any} selection - Selection info.
+     * @private
+     */
     private _handleOnSelectPersona(selection) {
         this.ignoreSelectionNextUpdate = !!this.subSelectionData;
         const selectionId = selection.id;
         let persona = this.personas.findPersona(selectionId);
 
         if (selection.selected) {
-            const subSelection:any = {};
+            const subSelection: any = {};
 
             if (selectionId === Personas.OTHER_PERSONA_DEFAULT_ID) {
                 if (this.otherPersona && this.data.aggregates.other) {
@@ -709,25 +921,25 @@ export default class ClusterMap implements IVisual {
                     };
                     this.host.onSelect(selectArgs);
                     persona = this.otherPersona;
-                    this._addSubselectionInfo(subSelection, selectionId, [persona.data.totalCount]);
+                    this._addSubSelectionInfo(subSelection, selectionId, [persona.data.totalCount]);
                 }
             } else {
                 const personaInfo = this.data.aggregates.personas[selectionId];
                 if (personaInfo && personaInfo.selection) {
                     const selectArgs: any = {
-                        data: personaInfo.selection.map((identity:any) => ({data: [identity]}))
+                        data: personaInfo.selection.map((identity: any) => ({data: [identity]}))
                     };
                     this.host.onSelect(selectArgs);
 
-                    this._addSubselectionInfo(subSelection, selectionId, persona.data.properties.map(property => property.count));
+                    this._addSubSelectionInfo(subSelection, selectionId, persona.data.properties.map(property => property.count));
 
                     if (this.hasLinks) {
                         const links = this.personas.mSortedData.original.aggregates.links;
                         links.forEach(link => {
                             if (link.source === selectionId) {
-                                this._addSubselectionInfo(subSelection, link.target, [0]);
+                                this._addSubSelectionInfo(subSelection, link.target, [0]);
                             } else if (link.target === selectionId) {
-                                this._addSubselectionInfo(subSelection, link.source, [0]);
+                                this._addSubSelectionInfo(subSelection, link.source, [0]);
                             }
                         });
                     }
@@ -736,12 +948,12 @@ export default class ClusterMap implements IVisual {
 
             this.personas.subSelectPersonas(subSelection, false);
             if (!this.inSandbox) {
-                (<JQuery>(<any>this.$personas).find('[filter^="url("]', '[FILTER^="url("]')).each((index, element)=> {
+                (<JQuery>(<any>this.$personas).find('[filter^="url("]', '[FILTER^="url("]')).each((index, element) => {
                     const currentUrl = $(element).attr('filter');
                     const filtermatch = /url\(['"]?(#[a-zA-Z0-9]+)['"]?\)/ig.exec(currentUrl);
                     const $element = $(element);
                     if (filtermatch && filtermatch.length > 1) {
-                        $element.attr('filter', 'url("' + element.ownerDocument.URL + filtermatch[1] + '")')
+                        $element.attr('filter', 'url("' + element.ownerDocument.URL + filtermatch[1] + '")');
                     }
                 });
             }
@@ -751,6 +963,14 @@ export default class ClusterMap implements IVisual {
         }
     }
 
+    /**
+     * Converts the provided RGB color to HSL space.
+     *
+     * @method _RGBToHSL
+     * @param {{r: number, g: number, b: number}} rgb - The RGB color to convert.
+     * @returns {{h: number, s: number, l: number}}
+     * @private
+     */
     private _RGBToHSL(rgb) {
         const r = rgb.r / 255;
         const g = rgb.g / 255;
@@ -785,29 +1005,37 @@ export default class ClusterMap implements IVisual {
 
     }
 
-    private _HSLToRGB(hsl){
+    /**
+     * Converts the provided HSL color to RGB.
+     *
+     * @method _HSLToRGB
+     * @param {{h: number, s: number, l: number}} hsl - The HSL color to convert.
+     * @returns {{r: number, g: number, b: number}}
+     * @private
+     */
+    private _HSLToRGB(hsl) {
         const h = hsl.h;
         const s = hsl.s;
         const l = hsl.l;
         let r, g, b;
 
-        if (s == 0) {
+        if (s === 0) {
             r = g = b = l; // achromatic
         } else {
-            var hue2rgb = function hue2rgb(p, q, t) {
-                if(t < 0) t += 1;
-                if(t > 1) t -= 1;
-                if(t < 1/6) return p + (q - p) * 6 * t;
-                if(t < 1/2) return q;
-                if(t < 2/3) return p + (q - p) * (2/3 - t) * 6;
+            const hue2rgb = function hue2rgb(p, q, t) {
+                if (t < 0) t += 1;
+                if (t > 1) t -= 1;
+                if (t < 1 / 6) return p + (q - p) * 6 * t;
+                if (t < 1 / 2) return q;
+                if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
                 return p;
             };
 
-            var q = l < 0.5 ? l * (1 + s) : l + s - l * s;
-            var p = 2 * l - q;
-            r = hue2rgb(p, q, h + 1/3);
+            const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+            const p = 2 * l - q;
+            r = hue2rgb(p, q, h + 1 / 3);
             g = hue2rgb(p, q, h);
-            b = hue2rgb(p, q, h - 1/3);
+            b = hue2rgb(p, q, h - 1 / 3);
         }
 
         return {
@@ -817,6 +1045,16 @@ export default class ClusterMap implements IVisual {
         };
     }
 
+    /**
+     * Interpolates the specified color to generate a palette with the specified number of iterations.
+     *
+     * @method _colorInterpolation
+     * @param {string} color - The color to interpolate in HEX notation.
+     * @param {number} iterations - The number of iteration to use while interpolating.
+     * @param {boolean} isSelection - Should the oclor be treated as a selection color.
+     * @returns {Array}
+     * @private
+     */
     private _colorInterpolation(color, iterations, isSelection) {
         /* convert the color to rgb */
         const rgb = {
@@ -860,6 +1098,13 @@ export default class ClusterMap implements IVisual {
         return palette;
     }
 
+    /**
+     * If the visual has data buckets, this function assigns interpolated colors to the provided Persona properties.
+     *
+     * @method _colorProperties
+     * @param {any} properties - The properties to which colors will be assigned.
+     * @private
+     */
     private _colorProperties(properties) {
         if (this.hasBuckets) {
             const colorCount = properties.length <= 3 ? 3 : properties.length;

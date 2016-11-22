@@ -22,30 +22,78 @@
  */
 
 export interface IPersonas {
+
+    /**
+     * The data in this personas instance sorted by the internal heuristics.
+     * @private
+     */
+    mSortedData: any;
+
+    /**
+     * The internal viewport used by the component.
+     * @private
+     */
+    mViewport: any;
+
+    /**
+     * The internal persona used to display the "other" persona.
+     * @private
+     */
+    mOtherPersona: any;
+
+    /**
+     * Returns the internal layout system used in this personas instance.
+     * @readonly
+     */
+    layoutSystem: any;
+
+    /**
+     * Property to define the layout system type that Personas will use.
+     */
+    layoutSystemType: string;
+
     /**
      * Loads data into the Personas View
      */
-    loadData(data:any, append:boolean);
+    loadData(data: any, append: boolean);
 
     /**
      * Finds a persona by an id
      */
-    findPersona(id:string): any;
+    findPersona(id: string): any;
 
     /**
      * Sub-select personas.
      */
-    subSelectPersonas(subselect:any, keepSubSelection:boolean);
+    subSelectPersonas(subselect: any, keepSubSelection: boolean);
 
     /**
      * Enable/Disable the Sidebar
      */
-    subSelectPersonasMultiGauge(subselect:any, keepSubSelection:boolean);
+    subSelectPersonasMultiGauge(subselect: any, keepSubSelection: boolean);
 
     /**
      * Enable/Disable image blur
      */
-    enableBlur(enable:boolean);
+    enableBlur(enable: boolean);
+
+    /**
+     * Automatically zooms and repositions the viewport so all its contents fit in the view while respecting the configured
+     * min and max scale values of the viewport.
+     */
+    autoZoom();
+
+    /**
+     * Resizes the component to fit within its container.
+     */
+    resize();
+
+    /**
+     * Unregisters all the events registered in the `registerEvents` function.
+     *
+     * @method unregisterEvents
+     */
+    unregisterEvents();
 }
 
 export interface IPersonasData {
@@ -135,7 +183,7 @@ export interface IPersonasData {
         /**
          * Seed personas, or personas that have the potential to become personas.
          */
-        links?: {
+        links?: Array<{
             /**
              * The id of this seed persona, must be the same as the id within the object.
              */
@@ -165,7 +213,7 @@ export interface IPersonasData {
                     count: number;
                 }>;
             }
-        };
+        }>;
 
         other?: {
             count: number;
@@ -232,7 +280,7 @@ export interface IPersonasSubSelection {
             color: string;
             count: number;
         }>
-    }
+    };
 }
 
 /**
@@ -240,30 +288,30 @@ export interface IPersonasSubSelection {
  */
 export interface IPersonasOptions {
     hooks?: {
-        /* *
-         * Invoked when the user clicks on a persona effectively selecting or deselcting it,
+        /**
+         * Invoked when the user clicks on a persona, effectively selecting or deselecting it,
          * this callback is also invoked when the user deselects all personas by clicking on an empty space.
          */
         onSelectPersona?: Function;
 
         /**
-         * Invoked when the places the mouse pointer on top of a persona.
+         * Invoked when the user places the mouse pointer on top of a persona.
          */
         onHoverPersona?: Function;
 
         /**
-         * Invoked if merging personas is enabled and the user drags a persona on top of another completing a merge between them.
+         * Invoked if merging personas is enabled and the user drags a persona on top of another, completing a merge between them.
          */
         onMergePersona?: Function;
     };
 
     /**
-     * Should the `entityIcons` be auto generated, if set to `false` the `entityIcons` field must be present.
+     * Should the `entityIcons` be auto generated; if set to `false`, the `entityIcons` field must be present.
      */
     autoGenerateIconMap?: boolean;
 
     /**
-     * Array containing information about entities within the clusters which a personas represent.
+     * Array containing information about entities within the clusters which the personas component represents.
      */
     entityIcons?: Array<{
         /**
@@ -346,8 +394,8 @@ export interface IPersonasOptions {
 
         config?: {
             /**
-             * The base duration for animations in milliseconds, not all animations
-             * will have this duration this number is used as a suggestion.
+             * The base duration for animations, in milliseconds.
+             * Not all animations will have this duration; rather, this number is used as a suggestion.
              */
             animationsDurationBase?: number;
 
@@ -377,7 +425,7 @@ export interface IPersonasOptions {
             mergeScaleRatio?: number;
 
             /**
-             * Should orbits where personas are placed drawn
+             * Should the orbits used in the orbital layout system be drawn.
              */
             drawOrbits?: boolean;
 
@@ -392,12 +440,12 @@ export interface IPersonasOptions {
             autoGenerateFallbackColors?: boolean;
 
             /**
-             * If colors are automatically generated what's the minimum value per channel that they should have (0 - 255)
+             * If colors are automatically generated, what's the minimum value per channel that they should have (0 - 255)
              */
             autoColorClampMin?: number;
 
             /**
-             * If colors are automatically generated what's the maximum value per channel that they should have (0 - 255)
+             * If colors are automatically generated, what's the maximum value per channel that they should have (0 - 255)
              */
             autoColorClampMax?: number;
 
@@ -414,7 +462,7 @@ export interface IPersonasOptions {
             /**
              * Should this instance register itself to listen for window resize events.
              */
-            registerWindowResize? :boolean;
+            registerWindowResize?: boolean;
 
             /**
              * Should the persona label display the total count of the persona.
@@ -450,4 +498,52 @@ export interface IPersonasVisualConfiguration {
      * The transform of the personas visual
      */
     transform?: string;
+}
+
+export interface IClusterMapSettings {
+    /**
+     * Visual's presentation settings.
+     */
+    presentation: {
+        /**
+         * Persona layout type.
+         */
+        layout: string;
+
+        /**
+         * Defines if persona background images should be blurred.
+         */
+        imageBlur: boolean;
+
+        /**
+         * Initial number of personas loaded in the visual. If the total number of personas is higher than this number,
+         * an "other" persona will be created to represent the data.
+         */
+        initialCount: number;
+
+        /**
+         * How many personas should be loaded when paginating.
+         */
+        loadMoreCount: number;
+
+        /**
+         * The default color for persona gauge bars.
+         */
+        normalColor: { solid: { color: string } },
+
+        /**
+         * The selected-state color for persona gauge bars.
+         */
+        selectedColor: { solid: { color: string } }
+    };
+
+    /**
+     * Data loading settings.
+     */
+    dataLoading: {
+        /**
+         * How many rows of data can be loaded at once.
+         */
+        maxDataRows: number;
+    };
 }
