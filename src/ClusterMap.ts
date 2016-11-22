@@ -107,7 +107,7 @@ export default class ClusterMap implements IVisual {
     };
 
     /**
-     * The element in which the Personas component will be added to.
+     * The element to which the Personas component will be added.
      *
      * @type {JQuery}
      * @private
@@ -187,7 +187,7 @@ export default class ClusterMap implements IVisual {
     private data: IPersonasData;
 
     /**
-     * The "other" persona, if visible, null otherwise.
+     * The “other” persona, if visible; otherwise, null.
      *
      * @type {any}
      * @private
@@ -203,7 +203,7 @@ export default class ClusterMap implements IVisual {
     private dataView: DataView;
 
     /**
-     * Does this visual have links between personas.
+     * Whether this visual has links between personas.
      *
      * @type {boolean}
      * @private
@@ -211,7 +211,7 @@ export default class ClusterMap implements IVisual {
     private hasLinks: boolean;
 
     /**
-     * Does this visual have buckets to split the data.
+     * Whether this visual has buckets to split the data.
      *
      * @type {boolean}
      * @private
@@ -227,7 +227,7 @@ export default class ClusterMap implements IVisual {
     private serializedData: any = null;
 
     /**
-     * Sub-selection data if any, otherwise null.
+     * Sub-selection data, if any; otherwise, null.
      *
      * @type {any}
      * @private
@@ -243,7 +243,7 @@ export default class ClusterMap implements IVisual {
     private ignoreSelectionNextUpdate: boolean = false;
 
     /**
-     * Is there more data available to be loaded by this visual.
+     * Whether there is more data available to be loaded by this visual.
      *
      * @type {boolean}
      * @private
@@ -251,7 +251,7 @@ export default class ClusterMap implements IVisual {
     private hasMoreData: boolean = false;
 
     /**
-     * Converts an array of data objects to an lookup table object.
+     * Converts an array of data objects to a lookup table object.
      *
      * @method convertToLookup
      * @param {Array<{id: string}>} data - The data array to convert.
@@ -319,7 +319,7 @@ export default class ClusterMap implements IVisual {
     }
 
     /**
-     * Update function called by PowerBI when the visual or its data needs to be updated.
+     * Update function called by PowerBI when the visual or its data need to be updated.
      *
      * @method update
      * @param {VisualUpdateOptions} options - Update options object as provided by PowerBI.
@@ -876,11 +876,11 @@ export default class ClusterMap implements IVisual {
     }
 
     /**
-     * Adds the specified sub selection counts to the persona ID in the `subSelection` object.
+     * Adds the specified sub selection counts to the `subSelection` object corresponding to the given persona ID.
      *
      * @method _addSubSelectionInfo
      * @param {IPersonasSubSelection} subSelection - The subselection object to modify.
-     * @param {string} personaId - The persona ID to which the counts will be added.
+     * @param {string} personaId - The persona ID for which the counts will be added..
      * @param {number[]} counts - An array containing the counts that will be sub-selected in the specified persona.
      * @private
      */
@@ -1099,7 +1099,7 @@ export default class ClusterMap implements IVisual {
     }
 
     /**
-     * If the visual has data buckets, this function assigns interpolated colors to the provided Persona porperties.
+     * If the visual has data buckets, this function assigns interpolated colors to the provided Persona properties.
      *
      * @method _colorProperties
      * @param {any} properties - The properties to which colors will be assigned.

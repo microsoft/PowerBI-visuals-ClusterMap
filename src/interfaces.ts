@@ -288,30 +288,30 @@ export interface IPersonasSubSelection {
  */
 export interface IPersonasOptions {
     hooks?: {
-        /* *
-         * Invoked when the user clicks on a persona effectively selecting or deselcting it,
+        /**
+         * Invoked when the user clicks on a persona, effectively selecting or deselecting it,
          * this callback is also invoked when the user deselects all personas by clicking on an empty space.
          */
         onSelectPersona?: Function;
 
         /**
-         * Invoked when the places the mouse pointer on top of a persona.
+         * Invoked when the user places the mouse pointer on top of a persona.
          */
         onHoverPersona?: Function;
 
         /**
-         * Invoked if merging personas is enabled and the user drags a persona on top of another completing a merge between them.
+         * Invoked if merging personas is enabled and the user drags a persona on top of another, completing a merge between them.
          */
         onMergePersona?: Function;
     };
 
     /**
-     * Should the `entityIcons` be auto generated, if set to `false` the `entityIcons` field must be present.
+     * Should the `entityIcons` be auto generated; if set to `false`, the `entityIcons` field must be present.
      */
     autoGenerateIconMap?: boolean;
 
     /**
-     * Array containing information about entities within the clusters which a personas represent.
+     * Array containing information about entities within the clusters which the personas component represent.
      */
     entityIcons?: Array<{
         /**
@@ -394,8 +394,8 @@ export interface IPersonasOptions {
 
         config?: {
             /**
-             * The base duration for animations in milliseconds, not all animations
-             * will have this duration this number is used as a suggestion.
+             * The base duration for animations, in milliseconds.
+             * Not all animations will have this duration; rather, this number is used as a suggestion.
              */
             animationsDurationBase?: number;
 
@@ -425,7 +425,7 @@ export interface IPersonasOptions {
             mergeScaleRatio?: number;
 
             /**
-             * Should orbits where personas are placed drawn
+             * Should the orbits used in the orbital layout system be drawn.
              */
             drawOrbits?: boolean;
 
@@ -440,12 +440,12 @@ export interface IPersonasOptions {
             autoGenerateFallbackColors?: boolean;
 
             /**
-             * If colors are automatically generated what's the minimum value per channel that they should have (0 - 255)
+             * If colors are automatically generated, what's the minimum value per channel that they should have (0 - 255)
              */
             autoColorClampMin?: number;
 
             /**
-             * If colors are automatically generated what's the maximum value per channel that they should have (0 - 255)
+             * If colors are automatically generated, what's the maximum value per channel that they should have (0 - 255)
              */
             autoColorClampMax?: number;
 
@@ -516,7 +516,7 @@ export interface IClusterMapSettings {
         imageBlur: boolean;
 
         /**
-         * Initial number of personas loaded in the visual, if the total number of personas is higher than this number,
+         * Initial number of personas loaded in the visual. If the total number of personas is higher than this number,
          * an "other" persona will be created to represent the data.
          */
         initialCount: number;
