@@ -379,7 +379,8 @@ export default class ClusterMap implements IVisual {
                     }
                 }
             }
-            this.updateDataView(dataView);
+            const append = (options.operationKind === powerbi.VisualDataChangeOperationKind.Append);
+            this.updateDataView(dataView, append);
             if (this.personas) {
                 /* set the layout type in personas */
                 this.personas.layoutSystemType = this.hasLinks ? this.settings.presentation.layout : 'orbital';
@@ -401,25 +402,8 @@ export default class ClusterMap implements IVisual {
         // don't modify the source dataview, use a copy instead.
         const dataView = $.extend(true, {}, dv);
 
-        /* if the new data is the result of `loadMoreData` merge it with the old data before updating */
-        // Sandbox mode vs non-sandbox mode handles merge data differently.
-        const lastMergeIndex = (<DataViewCategoricalSegment>dataView.categorical).lastMergeIndex;
-        let isDataAppendedToDataview = false;
-
-        const currentDataViewSize = dataView.categorical.categories[0].values.length;
-        let loadedPreviously = false;
-        if (lastMergeIndex !== undefined) {
-            loadedPreviously = !!this.dataView;
-        } else {
-            // assume that if the dataview length <= the document request size, then its new data.
-            if (currentDataViewSize > DOCUMENT_REQUEST_COUNT) {
-                loadedPreviously = true;
-                isDataAppendedToDataview = true;
-            }
-        }
-
         // run this only if new data is being appended to the dataview (non-sandbox mode).
-        if (!isDataAppendedToDataview && this.dataView && loadedPreviously) {
+        if (this.dataView && append) {
             const mergedRows = this.dataView.table.rows;
             mergedRows.push.apply(mergedRows, dataView.table.rows);
             dataView.table.rows = mergedRows;
@@ -492,7 +476,7 @@ export default class ClusterMap implements IVisual {
                 }
                 this.serializedData = serializedData;
                 this.data = data;
-                this.personas.loadData(this.data, append);
+                this.personas.loadData(this.data, false);
 
                 this.otherPersona = this.personas.mOtherPersona;
 
