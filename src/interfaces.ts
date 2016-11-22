@@ -311,7 +311,7 @@ export interface IPersonasOptions {
     autoGenerateIconMap?: boolean;
 
     /**
-     * Array containing information about entities within the clusters which the personas component represent.
+     * Array containing information about entities within the clusters which the personas component represents.
      */
     entityIcons?: Array<{
         /**
