@@ -938,18 +938,20 @@ export default class ClusterMap implements IVisual {
                 }
             }
 
-            this.personas.subSelectPersonas(subSelection, false);
-            if (!this.inSandbox) {
-                (<JQuery>(<any>this.$personas).find('[filter^="url("]', '[FILTER^="url("]')).each((index, element) => {
-                    const currentUrl = $(element).attr('filter');
-                    const filtermatch = /url\(['"]?(#[a-zA-Z0-9]+)['"]?\)/ig.exec(currentUrl);
-                    const $element = $(element);
-                    if (filtermatch && filtermatch.length > 1) {
-                        $element.attr('filter', 'url("' + element.ownerDocument.URL + filtermatch[1] + '")');
-                    }
-                });
-            }
-            persona.isSelected = true;
+            setTimeout(() => {
+                this.personas.subSelectPersonas(subSelection, false);
+                if (!this.inSandbox) {
+                    (<JQuery>(<any>this.$personas).find('[filter^="url("]', '[FILTER^="url("]')).each((index, element) => {
+                        const currentUrl = $(element).attr('filter');
+                        const filtermatch = /url\(['"]?(#[a-zA-Z0-9]+)['"]?\)/ig.exec(currentUrl);
+                        const $element = $(element);
+                        if (filtermatch && filtermatch.length > 1) {
+                            $element.attr('filter', 'url("' + element.ownerDocument.URL + filtermatch[1] + '")');
+                        }
+                    });
+                }
+                persona.isSelected = true;
+            });
         } else {
             this.selectionManager.clear();
         }
