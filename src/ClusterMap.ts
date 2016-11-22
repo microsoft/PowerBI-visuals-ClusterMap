@@ -791,7 +791,15 @@ export default class ClusterMap implements IVisual {
                 /* if this persona's index is within the limits of personas to load, process its info */
                 if (i < this.maxPersonas) {
                     /* sort the properties */
-                    // properties = properties.sort((pa, pb) => pb.count - pa.count); // properties are already sorted due to uncertainty.
+                    properties = properties.sort((pa, pb) => {
+                        if (pa.entityRefId < pb.entityRefId) {
+                            return -1;
+                        }
+                        if (pa.entityRefId > pb.entityRefId) {
+                            return 1;
+                        }
+                        return 0;
+                    }); // properties are already sorted due to uncertainty.
                     /* color the properties */
                     this._colorProperties(properties);
                     /* set the first property (biggest one) as the primary property */
