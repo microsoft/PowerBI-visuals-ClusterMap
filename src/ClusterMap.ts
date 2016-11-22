@@ -341,7 +341,7 @@ export default class ClusterMap implements IVisual {
 
         if (options.dataViews && options.dataViews.length > 0) {
             const dataView = options.dataViews[0];
-            const newObjects:any = dataView && dataView.metadata && dataView.metadata.objects;
+            const newObjects: any = dataView && dataView.metadata && dataView.metadata.objects;
             if (newObjects) {
                 /* update settings */
                 if (newObjects && !_.isMatch(this.settings, newObjects)) {
@@ -362,12 +362,12 @@ export default class ClusterMap implements IVisual {
                         this.personas.enableBlur(this.settings.presentation.imageBlur);
 
                         if (!this.inSandbox) {
-                            (<JQuery>(<any>this.$personas).find('[filter^="url("]', '[FILTER^="url("]')).each((index, element)=> {
+                            (<JQuery>(<any>this.$personas).find('[filter^="url("]', '[FILTER^="url("]')).each((index, element) => {
                                 const currentUrl = $(element).attr('filter');
                                 const filtermatch = /url\(['"]?(#[a-zA-Z0-9]+)['"]?\)/ig.exec(currentUrl);
                                 const $element = $(element);
                                 if (filtermatch && filtermatch.length > 1) {
-                                    $element.attr('filter', 'url("' + element.ownerDocument.URL + filtermatch[1] + '")')
+                                    $element.attr('filter', 'url("' + element.ownerDocument.URL + filtermatch[1] + '")');
                                 }
                             });
                         }
@@ -456,14 +456,14 @@ export default class ClusterMap implements IVisual {
         }
 
         /* convert the data */
-        const data:any = this.converter(dataView);
+        const data: any = this.converter(dataView);
 
         if (data) {
             this.element.show();
-            let serializedData:string = JSON.stringify(data);
+            let serializedData: string = JSON.stringify(data);
             if (!this.serializedData || !_.isEqual(this.serializedData, serializedData)) {
                 if (!this.personas) {
-                    const personasOptions:IPersonasOptions = {
+                    const personasOptions: IPersonasOptions = {
                         autoGenerateIconMap: true,
                         Persona: {
                             layout: {
@@ -497,26 +497,26 @@ export default class ClusterMap implements IVisual {
                 this.otherPersona = this.personas.mOtherPersona;
 
                 if (!this.inSandbox) {
-                    (<JQuery>(<any>this.$personas).find('[mask^="url("]', '[MASK^="url("]')).each((index, element)=> {
+                    (<JQuery>(<any>this.$personas).find('[mask^="url("]', '[MASK^="url("]')).each((index, element) => {
                         const currentUrl = $(element).attr('mask');
                         const maskmatch = /url\(['"]?(#[a-zA-Z0-9]+)['"]?\)/ig.exec(currentUrl);
                         if (maskmatch && maskmatch.length > 1) {
-                            $(element).attr('mask', 'url("' + element.ownerDocument.URL + maskmatch[1] + '")')
+                            $(element).attr('mask', 'url("' + element.ownerDocument.URL + maskmatch[1] + '")');
                         }
                     });
-                    (<JQuery>(<any>this.$personas).find('[filter^="url("]', '[FILTER^="url("]')).each((index, element)=> {
+                    (<JQuery>(<any>this.$personas).find('[filter^="url("]', '[FILTER^="url("]')).each((index, element) => {
                         const currentUrl = $(element).attr('filter');
                         const filtermatch = /url\(['"]?(#[a-zA-Z0-9]+)['"]?\)/ig.exec(currentUrl);
                         const $element = $(element);
                         if (filtermatch && filtermatch.length > 1) {
-                            $element.attr('filter', 'url("' + element.ownerDocument.URL + filtermatch[1] + '")')
+                            $element.attr('filter', 'url("' + element.ownerDocument.URL + filtermatch[1] + '")');
                         }
                     });
-                    (<JQuery>(<any>this.$personas).find('[fill^="url("]', '[FILL^="url("]')).each((index, element)=> {
+                    (<JQuery>(<any>this.$personas).find('[fill^="url("]', '[FILL^="url("]')).each((index, element) => {
                         const currentUrl = $(element).attr('fill');
                         const fillmatch = /url\(['"]?(#[a-zA-Z0-9]+)['"]?\)/ig.exec(currentUrl);
                         if (fillmatch && fillmatch.length > 1) {
-                            $(element).attr('fill', 'url("' + element.ownerDocument.URL + fillmatch[1] + '")')
+                            $(element).attr('fill', 'url("' + element.ownerDocument.URL + fillmatch[1] + '")');
                         }
                     });
                 }
@@ -528,12 +528,12 @@ export default class ClusterMap implements IVisual {
                 if (this.subSelectionData) {
                     this.personas.subSelectPersonas(this.subSelectionData, false);
                     if (!this.inSandbox) {
-                        (<JQuery>(<any>this.$personas).find('[filter^="url("]', '[FILTER^="url("]')).each((index, element)=> {
+                        (<JQuery>(<any>this.$personas).find('[filter^="url("]', '[FILTER^="url("]')).each((index, element) => {
                             const currentUrl = $(element).attr('filter');
                             const filtermatch = /url\(['"]?(#[a-zA-Z0-9]+)['"]?\)/ig.exec(currentUrl);
                             const $element = $(element);
                             if (filtermatch && filtermatch.length > 1) {
-                                $element.attr('filter', 'url("' + element.ownerDocument.URL + filtermatch[1] + '")')
+                                $element.attr('filter', 'url("' + element.ownerDocument.URL + filtermatch[1] + '")');
                             }
                         });
                     }
@@ -637,7 +637,7 @@ export default class ClusterMap implements IVisual {
                 this.subSelectionData = null;
             }
 
-            let links:any[] = [];
+            let links: any[] = [];
             const personaCounts = referencesDv.rows.reduce((memo, row) => {
                 const rawPersonaId = row[personaIdColIndex];
                 const personaId = (rawPersonaId !== undefined && rawPersonaId !== null) ? rawPersonaId.toString() : null;
@@ -666,7 +666,7 @@ export default class ClusterMap implements IVisual {
                         if (targetId && targetId !== personaId && !links.some(link => (
                             (link.source === personaId || link.target === personaId) &&
                             (link.source === targetId || link.target === targetId)))) {
-                            const linkInfo:any = {
+                            const linkInfo: any = {
                                 source: personaId,
                                 target: targetId
                             };
@@ -690,10 +690,10 @@ export default class ClusterMap implements IVisual {
 
             // retrieve the top X personas, ordered by count.
             const sortedPersonas = personaCounts.sort((a, b) => b.count - a.count);
-            let entityRefs:any[] = [];
+            let entityRefs: any[] = [];
 
-            const personaInfos:any[] = [];
-            let otherPersonaInfo:any = {
+            const personaInfos: any[] = [];
+            let otherPersonaInfo: any = {
                 'count': 0,
                 'metadata': {
                     'selection': null,
@@ -701,7 +701,7 @@ export default class ClusterMap implements IVisual {
                 }
             };
 
-            const viz:any = powerbi.visuals;
+            const viz: any = powerbi.visuals;
             const labelFormat = metadata.columns[referenceNameColIndex].format;
             const countFormat = metadata.columns[referenceCountColIndex].format;
             const defaultFormatter = labelFormat ? viz.valueFormatter.create({format: labelFormat}) : null;
@@ -713,7 +713,7 @@ export default class ClusterMap implements IVisual {
                 const personaId = personaValue.id;
 
                 /* information fields to extract */
-                let properties:Array<any> = [];
+                let properties: Array<any> = [];
 
                 /* iterate through all the rows */
                 referencesDv.rows.forEach((row, rowIndex) => {
@@ -725,7 +725,7 @@ export default class ClusterMap implements IVisual {
                     if (otherPersonaId === personaId) {
                         /* extract the entity ref info */
                         const rawRefId = row[referenceNameColIndex];
-                        let refId:string = (rawRefId !== undefined && rawRefId !== null) ? rawRefId.toString() : null;
+                        let refId: string = (rawRefId !== undefined && rawRefId !== null) ? rawRefId.toString() : null;
                         if (refId) {
                             if (this.hasBuckets) {
                                 refId += '_' + row[referenceBucketColIndex];
@@ -764,7 +764,7 @@ export default class ClusterMap implements IVisual {
                             }
 
                             /* extract the property info */
-                            let propertyIndex:number = _.findIndex(properties, p => p.entityRefId === refId);
+                            let propertyIndex: number = _.findIndex(properties, p => p.entityRefId === refId);
                             if (propertyIndex < 0) {
                                 propertyIndex = properties.length;
                                 properties.push({
@@ -791,7 +791,7 @@ export default class ClusterMap implements IVisual {
                 /* if this persona's index is within the limits of personas to load, process its info */
                 if (i < this.maxPersonas) {
                     /* sort the properties */
-                    //properties = properties.sort((pa, pb) => pb.count - pa.count); // properties are already sorted due to uncertainty.
+                    // properties = properties.sort((pa, pb) => pb.count - pa.count); // properties are already sorted due to uncertainty.
                     /* color the properties */
                     this._colorProperties(properties);
                     /* set the first property (biggest one) as the primary property */
@@ -800,7 +800,7 @@ export default class ClusterMap implements IVisual {
                     }
 
                     /* create the persona info */
-                    const info:any = {
+                    const info: any = {
                         'id': personaId,
                         'properties': properties,
                         'imageUrl': null,
@@ -819,7 +819,7 @@ export default class ClusterMap implements IVisual {
                     otherPersonaInfo.metadata.personaIds.push(personaId);
                     if (personaValue.selection) {
                         if (otherPersonaInfo.metadata.selection) {
-                            otherPersonaInfo.metadata.selection = SQExprBuilder.or(otherPersonaInfo.metadata.selection, personaValue.selection)
+                            otherPersonaInfo.metadata.selection = SQExprBuilder.or(otherPersonaInfo.metadata.selection, personaValue.selection);
                         } else {
                             otherPersonaInfo.metadata.selection = personaValue.selection;
                         }
@@ -852,7 +852,7 @@ export default class ClusterMap implements IVisual {
      * @returns {VisualObjectInstance[]}
      */
     public enumerateObjectInstances(options: EnumerateVisualObjectInstancesOptions): VisualObjectInstance[] {
-        let instances:VisualObjectInstance[] = [{
+        let instances: VisualObjectInstance[] = [{
             selector: null,
             objectName: options.objectName,
             properties: {}
@@ -894,7 +894,7 @@ export default class ClusterMap implements IVisual {
                 return {
                     color: 'rgb(' + rgb.r + ',' + rgb.g + ',' + rgb.b + ')',
                     count: count
-                }
+                };
             })
         };
     }
@@ -912,7 +912,7 @@ export default class ClusterMap implements IVisual {
         let persona = this.personas.findPersona(selectionId);
 
         if (selection.selected) {
-            const subSelection:any = {};
+            const subSelection: any = {};
 
             if (selectionId === Personas.OTHER_PERSONA_DEFAULT_ID) {
                 if (this.otherPersona && this.data.aggregates.other) {
@@ -927,7 +927,7 @@ export default class ClusterMap implements IVisual {
                 const personaInfo = this.data.aggregates.personas[selectionId];
                 if (personaInfo && personaInfo.selection) {
                     const selectArgs: any = {
-                        data: personaInfo.selection.map((identity:any) => ({data: [identity]}))
+                        data: personaInfo.selection.map((identity: any) => ({data: [identity]}))
                     };
                     this.host.onSelect(selectArgs);
 
@@ -948,12 +948,12 @@ export default class ClusterMap implements IVisual {
 
             this.personas.subSelectPersonas(subSelection, false);
             if (!this.inSandbox) {
-                (<JQuery>(<any>this.$personas).find('[filter^="url("]', '[FILTER^="url("]')).each((index, element)=> {
+                (<JQuery>(<any>this.$personas).find('[filter^="url("]', '[FILTER^="url("]')).each((index, element) => {
                     const currentUrl = $(element).attr('filter');
                     const filtermatch = /url\(['"]?(#[a-zA-Z0-9]+)['"]?\)/ig.exec(currentUrl);
                     const $element = $(element);
                     if (filtermatch && filtermatch.length > 1) {
-                        $element.attr('filter', 'url("' + element.ownerDocument.URL + filtermatch[1] + '")')
+                        $element.attr('filter', 'url("' + element.ownerDocument.URL + filtermatch[1] + '")');
                     }
                 });
             }
@@ -1013,29 +1013,29 @@ export default class ClusterMap implements IVisual {
      * @returns {{r: number, g: number, b: number}}
      * @private
      */
-    private _HSLToRGB(hsl){
+    private _HSLToRGB(hsl) {
         const h = hsl.h;
         const s = hsl.s;
         const l = hsl.l;
         let r, g, b;
 
-        if (s == 0) {
+        if (s === 0) {
             r = g = b = l; // achromatic
         } else {
-            var hue2rgb = function hue2rgb(p, q, t) {
-                if(t < 0) t += 1;
-                if(t > 1) t -= 1;
-                if(t < 1/6) return p + (q - p) * 6 * t;
-                if(t < 1/2) return q;
-                if(t < 2/3) return p + (q - p) * (2/3 - t) * 6;
+            const hue2rgb = function hue2rgb(p, q, t) {
+                if (t < 0) t += 1;
+                if (t > 1) t -= 1;
+                if (t < 1 / 6) return p + (q - p) * 6 * t;
+                if (t < 1 / 2) return q;
+                if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
                 return p;
             };
 
-            var q = l < 0.5 ? l * (1 + s) : l + s - l * s;
-            var p = 2 * l - q;
-            r = hue2rgb(p, q, h + 1/3);
+            const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+            const p = 2 * l - q;
+            r = hue2rgb(p, q, h + 1 / 3);
             g = hue2rgb(p, q, h);
-            b = hue2rgb(p, q, h - 1/3);
+            b = hue2rgb(p, q, h - 1 / 3);
         }
 
         return {

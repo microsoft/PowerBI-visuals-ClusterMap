@@ -55,27 +55,27 @@ export interface IPersonas {
     /**
      * Loads data into the Personas View
      */
-    loadData(data:any, append:boolean);
+    loadData(data: any, append: boolean);
 
     /**
      * Finds a persona by an id
      */
-    findPersona(id:string): any;
+    findPersona(id: string): any;
 
     /**
      * Sub-select personas.
      */
-    subSelectPersonas(subselect:any, keepSubSelection:boolean);
+    subSelectPersonas(subselect: any, keepSubSelection: boolean);
 
     /**
      * Enable/Disable the Sidebar
      */
-    subSelectPersonasMultiGauge(subselect:any, keepSubSelection:boolean);
+    subSelectPersonasMultiGauge(subselect: any, keepSubSelection: boolean);
 
     /**
      * Enable/Disable image blur
      */
-    enableBlur(enable:boolean);
+    enableBlur(enable: boolean);
 
     /**
      * Automatically zooms and repositions the viewport so all its contents fit in the view while respecting the configured
@@ -280,7 +280,7 @@ export interface IPersonasSubSelection {
             color: string;
             count: number;
         }>
-    }
+    };
 }
 
 /**
@@ -462,7 +462,7 @@ export interface IPersonasOptions {
             /**
              * Should this instance register itself to listen for window resize events.
              */
-            registerWindowResize? :boolean;
+            registerWindowResize?: boolean;
 
             /**
              * Should the persona label display the total count of the persona.
