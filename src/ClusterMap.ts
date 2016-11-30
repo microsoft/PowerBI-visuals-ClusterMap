@@ -709,7 +709,7 @@ export default class ClusterMap implements IVisual {
                     if (otherPersonaId === personaId) {
                         /* extract the entity ref info */
                         const rawRefId = row[referenceNameColIndex];
-                        let refId: string = (rawRefId !== undefined && rawRefId !== null) ? rawRefId.toString() : null;
+                        let refId: string = personaId.toString();
                         if (refId) {
                             if (this.hasBuckets) {
                                 refId += '_' + row[referenceBucketColIndex];
