@@ -602,15 +602,30 @@ export default class ClusterMap implements IVisual {
                                 this.data.aggregates.other.metadata &&
                                 this.data.aggregates.other.metadata.personaIds.indexOf(personaId) >= 0) {
                                 personaId = Personas.OTHER_PERSONA_DEFAULT_ID;
-                            }
 
-                            if (!subSelectionData[personaId]) {
-                                this._addSubSelectionInfo(subSelectionData, personaId, [highlight]);
+                                const newCount = subSelectionData[personaId] ? subSelectionData[personaId].bars[0].count + highlight: highlight;
+                                this._addSubSelectionInfo(subSelectionData, personaId, [newCount]);
                             } else {
-                                const oldData = subSelectionData[personaId];
-                                const counts = oldData.bars.map(bar => bar.count);
-                                counts.push(highlight);
-                                this._addSubSelectionInfo(subSelectionData, personaId, counts);
+                                const persona = this.personas.findPersona(personaId);
+                                if (persona) {
+                                    const counts = [];
+                                    const properties = persona.data.properties;
+                                    if (!subSelectionData[personaId]) {
+                                        properties.forEach(() => counts.push(0));
+                                    } else {
+                                        const oldData = subSelectionData[personaId];
+                                        oldData.bars.forEach(bar => counts.push(bar.count));
+                                    }
+
+                                    const propertyId = personaId + '_' + row[referenceBucketColIndex];
+                                    for (let i = 0, n = properties.length; i < n; ++i) {
+                                        if (properties[i].entityRefId === propertyId) {
+                                            counts[i] += highlight;
+                                        }
+                                    }
+
+                                    this._addSubSelectionInfo(subSelectionData, personaId, counts);
+                                }
                             }
                         }
                     }
