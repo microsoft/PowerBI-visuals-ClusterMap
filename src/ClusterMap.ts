@@ -798,7 +798,7 @@ export default class ClusterMap implements IVisual {
                             return 1;
                         }
                         return 0;
-                    }); // properties are already sorted due to uncertainty.
+                    });
                     /* color the properties */
                     this._colorProperties(properties);
                     /* set the first property (biggest one) as the primary property */
