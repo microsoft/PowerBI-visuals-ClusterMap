@@ -3,31 +3,38 @@
     {
       "name": "PersonaGroup",
       "kind": 0,
-      "displayName": "Group Id"
+      "displayName": "Cluster ID",
+      "description": "A unique ID that identifies each cluster."
     }, {
       "name": "ReferenceName",
       "kind": 0,
-      "displayName": "Label"
+      "displayName": "Label",
+      "description": "A label to display on top of each cluster."
     }, {
       "name": "ReferenceCount",
       "kind": 1,
-      "displayName": "Count"
+      "displayName": "Count",
+      "description": "The number of members of this cluster."
     }, {
       "name": "ReferenceBucket",
       "kind": 0,
-      "displayName": "Bucket By"
+      "displayName": "Segmented By",
+      "description": "Optional values to be used to segment the members of this cluster in groups."
     }, {
       "name": "ReferenceImageUrl",
       "kind": 0,
-      "displayName": "Image Url"
+      "displayName": "Image Url",
+      "description": "Up to four optional images to display as the cluster's background."
     }, {
       "name": "ReferenceLinkTo",
       "kind": 0,
-      "displayName": "Related To"
+      "displayName": "Related To",
+      "description": "Optional IDs of other clusters related to this cluster."
     }, {
       "name": "ReferenceLinkWeight",
       "kind": 0,
-      "displayName": "Relatedness Strength"
+      "displayName": "Relatedness Strength",
+      "description": "Optional strength of the link between this cluster and the other clusters it is related to."
     }
   ],
   "dataViewMappings": [{
