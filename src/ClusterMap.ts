@@ -379,7 +379,8 @@ export default class ClusterMap implements IVisual {
                     }
                 }
             }
-            this.updateDataView(dataView);
+            const append = (options.operationKind === powerbi.VisualDataChangeOperationKind.Append);
+            this.updateDataView(dataView, append);
             if (this.personas) {
                 /* set the layout type in personas */
                 this.personas.layoutSystemType = this.hasLinks ? this.settings.presentation.layout : 'orbital';
@@ -401,25 +402,8 @@ export default class ClusterMap implements IVisual {
         // don't modify the source dataview, use a copy instead.
         const dataView = $.extend(true, {}, dv);
 
-        /* if the new data is the result of `loadMoreData` merge it with the old data before updating */
-        // Sandbox mode vs non-sandbox mode handles merge data differently.
-        const lastMergeIndex = (<DataViewCategoricalSegment>dataView.categorical).lastMergeIndex;
-        let isDataAppendedToDataview = false;
-
-        const currentDataViewSize = dataView.categorical.categories[0].values.length;
-        let loadedPreviously = false;
-        if (lastMergeIndex !== undefined) {
-            loadedPreviously = !!this.dataView;
-        } else {
-            // assume that if the dataview length <= the document request size, then its new data.
-            if (currentDataViewSize > DOCUMENT_REQUEST_COUNT) {
-                loadedPreviously = true;
-                isDataAppendedToDataview = true;
-            }
-        }
-
         // run this only if new data is being appended to the dataview (non-sandbox mode).
-        if (!isDataAppendedToDataview && this.dataView && loadedPreviously) {
+        if (this.dataView && append) {
             const mergedRows = this.dataView.table.rows;
             mergedRows.push.apply(mergedRows, dataView.table.rows);
             dataView.table.rows = mergedRows;
@@ -492,7 +476,7 @@ export default class ClusterMap implements IVisual {
                 }
                 this.serializedData = serializedData;
                 this.data = data;
-                this.personas.loadData(this.data, append);
+                this.personas.loadData(this.data, false);
 
                 this.otherPersona = this.personas.mOtherPersona;
 
@@ -618,15 +602,30 @@ export default class ClusterMap implements IVisual {
                                 this.data.aggregates.other.metadata &&
                                 this.data.aggregates.other.metadata.personaIds.indexOf(personaId) >= 0) {
                                 personaId = Personas.OTHER_PERSONA_DEFAULT_ID;
-                            }
 
-                            if (!subSelectionData[personaId]) {
-                                this._addSubSelectionInfo(subSelectionData, personaId, [highlight]);
+                                const newCount = subSelectionData[personaId] ? subSelectionData[personaId].bars[0].count + highlight: highlight;
+                                this._addSubSelectionInfo(subSelectionData, personaId, [newCount]);
                             } else {
-                                const oldData = subSelectionData[personaId];
-                                const counts = oldData.bars.map(bar => bar.count);
-                                counts.push(highlight);
-                                this._addSubSelectionInfo(subSelectionData, personaId, counts);
+                                const persona = this.personas.findPersona(personaId);
+                                if (persona) {
+                                    const counts = [];
+                                    const properties = persona.data.properties;
+                                    if (!subSelectionData[personaId]) {
+                                        properties.forEach(() => counts.push(0));
+                                    } else {
+                                        const oldData = subSelectionData[personaId];
+                                        oldData.bars.forEach(bar => counts.push(bar.count));
+                                    }
+
+                                    const propertyId = personaId + '_' + row[referenceBucketColIndex];
+                                    for (let i = 0, n = properties.length; i < n; ++i) {
+                                        if (properties[i].entityRefId === propertyId) {
+                                            counts[i] += highlight;
+                                        }
+                                    }
+
+                                    this._addSubSelectionInfo(subSelectionData, personaId, counts);
+                                }
                             }
                         }
                     }
@@ -725,7 +724,7 @@ export default class ClusterMap implements IVisual {
                     if (otherPersonaId === personaId) {
                         /* extract the entity ref info */
                         const rawRefId = row[referenceNameColIndex];
-                        let refId: string = (rawRefId !== undefined && rawRefId !== null) ? rawRefId.toString() : null;
+                        let refId: string = personaId.toString();
                         if (refId) {
                             if (this.hasBuckets) {
                                 refId += '_' + row[referenceBucketColIndex];
@@ -791,7 +790,15 @@ export default class ClusterMap implements IVisual {
                 /* if this persona's index is within the limits of personas to load, process its info */
                 if (i < this.maxPersonas) {
                     /* sort the properties */
-                    // properties = properties.sort((pa, pb) => pb.count - pa.count); // properties are already sorted due to uncertainty.
+                    properties = properties.sort((pa, pb) => {
+                        if (pa.entityRefId < pb.entityRefId) {
+                            return -1;
+                        }
+                        if (pa.entityRefId > pb.entityRefId) {
+                            return 1;
+                        }
+                        return 0;
+                    });
                     /* color the properties */
                     this._colorProperties(properties);
                     /* set the first property (biggest one) as the primary property */
@@ -946,18 +953,20 @@ export default class ClusterMap implements IVisual {
                 }
             }
 
-            this.personas.subSelectPersonas(subSelection, false);
-            if (!this.inSandbox) {
-                (<JQuery>(<any>this.$personas).find('[filter^="url("]', '[FILTER^="url("]')).each((index, element) => {
-                    const currentUrl = $(element).attr('filter');
-                    const filtermatch = /url\(['"]?(#[a-zA-Z0-9]+)['"]?\)/ig.exec(currentUrl);
-                    const $element = $(element);
-                    if (filtermatch && filtermatch.length > 1) {
-                        $element.attr('filter', 'url("' + element.ownerDocument.URL + filtermatch[1] + '")');
-                    }
-                });
-            }
-            persona.isSelected = true;
+            setTimeout(() => {
+                this.personas.subSelectPersonas(subSelection, false);
+                if (!this.inSandbox) {
+                    (<JQuery>(<any>this.$personas).find('[filter^="url("]', '[FILTER^="url("]')).each((index, element) => {
+                        const currentUrl = $(element).attr('filter');
+                        const filtermatch = /url\(['"]?(#[a-zA-Z0-9]+)['"]?\)/ig.exec(currentUrl);
+                        const $element = $(element);
+                        if (filtermatch && filtermatch.length > 1) {
+                            $element.attr('filter', 'url("' + element.ownerDocument.URL + filtermatch[1] + '")');
+                        }
+                    });
+                }
+                persona.isSelected = true;
+            });
         } else {
             this.selectionManager.clear();
         }

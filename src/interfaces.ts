@@ -317,7 +317,7 @@ export interface IPersonasOptions {
         /**
          * Type of entity. what is it.
          */
-            type: string;
+        type: string;
         class?: string;
 
         /**
