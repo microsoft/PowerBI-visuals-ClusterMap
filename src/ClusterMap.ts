@@ -341,7 +341,7 @@ export default class ClusterMap implements IVisual {
 
         if (options.dataViews && options.dataViews.length > 0) {
             const dataView = options.dataViews[0];
-            const newObjects: any = dataView && dataView.metadata && dataView.metadata.objects;
+            const newObjects: any =  $.extend(true, {}, ClusterMap.DEFAULT_SETTINGS, (dataView && dataView.metadata && dataView.metadata.objects));
             if (newObjects) {
                 /* update settings */
                 if (newObjects && !_.isMatch(this.settings, newObjects)) {
