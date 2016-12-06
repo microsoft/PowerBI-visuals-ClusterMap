@@ -478,6 +478,17 @@ export interface IPersonasOptions {
              * When sub-selected, should the gauge display a background representing the maximum count of this persona.
              */
             renderSubSelectionBackground?: boolean;
+
+            /**
+             * Should gauges be separated by a small amount of blank space between them.
+             */
+            renderGaugeSeparators?: boolean;
+
+            /**
+             * A number between 0 and 1 representing the percentage of white space between bars; where 1 is the whole
+             * gauge, 0.5 is half the gauge and so on. Default value is 0.03.
+             */
+            gaugeSeparatorWidth?: number;
         };
     };
 }
