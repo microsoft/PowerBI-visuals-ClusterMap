@@ -462,7 +462,8 @@ export default class ClusterMap implements IVisual {
                                 registerWindowResize: false,
                                 displayTotalCountLabel: false,
                                 displayLabelsAtOneCount: false,
-                                renderSubSelectionBackground: false
+                                renderSubSelectionBackground: false,
+                                renderGaugeSeparators: true,
                             },
                         },
                         hooks: {
