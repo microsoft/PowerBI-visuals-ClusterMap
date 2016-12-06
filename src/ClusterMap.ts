@@ -279,6 +279,9 @@ export default class ClusterMap implements IVisual {
         this.$personas = $('<svg id="personas-panel" class="personas" style="stroke: none;"></svg>');
         this.element = $(options.element).append(this.$personas);
 
+        // prevent dragging in the visual from moving the visual
+        this.$personas.on('pointerdown', (e) => e.stopPropagation());
+
         this.inSandbox = this.element.parents('body.visual-sandbox').length > 0;
 
         this.selectionManager = options.host.createSelectionManager();
