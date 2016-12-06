@@ -339,6 +339,8 @@ export default class ClusterMap implements IVisual {
             return;
         }
 
+        let canRestoreSelection = false;
+        let restoreSelectionData = null;
         if (options.dataViews && options.dataViews.length > 0) {
             const dataView = options.dataViews[0];
             const newObjects: any =  $.extend(true, {}, ClusterMap.DEFAULT_SETTINGS, (dataView && dataView.metadata && dataView.metadata.objects));
@@ -346,6 +348,7 @@ export default class ClusterMap implements IVisual {
                 /* update settings */
                 if (newObjects && !_.isMatch(this.settings, newObjects)) {
                     const oldGaugeColor = this.settings.presentation.normalColor.solid.color;
+                    const oldSelectionColor = this.settings.presentation.selectedColor.solid.color;
                     $.extend(true, this.settings, newObjects);
                     this.settings.presentation.initialCount = Math.max(this.settings.presentation.initialCount, 1);
                     this.settings.dataLoading.maxDataRows = Math.max(this.settings.dataLoading.maxDataRows, 1);
@@ -354,6 +357,7 @@ export default class ClusterMap implements IVisual {
                     this.maxPersonas = this.settings.presentation.initialCount;
 
                     const normalColorChanged = (oldGaugeColor !== this.settings.presentation.normalColor.solid.color);
+                    const selectionColorChanged = (oldSelectionColor !== this.settings.presentation.selectedColor.solid.color);
 
                     if (this.personas) {
                         /* set the layout type in personas */
@@ -372,8 +376,32 @@ export default class ClusterMap implements IVisual {
                             });
                         }
 
-                        /* the update was triggered by a change in the settings, retrun if the max number of personas or the gauge color didn't change */
-                        if (!maxPersonasChanged && !normalColorChanged) {
+                        /* the update was triggered by a change in the settings, return unless a change has to be handled immediately */
+                        if (this.personas) {
+                            /* find if the data has highlights */
+                            const highlights = (dataView.categorical &&
+                            dataView.categorical.values &&
+                            dataView.categorical.values.length &&
+                            dataView.categorical.values[0].highlights);
+                            if (highlights) {
+                                canRestoreSelection = true;
+                            } else {
+                                /* find if there are selected personas */
+                                this.personas.layoutSystem.forEach(function(object) {
+                                    if (object.personaId && object.isSelected) {
+                                        canRestoreSelection = true;
+                                        restoreSelectionData = {
+                                            id: object.personaId,
+                                            selected: true,
+                                        };
+                                    }
+                                });
+                            }
+                        }
+
+                        const colorUpdateRequired = (canRestoreSelection && selectionColorChanged) || normalColorChanged;
+
+                        if (!maxPersonasChanged && !colorUpdateRequired) {
                             return;
                         }
                     }
@@ -386,6 +414,10 @@ export default class ClusterMap implements IVisual {
                 this.personas.layoutSystemType = this.hasLinks ? this.settings.presentation.layout : 'orbital';
                 /* set the blur for the images */
                 this.personas.enableBlur(this.settings.presentation.imageBlur);
+                /* restore the selection if needed */
+                if (restoreSelectionData) {
+                    this._handleOnSelectPersona(restoreSelectionData);
+                }
             }
         }
     }
