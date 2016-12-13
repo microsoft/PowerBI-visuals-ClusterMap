@@ -347,66 +347,64 @@ export default class ClusterMap implements IVisual {
         if (options.dataViews && options.dataViews.length > 0) {
             const dataView = options.dataViews[0];
             const newObjects: any =  $.extend(true, {}, ClusterMap.DEFAULT_SETTINGS, (dataView && dataView.metadata && dataView.metadata.objects));
-            if (newObjects) {
-                /* update settings */
-                if (newObjects && !_.isMatch(this.settings, newObjects)) {
-                    const oldGaugeColor = this.settings.presentation.normalColor.solid.color;
-                    const oldSelectionColor = this.settings.presentation.selectedColor.solid.color;
-                    $.extend(true, this.settings, newObjects);
-                    this.settings.presentation.initialCount = Math.max(this.settings.presentation.initialCount, 1);
-                    this.settings.dataLoading.maxDataRows = Math.max(this.settings.dataLoading.maxDataRows, 1);
+            /* update settings */
+            if (newObjects && !_.isMatch(this.settings, newObjects)) {
+                const oldGaugeColor = this.settings.presentation.normalColor.solid.color;
+                const oldSelectionColor = this.settings.presentation.selectedColor.solid.color;
+                $.extend(true, this.settings, newObjects);
+                this.settings.presentation.initialCount = Math.max(this.settings.presentation.initialCount, 1);
+                this.settings.dataLoading.maxDataRows = Math.max(this.settings.dataLoading.maxDataRows, 1);
 
-                    const maxPersonasChanged = (this.maxPersonas !== this.settings.presentation.initialCount);
-                    this.maxPersonas = this.settings.presentation.initialCount;
+                const maxPersonasChanged = (this.maxPersonas !== this.settings.presentation.initialCount);
+                this.maxPersonas = this.settings.presentation.initialCount;
 
-                    const normalColorChanged = (oldGaugeColor !== this.settings.presentation.normalColor.solid.color);
-                    const selectionColorChanged = (oldSelectionColor !== this.settings.presentation.selectedColor.solid.color);
+                const normalColorChanged = (oldGaugeColor !== this.settings.presentation.normalColor.solid.color);
+                const selectionColorChanged = (oldSelectionColor !== this.settings.presentation.selectedColor.solid.color);
 
+                if (this.personas) {
+                    /* set the layout type in personas */
+                    this.personas.layoutSystemType = this.hasLinks ? this.settings.presentation.layout : 'orbital';
+                    /* set the blur for the images */
+                    this.personas.enableBlur(this.settings.presentation.imageBlur);
+
+                    if (!this.inSandbox) {
+                        (<JQuery>(<any>this.$personas).find('[filter^="url("]', '[FILTER^="url("]')).each((index, element) => {
+                            const currentUrl = $(element).attr('filter');
+                            const filtermatch = /url\(['"]?(#[a-zA-Z0-9]+)['"]?\)/ig.exec(currentUrl);
+                            const $element = $(element);
+                            if (filtermatch && filtermatch.length > 1) {
+                                $element.attr('filter', 'url("' + element.ownerDocument.URL + filtermatch[1] + '")');
+                            }
+                        });
+                    }
+
+                    /* the update was triggered by a change in the settings, return unless a change has to be handled immediately */
                     if (this.personas) {
-                        /* set the layout type in personas */
-                        this.personas.layoutSystemType = this.hasLinks ? this.settings.presentation.layout : 'orbital';
-                        /* set the blur for the images */
-                        this.personas.enableBlur(this.settings.presentation.imageBlur);
-
-                        if (!this.inSandbox) {
-                            (<JQuery>(<any>this.$personas).find('[filter^="url("]', '[FILTER^="url("]')).each((index, element) => {
-                                const currentUrl = $(element).attr('filter');
-                                const filtermatch = /url\(['"]?(#[a-zA-Z0-9]+)['"]?\)/ig.exec(currentUrl);
-                                const $element = $(element);
-                                if (filtermatch && filtermatch.length > 1) {
-                                    $element.attr('filter', 'url("' + element.ownerDocument.URL + filtermatch[1] + '")');
+                        /* find if the data has highlights */
+                        const highlights = (dataView.categorical &&
+                        dataView.categorical.values &&
+                        dataView.categorical.values.length &&
+                        dataView.categorical.values[0].highlights);
+                        if (highlights) {
+                            canRestoreSelection = true;
+                        } else {
+                            /* find if there are selected personas */
+                            this.personas.layoutSystem.forEach(function(object) {
+                                if (object.personaId && object.isSelected) {
+                                    canRestoreSelection = true;
+                                    restoreSelectionData = {
+                                        id: object.personaId,
+                                        selected: true,
+                                    };
                                 }
                             });
                         }
+                    }
 
-                        /* the update was triggered by a change in the settings, return unless a change has to be handled immediately */
-                        if (this.personas) {
-                            /* find if the data has highlights */
-                            const highlights = (dataView.categorical &&
-                            dataView.categorical.values &&
-                            dataView.categorical.values.length &&
-                            dataView.categorical.values[0].highlights);
-                            if (highlights) {
-                                canRestoreSelection = true;
-                            } else {
-                                /* find if there are selected personas */
-                                this.personas.layoutSystem.forEach(function(object) {
-                                    if (object.personaId && object.isSelected) {
-                                        canRestoreSelection = true;
-                                        restoreSelectionData = {
-                                            id: object.personaId,
-                                            selected: true,
-                                        };
-                                    }
-                                });
-                            }
-                        }
+                    const colorUpdateRequired = (canRestoreSelection && selectionColorChanged) || normalColorChanged;
 
-                        const colorUpdateRequired = (canRestoreSelection && selectionColorChanged) || normalColorChanged;
-
-                        if (!maxPersonasChanged && !colorUpdateRequired) {
-                            return;
-                        }
+                    if (!maxPersonasChanged && !colorUpdateRequired) {
+                        return;
                     }
                 }
             }
