@@ -20,7 +20,7 @@
   },
   "config": {},
   "keywords": [],
-  "author": "Uncharted Software Inc.",
+  "author": "Microsoft (experimental)",
   "license": "MIT",
   "privateSubmodules": {
     "@uncharted/personas": "0.5.8"
