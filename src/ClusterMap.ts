@@ -44,7 +44,7 @@ import {IPersonas, IPersonasData, IPersonasOptions, IPersonasSubSelection, IPers
 import * as $ from 'jquery';
 import * as _ from 'lodash';
 
-const Personas = require('@uncharted/personas/src/Personas');
+const Personas = require('@uncharted/personas/src/personas');
 const DOCUMENT_REQUEST_COUNT = 5000;
 
 /**
