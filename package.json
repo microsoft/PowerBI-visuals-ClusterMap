@@ -7,7 +7,7 @@
     "preinstall:prereq": "npm install tar.gz mv --save-dev",
     "preinstall:submodules": "node bin/downloadPrivateSubmodules",
     "preinstall:dependencies": "node bin/installSubmoduleDeps",
-    "preinstall": "npm run clean && npm run preinstall:prereq && npm run preinstall:submodules && npm run preinstall:dependencies",
+    "preinstall": "npm run preinstall:prereq && npm run preinstall:submodules && npm run preinstall:dependencies",
     "install-certificate": "node bin/openCert",
     "start": "npm run dev",
     "tdd": "npm-run-all --parallel dev test:tdd",
