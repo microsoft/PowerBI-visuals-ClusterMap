@@ -52,12 +52,16 @@ const compileScripts = (callback) => {
     const compiler = webpack(Object.assign(webpackConfig, packagingWebpackConfig));
     compiler.outputFileSystem = fs;
     compiler.run((err, stats) => {
-        if (err) throw(err);
-        let jsonStats = stats.toJson(true);
+        if (err) throw err;
+        const jsonStats = stats.toJson(true);
+        const errors = jsonStats.errors.filter(error => !regex.test(error));
         console.info('Time:', jsonStats.time);
         console.info('Hash:', jsonStats.hash);
         jsonStats.warnings.forEach(warning => console.warn('WARNING:', warning));
-        jsonStats.errors.forEach(error => !regex.test(error) && console.error('ERROR:', error));
+        errors.forEach(error => !regex.test(error) && console.error('ERROR:', error));
+        if (errors.length > 0) {
+            return process.exit(1);
+        }
         buildOSSReport(jsonStats.modules, ossReport => {
             const fileContent = fs.readFileSync("/visual.js").toString();
             callback(err, fileContent, ossReport);

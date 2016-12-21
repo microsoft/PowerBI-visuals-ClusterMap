@@ -44,7 +44,7 @@ import {IPersonas, IPersonasData, IPersonasOptions, IPersonasSubSelection, IPers
 import * as $ from 'jquery';
 import * as _ from 'lodash';
 
-const Personas = require('@uncharted/personas/src/Personas');
+const Personas = require('@uncharted/personas/src/personas');
 const DOCUMENT_REQUEST_COUNT = 5000;
 
 /**
@@ -603,7 +603,7 @@ export default class ClusterMap implements IVisual {
                                 this.data.aggregates.other.metadata.personaIds.indexOf(personaId) >= 0) {
                                 personaId = Personas.OTHER_PERSONA_DEFAULT_ID;
 
-                                const newCount = subSelectionData[personaId] ? subSelectionData[personaId].bars[0].count + highlight: highlight;
+                                const newCount = subSelectionData[personaId] ? subSelectionData[personaId].bars[0].count + highlight : highlight;
                                 this._addSubSelectionInfo(subSelectionData, personaId, [newCount]);
                             } else {
                                 const persona = this.personas.findPersona(personaId);
