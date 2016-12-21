@@ -1,0 +1,1 @@
+[https://privacy.microsoft.com/en-US/privacystatement/](https://privacy.microsoft.com/en-US/privacystatement/)
