@@ -21,27 +21,47 @@
  * SOFTWARE.
  */
 
-const os = require('os');
-const path = require('path');
-const exec = require('child_process').execSync;
-
-function openCertFile() {
-    const certPath = path.join(process.cwd(), 'certs/PowerBICustomVisualTest_public.crt');
-    const openCmds = {
-        linux: 'xdg-open',
-        darwin: 'open',
-        win32: 'powershell start'
-    };
-    const startCmd = openCmds[os.platform()];
-    if (startCmd) {
-        try {
-            exec(`${startCmd} "${certPath}"`);
-        } catch (e) {
-            console.info('Certificate path:', certPath);
+// fake powerbi functions
+window['powerbi'] = {
+    DataViewObjects: {
+        getValue: () => undefined,
+    },
+    visuals: {
+        valueFormatter: {
+            create: (obj) => ({ format: (value) => obj.format + value }),
+        },
+        utility: {
         }
-    } else {
-        console.info('Certificate path:', certPath);
+    },
+    extensibility: {
+        visualApiVersions: [],
+    },
+    data: {
+        SQExprBuilder: {
+            equal: function () {},
+            typedConstant: function () {},
+            or: function () {},
+        }
     }
-}
+};
 
-openCertFile();
+import * as $ from 'jquery';
+import * as sinon from 'sinon';
+import { expect } from 'chai';
+import ClusterMap from './ClusterMap';
+import VisualInitOptions = powerbi.VisualInitOptions;
+import VisualUpdateOptions = powerbi.VisualUpdateOptions;
+import VisualConstructorOptions = powerbi.extensibility.v110.VisualConstructorOptions;
+import DataViewObjects = powerbi.DataViewObjects;
+import SQExprBuilder = powerbi.data.SQExprBuilder;
+import * as _ from 'lodash';
+
+
+describe('The ClusterMap Component', function () {
+    before(function() {
+    });
+
+
+    it('exists', function () {
+    });
+});
