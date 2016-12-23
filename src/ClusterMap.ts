@@ -617,7 +617,9 @@ export default class ClusterMap implements IVisual {
                                         oldData.bars.forEach(bar => counts.push(bar.count));
                                     }
 
-                                    const propertyId = personaId + '_' + row[referenceBucketColIndex];
+                                    const propertyId = this.hasBuckets
+                                        ? personaId + '_' + row[referenceBucketColIndex]
+                                        : personaId;
                                     for (let i = 0, n = properties.length; i < n; ++i) {
                                         if (properties[i].entityRefId === propertyId) {
                                             counts[i] += highlight;
@@ -652,7 +654,7 @@ export default class ClusterMap implements IVisual {
                         memo.push({
                             id: personaId,
                             count: count,
-                            selection: SQExprBuilder.equal(idColumnMetadata.expr, SQExprBuilder.typedConstant(personaId, idColumnMetadata.type))
+                            selection: SQExprBuilder.equal(idColumnMetadata.expr, SQExprBuilder.typedConstant(rawPersonaId, idColumnMetadata.type))
                         });
                     } else {
                         memo[memoIndex].count += count;
