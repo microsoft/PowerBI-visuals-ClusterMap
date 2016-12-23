@@ -617,7 +617,9 @@ export default class ClusterMap implements IVisual {
                                         oldData.bars.forEach(bar => counts.push(bar.count));
                                     }
 
-                                    const propertyId = personaId + '_' + row[referenceBucketColIndex];
+                                    const propertyId = this.hasBuckets
+                                        ? personaId + '_' + row[referenceBucketColIndex]
+                                        : personaId;
                                     for (let i = 0, n = properties.length; i < n; ++i) {
                                         if (properties[i].entityRefId === propertyId) {
                                             counts[i] += highlight;
