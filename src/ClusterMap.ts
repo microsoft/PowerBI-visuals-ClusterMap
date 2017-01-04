@@ -650,14 +650,17 @@ export default class ClusterMap implements IVisual {
 
                     const idColumnMetadata = (metadata.columns[personaIdColIndex] as any);
                     const memoIndex = _.findIndex(memo, m => m.id === personaId);
+                    let bucketValue = row[referenceBucketColIndex];
                     if (memoIndex < 0) {
                         memo.push({
                             id: personaId,
                             count: count,
-                            selection: SQExprBuilder.equal(idColumnMetadata.expr, SQExprBuilder.typedConstant(rawPersonaId, idColumnMetadata.type))
+                            selection: SQExprBuilder.equal(idColumnMetadata.expr, SQExprBuilder.typedConstant(rawPersonaId, idColumnMetadata.type)),
+                            buckets: [bucketValue]
                         });
-                    } else {
+                    } else if (this.hasBuckets && (memo[memoIndex].buckets.indexOf(bucketValue) === -1)) {
                         memo[memoIndex].count += count;
+                        memo[memoIndex].buckets.push(bucketValue);
                     }
 
                     /* hijack the loop here to generate the links if needed, that way we have all links! */
@@ -712,6 +715,7 @@ export default class ClusterMap implements IVisual {
 
             sortedPersonas.forEach((personaValue, i) => {
                 const personaId = personaValue.id;
+                const count = personaValue.count;
 
                 /* information fields to extract */
                 let properties: Array<any> = [];
@@ -777,10 +781,10 @@ export default class ClusterMap implements IVisual {
                                 });
                             }
 
-                            const rawCount: string = row[referenceCountColIndex].toString();
-                            let count: number = parseInt(rawCount, 10);
-                            count = isNaN(count) ? 0 : count;
-                            properties[propertyIndex].count += count;
+                            //const rawCount: string = row[referenceCountColIndex].toString();
+                            //let count: number = parseInt(rawCount, 10);
+                            //count = isNaN(count) ? 0 : count;
+                            properties[propertyIndex].count = count;
 
                             if (countFormatter) {
                                 properties[propertyIndex].formattedCount = countFormatter.format(properties[propertyIndex].count);
