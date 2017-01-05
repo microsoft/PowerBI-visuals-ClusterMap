@@ -41,6 +41,9 @@ window['powerbi'] = {
             equal: function () {},
             typedConstant: function () {},
             or: function () {},
+        },
+        createDataViewScopeIdentity: function () {
+
         }
     }
 };
@@ -52,16 +55,70 @@ import ClusterMap from './ClusterMap';
 import VisualInitOptions = powerbi.VisualInitOptions;
 import VisualUpdateOptions = powerbi.VisualUpdateOptions;
 import VisualConstructorOptions = powerbi.extensibility.v110.VisualConstructorOptions;
-import DataViewObjects = powerbi.DataViewObjects;
-import SQExprBuilder = powerbi.data.SQExprBuilder;
+import mockDataView from './test_data/mockdataview';
 import * as _ from 'lodash';
 
 
 describe('The ClusterMap Component', function () {
+    let clusterMap;
+    let dataView;
+
     before(function() {
+        const element = $('<div></div>');
+        const dummyHost = {
+            createSelectionManager: () => ({ hostServices: 'hostService' } as any),
+        };
+        clusterMap = new ClusterMap(<VisualConstructorOptions>{ element: element[0], host: dummyHost });
     });
 
+    beforeEach(() => {
+        dataView = _.cloneDeep(mockDataView);
+    });
+
+    function populateData(data, highlights = null) {
+        //dataView.categorical.categories = dataView.categorical.categories.map(function (category, index) {
+        //    return new wrapCtor(category, data && data[index]);
+        //});
+        //
+        //if (highlights) {
+        //    dataView.categorical.values[0].highlights = highlights;
+        //}
+    }
 
     it('exists', function () {
+        expect(ClusterMap).to.be.ok;
+        expect(clusterMap).to.be.ok;
     });
-});
+
+    it('converts normal data', function () {
+        const converted = clusterMap.converter(dataView);
+        expect(converted.aggregates).to.be.ok;
+        expect(converted.aggregates.personas).to.be.ok;
+        expect(_.size(converted.aggregates.personas)).to.equal(10);
+        _.forEach(converted.aggregates.personas, function (value, key) {
+            expect(value.id).to.equal(key);
+            expect(value.properties).to.be.ok;
+            expect(value.properties.length).to.equal(1);
+            expect(value.selection).to.be.ok;
+            expect(value.selection.length).to.equal(1);
+            expect(value.totalCount).to.be.above(0);
+        });
+        expect(converted.aggregates.links).to.be.ok;
+        expect(converted.aggregates.links.length).to.equal(0);
+        expect(converted.aggregates.other).to.be.ok;
+        expect(converted.entityRefs).to.be.ok;
+        expect(_.size(converted.entityRefs)).to.equal(10);
+        _.forEach(converted.entityRefs, function (value, key) {
+            expect(value.id).to.equal(key);
+            expect(value.imageUrl).to.be.ok;
+            expect(value.imageUrl.length).to.equal(0);
+            expect(value.name).to.be.ok;
+        });
+    });
+
+    it('converts data with highlights', function () {
+        //populateData(
+        //    values.explodingPhones,
+        //    values.highlights
+        //);
+    });});
