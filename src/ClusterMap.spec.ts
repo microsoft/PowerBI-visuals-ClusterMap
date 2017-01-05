@@ -63,7 +63,20 @@ describe('The ClusterMap Component', function () {
     let clusterMap;
     let dataView;
 
-    before(function() {
+    // mock personas
+    const mockPersonas = function (data) {
+        return {
+            findPersona: function (personaId) {
+                return {
+                    data: _.find(data, function (o) {
+                        return o.id === personaId;
+                    })
+                };
+            }
+        };
+    };
+
+    before(() => {
         const element = $('<div></div>');
         const dummyHost = {
             createSelectionManager: () => ({ hostServices: 'hostService' } as any),
@@ -74,16 +87,6 @@ describe('The ClusterMap Component', function () {
     beforeEach(() => {
         dataView = _.cloneDeep(mockDataView);
     });
-
-    function populateData(data, highlights = null) {
-        //dataView.categorical.categories = dataView.categorical.categories.map(function (category, index) {
-        //    return new wrapCtor(category, data && data[index]);
-        //});
-        //
-        //if (highlights) {
-        //    dataView.categorical.values[0].highlights = highlights;
-        //}
-    }
 
     it('exists', function () {
         expect(ClusterMap).to.be.ok;
@@ -114,11 +117,90 @@ describe('The ClusterMap Component', function () {
             expect(value.imageUrl.length).to.equal(0);
             expect(value.name).to.be.ok;
         });
+        expect(clusterMap.subSelectionData).to.be.null;
     });
 
     it('converts data with highlights', function () {
-        //populateData(
-        //    values.explodingPhones,
-        //    values.highlights
-        //);
-    });});
+        dataView.categorical.values[0].highlights = [7, 9, 30, 40, null, 30, 18, null, 27, 8];
+        let converted = clusterMap.converter(dataView);
+        clusterMap.personas = mockPersonas(converted.aggregates.personas);
+        clusterMap.converter(dataView);
+
+        const expectedSubSelectionData = {
+            '&#8216;America First&#8217; - Donald Trump vows to quit TPP trade deal': {
+                'computePercentages': true,
+                'bars': [
+                    {
+                        'color': 'rgb(0,186,211)',
+                        'count': 7
+                    }
+                ]
+            },
+            '&#8216;Hamilton&#8217; vs Donald Trump-Mike Pence: A Timeline': {
+                'computePercentages': true,
+                'bars': [
+                    {
+                        'color': 'rgb(0,186,211)',
+                        'count': 9
+                    }
+                ]
+            },
+            'Donald Trump disavows racist alt-right: &#8216;Not a group I want to energize&#8217;': {
+                'computePercentages': true,
+                'bars': [
+                    {
+                        'color': 'rgb(0,186,211)',
+                        'count': 30
+                    }
+                ]
+            },
+            'Donald Trump faces storm over claims he asked Argentine president for help with office project': {
+                'computePercentages': true,
+                'bars': [
+                    {
+                        'color': 'rgb(0,186,211)',
+                        'count': 40
+                    }
+                ]
+            },
+            'Trump Lets Hillary Off The Hook For E-Mails And Corruption': {
+                'computePercentages': true,
+                'bars': [
+                    {
+                        'color': 'rgb(0,186,211)',
+                        'count': 30
+                    }
+                ]
+            },
+            'Trump skips press, outlines first 100 days on YouTube': {
+                'computePercentages': true,
+                'bars': [
+                    {
+                        'color': 'rgb(0,186,211)',
+                        'count': 18
+                    }
+                ]
+            },
+            'Trump&#8217;s big agenda could put GOP&#8217;s budget goals out of reach': {
+                'computePercentages': true,
+                'bars': [
+                    {
+                        'color': 'rgb(0,186,211)',
+                        'count': 27
+                    }
+                ]
+            },
+            'Trump, Trauma and the Triumph of Hate': {
+                'computePercentages': true,
+                'bars': [
+                    {
+                        'color': 'rgb(0,186,211)',
+                        'count': 8
+                    }
+                ]
+            }
+        };
+
+        expect(clusterMap.subSelectionData).to.deep.equal(expectedSubSelectionData);
+    });
+});
