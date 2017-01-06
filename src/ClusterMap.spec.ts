@@ -68,7 +68,7 @@ describe('The ClusterMap Component', function () {
         return {
             findPersona: function (personaId) {
                 return {
-                    data: _.find(data, function (o) {
+                    data: _.find(data, function (o: any) {
                         return o.id === personaId;
                     })
                 };
