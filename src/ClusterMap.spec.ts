@@ -58,7 +58,6 @@ import VisualConstructorOptions = powerbi.extensibility.v110.VisualConstructorOp
 import mockDataView from './test_data/mockdataview';
 import * as _ from 'lodash';
 
-
 describe('The ClusterMap Component', function () {
     let clusterMap;
     let dataView;
@@ -202,5 +201,18 @@ describe('The ClusterMap Component', function () {
         };
 
         expect(clusterMap.subSelectionData).to.deep.equal(expectedSubSelectionData);
+    });
+    
+    it('converts Arrays To Lookup Tables', function () {
+        let array = [{
+            id: '1'
+        },
+        {
+            id: '2'
+        }];
+
+        let result = ClusterMap.convertToLookup(array, (d) => d);
+        expect(result['1']).to.deep.equal(array[0]);
+        expect(result['2']).to.deep.equal(array[1]);
     });
 });
