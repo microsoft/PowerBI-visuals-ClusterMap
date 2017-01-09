@@ -125,10 +125,10 @@ export default {
         'root': {
             'children': [
                 {
-                    'name': '&#8216;America First&#8217; - Donald Trump vows to quit TPP trade deal',
+                    'name': 'Lorem ipsum dolor sit amet, consectetur adipiscing elit',
                     'values': [
                         {
-                            'value': '&#8216;America First&#8217; - Donald Trump vows to quit TPP trade deal'
+                            'value': 'Lorem ipsum dolor sit amet, consectetur adipiscing elit'
                         },
                         {
                             'value': 1
@@ -153,18 +153,18 @@ export default {
                                     'underlyingType': 1,
                                     'category': null
                                 },
-                                'value': '&#8216;America First&#8217; - Donald Trump vows to quit TPP trade deal',
-                                'valueEncoded': '\'&#8216;America First&#8217; - Donald Trump vows to quit TPP trade deal\''
+                                'value': 'Lorem ipsum dolor sit amet, consectetur adipiscing elit',
+                                'valueEncoded': '\'Lorem ipsum dolor sit amet, consectetur adipiscing elit\''
                             }
                         },
                         '_key': {}
                     }
                 },
                 {
-                    'name': '&#8216;Hamilton&#8217; vs Donald Trump-Mike Pence: A Timeline',
+                    'name': 'Nam congue erat nulla, at lobortis velit efficitur eget',
                     'values': [
                         {
-                            'value': '&#8216;Hamilton&#8217; vs Donald Trump-Mike Pence: A Timeline'
+                            'value': 'Nam congue erat nulla, at lobortis velit efficitur eget'
                         },
                         {
                             'value': 1
@@ -189,18 +189,18 @@ export default {
                                     'underlyingType': 1,
                                     'category': null
                                 },
-                                'value': '&#8216;Hamilton&#8217; vs Donald Trump-Mike Pence: A Timeline',
-                                'valueEncoded': '\'&#8216;Hamilton&#8217; vs Donald Trump-Mike Pence: A Timeline\''
+                                'value': 'Nam congue erat nulla, at lobortis velit efficitur eget',
+                                'valueEncoded': '\'Nam congue erat nulla, at lobortis velit efficitur eget\''
                             }
                         },
                         '_key': {}
                     }
                 },
                 {
-                    'name': 'Donald Trump disavows racist alt-right: &#8216;Not a group I want to energize&#8217;',
+                    'name': 'Pellentesque sit amet ante mattis, dignissim nisi et, efficitur nisi',
                     'values': [
                         {
-                            'value': 'Donald Trump disavows racist alt-right: &#8216;Not a group I want to energize&#8217;'
+                            'value': 'Pellentesque sit amet ante mattis, dignissim nisi et, efficitur nisi'
                         },
                         {
                             'value': 5
@@ -225,18 +225,18 @@ export default {
                                     'underlyingType': 1,
                                     'category': null
                                 },
-                                'value': 'Donald Trump disavows racist alt-right: &#8216;Not a group I want to energize&#8217;',
-                                'valueEncoded': '\'Donald Trump disavows racist alt-right: &#8216;Not a group I want to energize&#8217;\''
+                                'value': 'Pellentesque sit amet ante mattis, dignissim nisi et, efficitur nisi',
+                                'valueEncoded': '\'Pellentesque sit amet ante mattis, dignissim nisi et, efficitur nisi\''
                             }
                         },
                         '_key': {}
                     }
                 },
                 {
-                    'name': 'Donald Trump faces storm over claims he asked Argentine president for help with office project',
+                    'name': 'Nunc vitae sapien eget arcu egestas viverra eu vitae metus',
                     'values': [
                         {
-                            'value': 'Donald Trump faces storm over claims he asked Argentine president for help with office project'
+                            'value': 'Nunc vitae sapien eget arcu egestas viverra eu vitae metus'
                         },
                         {
                             'value': 7
@@ -261,18 +261,18 @@ export default {
                                     'underlyingType': 1,
                                     'category': null
                                 },
-                                'value': 'Donald Trump faces storm over claims he asked Argentine president for help with office project',
-                                'valueEncoded': '\'Donald Trump faces storm over claims he asked Argentine president for help with office project\''
+                                'value': 'Nunc vitae sapien eget arcu egestas viverra eu vitae metus',
+                                'valueEncoded': '\'Nunc vitae sapien eget arcu egestas viverra eu vitae metus\''
                             }
                         },
                         '_key': {}
                     }
                 },
                 {
-                    'name': 'The Island',
+                    'name': 'Cras et tincidunt nunc. Suspendisse vitae feugiat justo, sed malesuada est',
                     'values': [
                         {
-                            'value': 'The Island'
+                            'value': 'Cras et tincidunt nunc. Suspendisse vitae feugiat justo, sed malesuada est'
                         },
                         {
                             'value': 1
@@ -297,18 +297,18 @@ export default {
                                     'underlyingType': 1,
                                     'category': null
                                 },
-                                'value': 'The Island',
-                                'valueEncoded': '\'The Island\''
+                                'value': 'Cras et tincidunt nunc. Suspendisse vitae feugiat justo, sed malesuada est',
+                                'valueEncoded': '\'Cras et tincidunt nunc. Suspendisse vitae feugiat justo, sed malesuada est\''
                             }
                         },
                         '_key': {}
                     }
                 },
                 {
-                    'name': 'Trump Lets Hillary Off The Hook For E-Mails And Corruption',
+                    'name': 'Morbi enim leo, euismod porttitor risus nec, auctor pellentesque leo',
                     'values': [
                         {
-                            'value': 'Trump Lets Hillary Off The Hook For E-Mails And Corruption'
+                            'value': 'Morbi enim leo, euismod porttitor risus nec, auctor pellentesque leo'
                         },
                         {
                             'value': 3
@@ -333,18 +333,18 @@ export default {
                                     'underlyingType': 1,
                                     'category': null
                                 },
-                                'value': 'Trump Lets Hillary Off The Hook For E-Mails And Corruption',
-                                'valueEncoded': '\'Trump Lets Hillary Off The Hook For E-Mails And Corruption\''
+                                'value': 'Morbi enim leo, euismod porttitor risus nec, auctor pellentesque leo',
+                                'valueEncoded': '\'Morbi enim leo, euismod porttitor risus nec, auctor pellentesque leo\''
                             }
                         },
                         '_key': {}
                     }
                 },
                 {
-                    'name': 'Trump skips press, outlines first 100 days on YouTube',
+                    'name': 'Mauris volutpat commodo nisi eu rutrum',
                     'values': [
                         {
-                            'value': 'Trump skips press, outlines first 100 days on YouTube'
+                            'value': 'Mauris volutpat commodo nisi eu rutrum'
                         },
                         {
                             'value': 8
@@ -369,18 +369,18 @@ export default {
                                     'underlyingType': 1,
                                     'category': null
                                 },
-                                'value': 'Trump skips press, outlines first 100 days on YouTube',
-                                'valueEncoded': '\'Trump skips press, outlines first 100 days on YouTube\''
+                                'value': 'Mauris volutpat commodo nisi eu rutrum',
+                                'valueEncoded': '\'Mauris volutpat commodo nisi eu rutrum\''
                             }
                         },
                         '_key': {}
                     }
                 },
                 {
-                    'name': 'Trump tells New York Times he doesn\'t want to \'hurt the Clintons\'',
+                    'name': 'Etiam molestie congue nibh id rhoncus',
                     'values': [
                         {
-                            'value': 'Trump tells New York Times he doesn\'t want to \'hurt the Clintons\''
+                            'value': 'Etiam molestie congue nibh id rhoncus'
                         },
                         {
                             'value': 1
@@ -405,18 +405,18 @@ export default {
                                     'underlyingType': 1,
                                     'category': null
                                 },
-                                'value': 'Trump tells New York Times he doesn\'t want to \'hurt the Clintons\'',
-                                'valueEncoded': '\'Trump tells New York Times he doesn\'\'t want to \'\'hurt the Clintons\'\'\''
+                                'value': 'Etiam molestie congue nibh id rhoncus',
+                                'valueEncoded': '\'Etiam molestie congue nibh id rhoncus\''
                             }
                         },
                         '_key': {}
                     }
                 },
                 {
-                    'name': 'Trump&#8217;s big agenda could put GOP&#8217;s budget goals out of reach',
+                    'name': 'Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas',
                     'values': [
                         {
-                            'value': 'Trump&#8217;s big agenda could put GOP&#8217;s budget goals out of reach'
+                            'value': 'Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas'
                         },
                         {
                             'value': 6
@@ -441,18 +441,18 @@ export default {
                                     'underlyingType': 1,
                                     'category': null
                                 },
-                                'value': 'Trump&#8217;s big agenda could put GOP&#8217;s budget goals out of reach',
-                                'valueEncoded': '\'Trump&#8217;s big agenda could put GOP&#8217;s budget goals out of reach\''
+                                'value': 'Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas',
+                                'valueEncoded': '\'Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas\''
                             }
                         },
                         '_key': {}
                     }
                 },
                 {
-                    'name': 'Trump, Trauma and the Triumph of Hate',
+                    'name': 'Maecenas ut dolor posuere, tempor dolor nec, mattis ex',
                     'values': [
                         {
-                            'value': 'Trump, Trauma and the Triumph of Hate'
+                            'value': 'Maecenas ut dolor posuere, tempor dolor nec, mattis ex'
                         },
                         {
                             'value': 3
@@ -477,8 +477,8 @@ export default {
                                     'underlyingType': 1,
                                     'category': null
                                 },
-                                'value': 'Trump, Trauma and the Triumph of Hate',
-                                'valueEncoded': '\'Trump, Trauma and the Triumph of Hate\''
+                                'value': 'Maecenas ut dolor posuere, tempor dolor nec, mattis ex',
+                                'valueEncoded': '\'Maecenas ut dolor posuere, tempor dolor nec, mattis ex\''
                             }
                         },
                         '_key': {}
@@ -506,43 +506,43 @@ export default {
     'table': {
         'rows': [
             [
-                '&#8216;America First&#8217; - Donald Trump vows to quit TPP trade deal',
+                'Lorem ipsum dolor sit amet, consectetur adipiscing elit',
                 1
             ],
             [
-                '&#8216;Hamilton&#8217; vs Donald Trump-Mike Pence: A Timeline',
+                'Nam congue erat nulla, at lobortis velit efficitur eget',
                 1
             ],
             [
-                'Donald Trump disavows racist alt-right: &#8216;Not a group I want to energize&#8217;',
+                'Pellentesque sit amet ante mattis, dignissim nisi et, efficitur nisi',
                 5
             ],
             [
-                'Donald Trump faces storm over claims he asked Argentine president for help with office project',
+                'Nunc vitae sapien eget arcu egestas viverra eu vitae metus',
                 7
             ],
             [
-                'The Island',
+                'Cras et tincidunt nunc. Suspendisse vitae feugiat justo, sed malesuada est',
                 1
             ],
             [
-                'Trump Lets Hillary Off The Hook For E-Mails And Corruption',
+                'Morbi enim leo, euismod porttitor risus nec, auctor pellentesque leo',
                 3
             ],
             [
-                'Trump skips press, outlines first 100 days on YouTube',
+                'Mauris volutpat commodo nisi eu rutrum',
                 8
             ],
             [
-                'Trump tells New York Times he doesn\'t want to \'hurt the Clintons\'',
+                'Etiam molestie congue nibh id rhoncus',
                 1
             ],
             [
-                'Trump&#8217;s big agenda could put GOP&#8217;s budget goals out of reach',
+                'Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas',
                 6
             ],
             [
-                'Trump, Trauma and the Triumph of Hate',
+                'Maecenas ut dolor posuere, tempor dolor nec, mattis ex',
                 3
             ]
         ],
@@ -598,8 +598,8 @@ export default {
                             'underlyingType': 1,
                             'category': null
                         },
-                        'value': '&#8216;America First&#8217; - Donald Trump vows to quit TPP trade deal',
-                        'valueEncoded': '\'&#8216;America First&#8217; - Donald Trump vows to quit TPP trade deal\''
+                        'value': 'Lorem ipsum dolor sit amet, consectetur adipiscing elit',
+                        'valueEncoded': '\'Lorem ipsum dolor sit amet, consectetur adipiscing elit\''
                     }
                 },
                 '_key': {}
@@ -622,8 +622,8 @@ export default {
                             'underlyingType': 1,
                             'category': null
                         },
-                        'value': '&#8216;Hamilton&#8217; vs Donald Trump-Mike Pence: A Timeline',
-                        'valueEncoded': '\'&#8216;Hamilton&#8217; vs Donald Trump-Mike Pence: A Timeline\''
+                        'value': 'Nam congue erat nulla, at lobortis velit efficitur eget',
+                        'valueEncoded': '\'Nam congue erat nulla, at lobortis velit efficitur eget\''
                     }
                 },
                 '_key': {}
@@ -646,8 +646,8 @@ export default {
                             'underlyingType': 1,
                             'category': null
                         },
-                        'value': 'Donald Trump disavows racist alt-right: &#8216;Not a group I want to energize&#8217;',
-                        'valueEncoded': '\'Donald Trump disavows racist alt-right: &#8216;Not a group I want to energize&#8217;\''
+                        'value': 'Pellentesque sit amet ante mattis, dignissim nisi et, efficitur nisi',
+                        'valueEncoded': '\'Pellentesque sit amet ante mattis, dignissim nisi et, efficitur nisi\''
                     }
                 },
                 '_key': {}
@@ -670,8 +670,8 @@ export default {
                             'underlyingType': 1,
                             'category': null
                         },
-                        'value': 'Donald Trump faces storm over claims he asked Argentine president for help with office project',
-                        'valueEncoded': '\'Donald Trump faces storm over claims he asked Argentine president for help with office project\''
+                        'value': 'Nunc vitae sapien eget arcu egestas viverra eu vitae metus',
+                        'valueEncoded': '\'Nunc vitae sapien eget arcu egestas viverra eu vitae metus\''
                     }
                 },
                 '_key': {}
@@ -694,8 +694,8 @@ export default {
                             'underlyingType': 1,
                             'category': null
                         },
-                        'value': 'The Island',
-                        'valueEncoded': '\'The Island\''
+                        'value': 'Cras et tincidunt nunc. Suspendisse vitae feugiat justo, sed malesuada est',
+                        'valueEncoded': '\'Cras et tincidunt nunc. Suspendisse vitae feugiat justo, sed malesuada est\''
                     }
                 },
                 '_key': {}
@@ -718,8 +718,8 @@ export default {
                             'underlyingType': 1,
                             'category': null
                         },
-                        'value': 'Trump Lets Hillary Off The Hook For E-Mails And Corruption',
-                        'valueEncoded': '\'Trump Lets Hillary Off The Hook For E-Mails And Corruption\''
+                        'value': 'Morbi enim leo, euismod porttitor risus nec, auctor pellentesque leo',
+                        'valueEncoded': '\'Morbi enim leo, euismod porttitor risus nec, auctor pellentesque leo\''
                     }
                 },
                 '_key': {}
@@ -742,8 +742,8 @@ export default {
                             'underlyingType': 1,
                             'category': null
                         },
-                        'value': 'Trump skips press, outlines first 100 days on YouTube',
-                        'valueEncoded': '\'Trump skips press, outlines first 100 days on YouTube\''
+                        'value': 'Mauris volutpat commodo nisi eu rutrum',
+                        'valueEncoded': '\'Mauris volutpat commodo nisi eu rutrum\''
                     }
                 },
                 '_key': {}
@@ -766,8 +766,8 @@ export default {
                             'underlyingType': 1,
                             'category': null
                         },
-                        'value': 'Trump tells New York Times he doesn\'t want to \'hurt the Clintons\'',
-                        'valueEncoded': '\'Trump tells New York Times he doesn\'\'t want to \'\'hurt the Clintons\'\'\''
+                        'value': 'Etiam molestie congue nibh id rhoncus',
+                        'valueEncoded': '\'Etiam molestie congue nibh id rhoncus\''
                     }
                 },
                 '_key': {}
@@ -790,8 +790,8 @@ export default {
                             'underlyingType': 1,
                             'category': null
                         },
-                        'value': 'Trump&#8217;s big agenda could put GOP&#8217;s budget goals out of reach',
-                        'valueEncoded': '\'Trump&#8217;s big agenda could put GOP&#8217;s budget goals out of reach\''
+                        'value': 'Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas',
+                        'valueEncoded': '\'Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas\''
                     }
                 },
                 '_key': {}
@@ -814,8 +814,8 @@ export default {
                             'underlyingType': 1,
                             'category': null
                         },
-                        'value': 'Trump, Trauma and the Triumph of Hate',
-                        'valueEncoded': '\'Trump, Trauma and the Triumph of Hate\''
+                        'value': 'Maecenas ut dolor posuere, tempor dolor nec, mattis ex',
+                        'valueEncoded': '\'Maecenas ut dolor posuere, tempor dolor nec, mattis ex\''
                     }
                 },
                 '_key': {}
@@ -841,10 +841,10 @@ export default {
                         'levelValues': [
                             {
                                 'levelSourceIndex': 0,
-                                'value': '&#8216;America First&#8217; - Donald Trump vows to quit TPP trade deal'
+                                'value': 'Lorem ipsum dolor sit amet, consectetur adipiscing elit'
                             }
                         ],
-                        'value': '&#8216;America First&#8217; - Donald Trump vows to quit TPP trade deal',
+                        'value': 'Lorem ipsum dolor sit amet, consectetur adipiscing elit',
                         'identity': {
                             '_expr': {
                                 '_kind': 13,
@@ -863,8 +863,8 @@ export default {
                                         'underlyingType': 1,
                                         'category': null
                                     },
-                                    'value': '&#8216;America First&#8217; - Donald Trump vows to quit TPP trade deal',
-                                    'valueEncoded': '\'&#8216;America First&#8217; - Donald Trump vows to quit TPP trade deal\''
+                                    'value': 'Lorem ipsum dolor sit amet, consectetur adipiscing elit',
+                                    'valueEncoded': '\'Lorem ipsum dolor sit amet, consectetur adipiscing elit\''
                                 }
                             },
                             '_key': {}
@@ -880,10 +880,10 @@ export default {
                         'levelValues': [
                             {
                                 'levelSourceIndex': 0,
-                                'value': '&#8216;Hamilton&#8217; vs Donald Trump-Mike Pence: A Timeline'
+                                'value': 'Nam congue erat nulla, at lobortis velit efficitur eget'
                             }
                         ],
-                        'value': '&#8216;Hamilton&#8217; vs Donald Trump-Mike Pence: A Timeline',
+                        'value': 'Nam congue erat nulla, at lobortis velit efficitur eget',
                         'identity': {
                             '_expr': {
                                 '_kind': 13,
@@ -902,8 +902,8 @@ export default {
                                         'underlyingType': 1,
                                         'category': null
                                     },
-                                    'value': '&#8216;Hamilton&#8217; vs Donald Trump-Mike Pence: A Timeline',
-                                    'valueEncoded': '\'&#8216;Hamilton&#8217; vs Donald Trump-Mike Pence: A Timeline\''
+                                    'value': 'Nam congue erat nulla, at lobortis velit efficitur eget',
+                                    'valueEncoded': '\'Nam congue erat nulla, at lobortis velit efficitur eget\''
                                 }
                             },
                             '_key': {}
@@ -919,10 +919,10 @@ export default {
                         'levelValues': [
                             {
                                 'levelSourceIndex': 0,
-                                'value': 'Donald Trump disavows racist alt-right: &#8216;Not a group I want to energize&#8217;'
+                                'value': 'Pellentesque sit amet ante mattis, dignissim nisi et, efficitur nisi'
                             }
                         ],
-                        'value': 'Donald Trump disavows racist alt-right: &#8216;Not a group I want to energize&#8217;',
+                        'value': 'Pellentesque sit amet ante mattis, dignissim nisi et, efficitur nisi',
                         'identity': {
                             '_expr': {
                                 '_kind': 13,
@@ -941,8 +941,8 @@ export default {
                                         'underlyingType': 1,
                                         'category': null
                                     },
-                                    'value': 'Donald Trump disavows racist alt-right: &#8216;Not a group I want to energize&#8217;',
-                                    'valueEncoded': '\'Donald Trump disavows racist alt-right: &#8216;Not a group I want to energize&#8217;\''
+                                    'value': 'Pellentesque sit amet ante mattis, dignissim nisi et, efficitur nisi',
+                                    'valueEncoded': '\'Pellentesque sit amet ante mattis, dignissim nisi et, efficitur nisi\''
                                 }
                             },
                             '_key': {}
@@ -958,10 +958,10 @@ export default {
                         'levelValues': [
                             {
                                 'levelSourceIndex': 0,
-                                'value': 'Donald Trump faces storm over claims he asked Argentine president for help with office project'
+                                'value': 'Nunc vitae sapien eget arcu egestas viverra eu vitae metus'
                             }
                         ],
-                        'value': 'Donald Trump faces storm over claims he asked Argentine president for help with office project',
+                        'value': 'Nunc vitae sapien eget arcu egestas viverra eu vitae metus',
                         'identity': {
                             '_expr': {
                                 '_kind': 13,
@@ -980,8 +980,8 @@ export default {
                                         'underlyingType': 1,
                                         'category': null
                                     },
-                                    'value': 'Donald Trump faces storm over claims he asked Argentine president for help with office project',
-                                    'valueEncoded': '\'Donald Trump faces storm over claims he asked Argentine president for help with office project\''
+                                    'value': 'Nunc vitae sapien eget arcu egestas viverra eu vitae metus',
+                                    'valueEncoded': '\'Nunc vitae sapien eget arcu egestas viverra eu vitae metus\''
                                 }
                             },
                             '_key': {}
@@ -997,10 +997,10 @@ export default {
                         'levelValues': [
                             {
                                 'levelSourceIndex': 0,
-                                'value': 'The Island'
+                                'value': 'Cras et tincidunt nunc. Suspendisse vitae feugiat justo, sed malesuada est'
                             }
                         ],
-                        'value': 'The Island',
+                        'value': 'Cras et tincidunt nunc. Suspendisse vitae feugiat justo, sed malesuada est',
                         'identity': {
                             '_expr': {
                                 '_kind': 13,
@@ -1019,8 +1019,8 @@ export default {
                                         'underlyingType': 1,
                                         'category': null
                                     },
-                                    'value': 'The Island',
-                                    'valueEncoded': '\'The Island\''
+                                    'value': 'Cras et tincidunt nunc. Suspendisse vitae feugiat justo, sed malesuada est',
+                                    'valueEncoded': '\'Cras et tincidunt nunc. Suspendisse vitae feugiat justo, sed malesuada est\''
                                 }
                             },
                             '_key': {}
@@ -1036,10 +1036,10 @@ export default {
                         'levelValues': [
                             {
                                 'levelSourceIndex': 0,
-                                'value': 'Trump Lets Hillary Off The Hook For E-Mails And Corruption'
+                                'value': 'Morbi enim leo, euismod porttitor risus nec, auctor pellentesque leo'
                             }
                         ],
-                        'value': 'Trump Lets Hillary Off The Hook For E-Mails And Corruption',
+                        'value': 'Morbi enim leo, euismod porttitor risus nec, auctor pellentesque leo',
                         'identity': {
                             '_expr': {
                                 '_kind': 13,
@@ -1058,8 +1058,8 @@ export default {
                                         'underlyingType': 1,
                                         'category': null
                                     },
-                                    'value': 'Trump Lets Hillary Off The Hook For E-Mails And Corruption',
-                                    'valueEncoded': '\'Trump Lets Hillary Off The Hook For E-Mails And Corruption\''
+                                    'value': 'Morbi enim leo, euismod porttitor risus nec, auctor pellentesque leo',
+                                    'valueEncoded': '\'Morbi enim leo, euismod porttitor risus nec, auctor pellentesque leo\''
                                 }
                             },
                             '_key': {}
@@ -1075,10 +1075,10 @@ export default {
                         'levelValues': [
                             {
                                 'levelSourceIndex': 0,
-                                'value': 'Trump skips press, outlines first 100 days on YouTube'
+                                'value': 'Mauris volutpat commodo nisi eu rutrum'
                             }
                         ],
-                        'value': 'Trump skips press, outlines first 100 days on YouTube',
+                        'value': 'Mauris volutpat commodo nisi eu rutrum',
                         'identity': {
                             '_expr': {
                                 '_kind': 13,
@@ -1097,8 +1097,8 @@ export default {
                                         'underlyingType': 1,
                                         'category': null
                                     },
-                                    'value': 'Trump skips press, outlines first 100 days on YouTube',
-                                    'valueEncoded': '\'Trump skips press, outlines first 100 days on YouTube\''
+                                    'value': 'Mauris volutpat commodo nisi eu rutrum',
+                                    'valueEncoded': '\'Mauris volutpat commodo nisi eu rutrum\''
                                 }
                             },
                             '_key': {}
@@ -1114,10 +1114,10 @@ export default {
                         'levelValues': [
                             {
                                 'levelSourceIndex': 0,
-                                'value': 'Trump tells New York Times he doesn\'t want to \'hurt the Clintons\''
+                                'value': 'Etiam molestie congue nibh id rhoncus'
                             }
                         ],
-                        'value': 'Trump tells New York Times he doesn\'t want to \'hurt the Clintons\'',
+                        'value': 'Etiam molestie congue nibh id rhoncus',
                         'identity': {
                             '_expr': {
                                 '_kind': 13,
@@ -1136,8 +1136,8 @@ export default {
                                         'underlyingType': 1,
                                         'category': null
                                     },
-                                    'value': 'Trump tells New York Times he doesn\'t want to \'hurt the Clintons\'',
-                                    'valueEncoded': '\'Trump tells New York Times he doesn\'\'t want to \'\'hurt the Clintons\'\'\''
+                                    'value': 'Etiam molestie congue nibh id rhoncus',
+                                    'valueEncoded': '\'Etiam molestie congue nibh id rhoncus\''
                                 }
                             },
                             '_key': {}
@@ -1153,10 +1153,10 @@ export default {
                         'levelValues': [
                             {
                                 'levelSourceIndex': 0,
-                                'value': 'Trump&#8217;s big agenda could put GOP&#8217;s budget goals out of reach'
+                                'value': 'Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas'
                             }
                         ],
-                        'value': 'Trump&#8217;s big agenda could put GOP&#8217;s budget goals out of reach',
+                        'value': 'Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas',
                         'identity': {
                             '_expr': {
                                 '_kind': 13,
@@ -1175,8 +1175,8 @@ export default {
                                         'underlyingType': 1,
                                         'category': null
                                     },
-                                    'value': 'Trump&#8217;s big agenda could put GOP&#8217;s budget goals out of reach',
-                                    'valueEncoded': '\'Trump&#8217;s big agenda could put GOP&#8217;s budget goals out of reach\''
+                                    'value': 'Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas',
+                                    'valueEncoded': '\'Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas\''
                                 }
                             },
                             '_key': {}
@@ -1192,10 +1192,10 @@ export default {
                         'levelValues': [
                             {
                                 'levelSourceIndex': 0,
-                                'value': 'Trump, Trauma and the Triumph of Hate'
+                                'value': 'Maecenas ut dolor posuere, tempor dolor nec, mattis ex'
                             }
                         ],
-                        'value': 'Trump, Trauma and the Triumph of Hate',
+                        'value': 'Maecenas ut dolor posuere, tempor dolor nec, mattis ex',
                         'identity': {
                             '_expr': {
                                 '_kind': 13,
@@ -1214,8 +1214,8 @@ export default {
                                         'underlyingType': 1,
                                         'category': null
                                     },
-                                    'value': 'Trump, Trauma and the Triumph of Hate',
-                                    'valueEncoded': '\'Trump, Trauma and the Triumph of Hate\''
+                                    'value': 'Maecenas ut dolor posuere, tempor dolor nec, mattis ex',
+                                    'valueEncoded': '\'Maecenas ut dolor posuere, tempor dolor nec, mattis ex\''
                                 }
                             },
                             '_key': {}

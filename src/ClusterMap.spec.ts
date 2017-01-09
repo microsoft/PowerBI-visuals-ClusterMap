@@ -126,7 +126,7 @@ describe('The ClusterMap Component', function () {
         clusterMap.converter(dataView);
 
         const expectedSubSelectionData = {
-            '&#8216;America First&#8217; - Donald Trump vows to quit TPP trade deal': {
+            'Lorem ipsum dolor sit amet, consectetur adipiscing elit': {
                 'computePercentages': true,
                 'bars': [
                     {
@@ -135,7 +135,7 @@ describe('The ClusterMap Component', function () {
                     }
                 ]
             },
-            '&#8216;Hamilton&#8217; vs Donald Trump-Mike Pence: A Timeline': {
+            'Nam congue erat nulla, at lobortis velit efficitur eget': {
                 'computePercentages': true,
                 'bars': [
                     {
@@ -144,7 +144,7 @@ describe('The ClusterMap Component', function () {
                     }
                 ]
             },
-            'Donald Trump disavows racist alt-right: &#8216;Not a group I want to energize&#8217;': {
+            'Pellentesque sit amet ante mattis, dignissim nisi et, efficitur nisi': {
                 'computePercentages': true,
                 'bars': [
                     {
@@ -153,7 +153,7 @@ describe('The ClusterMap Component', function () {
                     }
                 ]
             },
-            'Donald Trump faces storm over claims he asked Argentine president for help with office project': {
+            'Nunc vitae sapien eget arcu egestas viverra eu vitae metus': {
                 'computePercentages': true,
                 'bars': [
                     {
@@ -162,7 +162,7 @@ describe('The ClusterMap Component', function () {
                     }
                 ]
             },
-            'Trump Lets Hillary Off The Hook For E-Mails And Corruption': {
+            'Morbi enim leo, euismod porttitor risus nec, auctor pellentesque leo': {
                 'computePercentages': true,
                 'bars': [
                     {
@@ -171,7 +171,7 @@ describe('The ClusterMap Component', function () {
                     }
                 ]
             },
-            'Trump skips press, outlines first 100 days on YouTube': {
+            'Mauris volutpat commodo nisi eu rutrum': {
                 'computePercentages': true,
                 'bars': [
                     {
@@ -180,7 +180,7 @@ describe('The ClusterMap Component', function () {
                     }
                 ]
             },
-            'Trump&#8217;s big agenda could put GOP&#8217;s budget goals out of reach': {
+            'Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas': {
                 'computePercentages': true,
                 'bars': [
                     {
@@ -189,7 +189,7 @@ describe('The ClusterMap Component', function () {
                     }
                 ]
             },
-            'Trump, Trauma and the Triumph of Hate': {
+            'Maecenas ut dolor posuere, tempor dolor nec, mattis ex': {
                 'computePercentages': true,
                 'bars': [
                     {
@@ -202,7 +202,7 @@ describe('The ClusterMap Component', function () {
 
         expect(clusterMap.subSelectionData).to.deep.equal(expectedSubSelectionData);
     });
-    
+
     it('converts Arrays To Lookup Tables', function () {
         let array = [{
             id: '1'
