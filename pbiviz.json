@@ -12,9 +12,11 @@
     "name": "Microsoft (experimental)",
     "email": "msrvizsupport@microsoft.com"
   },
-  "apiVersion": "1.1.0",
+  "apiVersion": "",
   "assets": {
-    "icon": "assets/icon.svg"
+    "icon": "assets/icon.svg",
+    "thumbnail": "assets/thumbnail.png",
+    "screenshot": "assets/screenshot.png"
   },
   "style": "style/visual.scss",
   "capabilities": "capabilities.json",

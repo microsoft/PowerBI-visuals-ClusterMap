@@ -1,6 +1,6 @@
 {
   "name": "ClusterMap",
-  "version": "0.5.1",
+  "version": "0.5.2",
   "description": "Cluster Map - PowerBI custom visual.",
   "main": "src/index.js",
   "scripts": {
@@ -21,9 +21,10 @@
   "config": {},
   "keywords": [],
   "author": "Microsoft (experimental)",
-  "license": "MIT",
+  "license": "https://raw.githubusercontent.com/Microsoft/PowerBI-visuals-ClusterMap/master/LICENSE",
+  "privacyTerms": "https://privacy.microsoft.com/en-US/privacystatement/",
   "privateSubmodules": {
-    "@uncharted/personas": "0.5.8"
+    "@uncharted/personas": "0.5.9"
   },
   "devDependencies": {
     "@types/jquery": "^2.0.33",
