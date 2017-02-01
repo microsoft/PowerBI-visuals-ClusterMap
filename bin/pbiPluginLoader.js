@@ -131,9 +131,7 @@ function pbivizPluginTemplate (pbiviz) {
                                 var adaptedOptions = {
                                     host: {
                                         createSelectionManager: function() {
-                                            return {
-                                                hostServices: options.host
-                                            };
+                                            return new powerbi.visuals.utility.SelectionManager({hostServices: options.host});
                                         },
                                         colors: options.style.colorPalette.dataColors.getAllColors()
                                     },
