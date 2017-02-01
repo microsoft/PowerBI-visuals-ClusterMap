@@ -450,6 +450,11 @@ export interface IPersonasOptions {
             autoColorClampMax?: number;
 
             /**
+             * Used to define if the background colors of personas should be forced to always be greyscale.
+             */
+            forceGreyscaleBackgroundColor?: boolean;
+
+            /**
              * If colors should not be automatically generated, what should the default background color for personas be.
              */
             fallbackBackgroundColor?: string;

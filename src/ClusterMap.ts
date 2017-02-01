@@ -462,7 +462,8 @@ export default class ClusterMap implements IVisual {
                                 registerWindowResize: false,
                                 displayTotalCountLabel: false,
                                 displayLabelsAtOneCount: false,
-                                renderSubSelectionBackground: false
+                                renderSubSelectionBackground: false,
+                                forceGreyscaleBackgroundColor: false,
                             },
                         },
                         hooks: {
@@ -573,6 +574,9 @@ export default class ClusterMap implements IVisual {
                 }
                 return memo;
             }, []);
+            const referenceBackgroundColor = _.findIndex(metadata.columns, c => {
+                return c.roles['ReferenceBackgroundColor'];
+            });
             const referenceLinkToColIndex = _.findIndex(metadata.columns, c => {
                 return c.roles['ReferenceLinkTo'];
             });
@@ -760,7 +764,8 @@ export default class ClusterMap implements IVisual {
                                             memo.push(imageURL);
                                         }
                                         return memo;
-                                    }, [])
+                                    }, []),
+                                    'backgroundColor': row[referenceBackgroundColor],
                                 });
                             }
 

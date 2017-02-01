@@ -26,6 +26,11 @@
       "displayName": "Image Url",
       "description": "Up to four optional images to display as the cluster's background."
     }, {
+      "name": "ReferenceBackgroundColor",
+      "kind": 0,
+      "displayName": "Background Color",
+      "description": "The background color to display as the cluster's background when images are not present."
+    }, {
       "name": "ReferenceLinkTo",
       "kind": 0,
       "displayName": "Related To",
@@ -45,6 +50,7 @@
         "ReferenceCount": {"max": 1},
         "ReferenceBucket": {"max": 1},
         "ReferenceImageUrl": {"max": 4},
+        "ReferenceBackgroundColor": {"max": 1},
         "ReferenceLinkTo": {"max": 1},
         "ReferenceLinkWeight": {"max": 1}
       }
@@ -60,6 +66,7 @@
           {"for": {"in": "ReferenceCount"}},
           {"for": {"in": "ReferenceBucket"}},
           {"for": {"in": "ReferenceImageUrl"}},
+          {"for": {"in": "ReferenceBackgroundColor"}},
           {"for": {"in": "ReferenceLinkTo"}},
           {"for": {"in": "ReferenceLinkWeight"}}
         ],

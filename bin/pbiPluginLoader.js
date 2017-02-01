@@ -21,11 +21,14 @@
  * SOFTWARE.
  */
 
+'use strict';
+
 const path = require('path');
 const cp = require('child_process');
 const crypto = require('crypto');
 const pbiviz = require(path.join(process.cwd(), 'pbiviz.json'));
 const packageJson = require(path.join(process.cwd(), 'package.json'));
+const capabilitiesJson = require(path.join(process.cwd(), 'capabilities.json'));
 
 const userName = cp.execSync('whoami').toString();
 const userHash = crypto.createHash('md5').update(userName).digest('hex');
@@ -58,7 +61,7 @@ const patchAPI = function (version) {
         api.overloads = function (visual, host) {
 
             if (!isESSEXVisual(visual)) {
-                return overloads(visual, host);
+                return overloads ? overloads(visual, host) : visual;
             }
 
             var proxy = {
@@ -81,7 +84,7 @@ const patchAPI = function (version) {
 
                 options: null
             };
-            var overloadedProxy = overloads(proxy, host);
+            var overloadedProxy = overloads ? overloads(proxy, host) : proxy;
 
             return {
                 update: function(options) {
@@ -116,10 +119,27 @@ function pbivizPluginTemplate (pbiviz) {
                     class: '${pbiviz.visual.visualClassName}',
                     version: '${packageJson.version}',
                     apiVersion: ${pbiviz.apiVersion ? `'${pbiviz.apiVersion}'` : undefined },
-                    capabilities: {}, // will be overridden by capabilities.json (needed for debug visual for somehow)
+                    capabilities: ${pbiviz.apiVersion ? '{}' : `${JSON.stringify(capabilitiesJson)}`},
                     create: function (/*options*/) {
                         var instance = Object.create(${pbiviz.visual.visualClassName}.prototype);
-                        ${pbiviz.visual.visualClassName}.apply(instance, arguments);
+                        ${pbiviz.apiVersion ?
+                        `${pbiviz.visual.visualClassName}.apply(instance, arguments);`
+                        :
+                        `var oldInit = instance.init;
+                            instance.init = function(options) {
+                                instance.init = oldInit;
+                                var adaptedOptions = {
+                                    host: {
+                                        createSelectionManager: function() {
+                                            return new powerbi.visuals.utility.SelectionManager({hostServices: options.host});
+                                        },
+                                        colors: options.style.colorPalette.dataColors.getAllColors()
+                                    },
+                                    element: options.element.get(0),
+                                };
+                                ${pbiviz.visual.visualClassName}.call(instance, adaptedOptions);
+                            }`
+        }
                         return instance;
                     },
                     custom: true
@@ -141,9 +161,9 @@ function pbivizPluginTemplate (pbiviz) {
  * Webpack loader function that appends pbiviz plugin code at the end of the provided source
  */
 function pluginLoader (source, map) {
-  this.cacheable();
-  source = source + '\n' + pbivizPluginTemplate(pbiviz);
-  this.callback(null, source, map);
+    this.cacheable();
+    source = source + '\n' + pbivizPluginTemplate(pbiviz);
+    this.callback(null, source, map);
 }
 
 module.exports = pluginLoader;
