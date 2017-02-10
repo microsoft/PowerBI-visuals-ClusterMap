@@ -27,6 +27,7 @@ const fs = require('fs');
 const zip = require('node-zip')();
 const path = require('path');
 const sass = require('node-sass');
+const CleanCSS = require('clean-css');
 const mkdirp = require('mkdirp');
 const webpack = require("webpack");
 const MemoryFS = require("memory-fs");
@@ -137,7 +138,9 @@ const _buildPackageJson = () => {
 const buildPackageJson = pbivizJson.apiVersion ? _buildPackageJson() : _buildLegacyPackageJson();
 
 const compileSass = () => {
-    const cssContent = sass.renderSync({ file: pbivizJson.style }).css.toString();
+    const sassOutput = sass.renderSync({ file: pbivizJson.style }).css.toString();
+    const options = { level: { 2: { all: true } } };
+    const cssContent = new CleanCSS(options).minify(sassOutput).styles;
     return cssContent;
 };
 

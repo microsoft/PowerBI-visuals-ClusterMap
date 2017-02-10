@@ -35,6 +35,7 @@
     "@types/sinon-chai": "^2.7.27",
     "chai": "^3.5.0",
     "chokidar": "^1.6.1",
+    "clean-css": "^4.0.3",
     "connect": "^3.5.0",
     "imports-loader": "^0.6.5",
     "json": "^9.0.4",
