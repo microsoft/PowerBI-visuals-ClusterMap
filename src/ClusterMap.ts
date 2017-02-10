@@ -755,7 +755,7 @@ export default class ClusterMap implements IVisual {
                                     'id': refId,
                                     'name': name,
                                     'imageUrl': referenceImageUrlColIndices.reduce((memo, imageIndex) => {
-                                        const pattern = new RegExp('^(https?)://[^\s/$.?#].[^\s]*', 'i');
+                                        const pattern = /^(https?):\/\/[^\s/$.?#].[^\s]*/i;
                                         const rawImageURL = row[imageIndex];
                                         const imageURL = (rawImageURL !== undefined &&
                                         rawImageURL !== null) ?
