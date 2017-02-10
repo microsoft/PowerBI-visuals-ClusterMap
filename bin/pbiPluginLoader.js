@@ -164,8 +164,13 @@ function pbivizPluginTemplate (pbiviz) {
                                     element: options.element.get(0),
                                 };
                                 ${pbiviz.visual.visualClassName}.call(instance, adaptedOptions);
+
+                                instance.update = function(options) {
+                                    options.type = powerbi.extensibility.v100.convertLegacyUpdateType(options);
+                                    ${pbiviz.visual.visualClassName}.prototype.update.call(instance, options);
+                                }
                             }`
-        }
+                        }
                         return instance;
                     },
                     custom: true
