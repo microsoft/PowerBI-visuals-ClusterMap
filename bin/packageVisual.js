@@ -48,7 +48,7 @@ const packagingWebpackConfig = {
 };
 
 const _buildLegacyPackageJson = () => {
-    return {
+    const pack = {
         version: packageJson.version,
         author: pbivizJson.author,
         licenseTerms: packageJson.license,
@@ -85,7 +85,7 @@ const _buildLegacyPackageJson = () => {
                 "file": `resources/${path.basename(pbivizJson.assets.screenshot)}`
             }
         ],
-        visual: Object.assign(pbivizJson.visual, { version: packageJson.version }),
+        visual: Object.assign({ version: packageJson.version }, pbivizJson.visual),
         "code": {
             "typeScript": {
                 "resourceId": "rId0"
@@ -111,6 +111,13 @@ const _buildLegacyPackageJson = () => {
             ]
         }
     };
+
+    delete pack.visual.visualClassName;
+
+    const date = new Date();
+    pack.build = date.getUTCFullYear().toString().substring(2) + '.' + (date.getUTCMonth() + 1) + '.' + date.getUTCDate() + '.' + ((date.getUTCHours() * 3600) + (date.getUTCMinutes() * 60) + date.getUTCSeconds());
+
+    return pack;
 };
 
 const _buildPackageJson = () => {
@@ -126,7 +133,7 @@ const _buildPackageJson = () => {
                 file: `resources/${ pbivizJson.visual.guid }.pbiviz.json`,
             }
         ],
-        visual: Object.assign(pbivizJson.visual, { version: packageJson.version }),
+        visual: Object.assign({ version: packageJson.version }, pbivizJson.visual),
         metadata: {
             pbivizjson: {
                 resourceId: 'rId0'
