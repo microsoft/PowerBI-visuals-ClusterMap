@@ -24,7 +24,7 @@
   "license": "https://raw.githubusercontent.com/Microsoft/PowerBI-visuals-ClusterMap/master/LICENSE",
   "privacyTerms": "https://privacy.microsoft.com/en-US/privacystatement/",
   "privateSubmodules": {
-    "@uncharted/personas": "0.5.9"
+    "@uncharted/personas": "0.5.10"
   },
   "devDependencies": {
     "@types/jquery": "^2.0.33",
