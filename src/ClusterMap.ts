@@ -648,20 +648,14 @@ export default class ClusterMap implements IVisual {
                 const personaId = (rawPersonaId !== undefined && rawPersonaId !== null) ? rawPersonaId.toString() : null;
 
                 if (personaId) {
-                    const rawCount: string = row[referenceCountColIndex].toString();
-                    let count: number = parseInt(rawCount, 10);
-                    count = isNaN(count) ? 0 : count;
-
                     const idColumnMetadata = (metadata.columns[personaIdColIndex] as any);
                     const memoIndex = _.findIndex(memo, m => m.id === personaId);
                     if (memoIndex < 0) {
                         memo.push({
                             id: personaId,
-                            count: count,
+                            count: 0,
                             selection: SQExprBuilder.equal(idColumnMetadata.expr, SQExprBuilder.typedConstant(rawPersonaId, idColumnMetadata.type))
                         });
-                    } else {
-                        memo[memoIndex].count += count;
                     }
 
                     /* hijack the loop here to generate the links if needed, that way we have all links! */
@@ -721,6 +715,8 @@ export default class ClusterMap implements IVisual {
                 let properties: Array<any> = [];
 
                 /* iterate through all the rows */
+                const countedEntries = {};
+                personaValue.count = 0;
                 referencesDv.rows.forEach((row, rowIndex) => {
                     const rawOtherPersonaId = row[personaIdColIndex];
                     const otherPersonaId = (rawOtherPersonaId !== undefined &&
@@ -785,7 +781,23 @@ export default class ClusterMap implements IVisual {
                             const rawCount: string = row[referenceCountColIndex].toString();
                             let count: number = parseInt(rawCount, 10);
                             count = isNaN(count) ? 0 : count;
-                            properties[propertyIndex].count += count;
+
+                            /* check if the count should be added to */
+                            let countKey = '';
+                            row.forEach((value, i) => {
+                                if (i !== referenceCountColIndex &&
+                                    i !== referenceLinkToColIndex &&
+                                    i !== referenceLinkWeightColIndex &&
+                                    referenceImageUrlColIndices.indexOf(i) === -1) {
+                                    countKey += value.toString();
+                                }
+                            });
+
+                            if (!countedEntries.hasOwnProperty(countKey)) {
+                                properties[propertyIndex].count += count;
+                                personaValue.count += count;
+                                countedEntries[countKey] = count;
+                            }
 
                             if (countFormatter) {
                                 properties[propertyIndex].formattedCount = countFormatter.format(properties[propertyIndex].count);
