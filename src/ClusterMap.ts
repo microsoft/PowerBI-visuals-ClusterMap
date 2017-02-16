@@ -307,8 +307,10 @@ export default class ClusterMap implements IVisual {
             this.otherPersona = null;
         }
 
-        this.$personas.remove();
-        this.$personas = null;
+        if (this.$personas) {
+            this.$personas.remove();
+            this.$personas = null;
+        }
 
         this.subSelectionData = null;
         this.serializedData = null;
@@ -339,7 +341,7 @@ export default class ClusterMap implements IVisual {
             return;
         }
 
-        if (options.dataViews && options.dataViews.length > 0) {
+        if (options.dataViews && options.dataViews.length > 0 && options.dataViews[0].table) {
             const dataView = options.dataViews[0];
             const newObjects: any = dataView && dataView.metadata && dataView.metadata.objects;
             if (newObjects) {
@@ -671,8 +673,9 @@ export default class ClusterMap implements IVisual {
                             };
 
                             if (referenceLinkWeightColIndex >= 0) {
-                                const rawLinkWeight: string = row[referenceLinkWeightColIndex].toString();
-                                let linkWeight: number = parseFloat(rawLinkWeight);
+                                const rawLinkWeight: any = row[referenceLinkWeightColIndex];
+                                const stringLinkWeight: string = (rawLinkWeight !== undefined && rawLinkWeight !== null) ? rawLinkWeight.toString() : null;
+                                let linkWeight: number = parseFloat(stringLinkWeight);
                                 if (!isNaN(linkWeight)) {
                                     linkInfo.weight = linkWeight;
                                 }
@@ -727,7 +730,7 @@ export default class ClusterMap implements IVisual {
                         /* extract the entity ref info */
                         const rawRefId = row[referenceNameColIndex];
                         let refId: string = personaId.toString();
-                        if (refId) {
+                        if (refId && rawRefId !== undefined && rawRefId !== null) {
                             if (this.hasBuckets) {
                                 refId += '_' + row[referenceBucketColIndex];
                             }
@@ -778,8 +781,9 @@ export default class ClusterMap implements IVisual {
                                 });
                             }
 
-                            const rawCount: string = row[referenceCountColIndex].toString();
-                            let count: number = parseInt(rawCount, 10);
+                            const rawCount: any = row[referenceCountColIndex];
+                            const stringCount: string = (rawCount !== undefined && rawCount !== null) ? rawCount.toString() : null;
+                            let count: number = parseInt(stringCount, 10);
                             count = isNaN(count) ? 0 : count;
 
                             /* check if the count should be added to */
