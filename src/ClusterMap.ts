@@ -716,7 +716,7 @@ export default class ClusterMap implements IVisual {
 
                 /* iterate through all the rows */
                 const countedEntries = {};
-                personaValue.count = 0;
+                personaValue.customSize = 0;
                 referencesDv.rows.forEach((row, rowIndex) => {
                     const rawOtherPersonaId = row[personaIdColIndex];
                     const otherPersonaId = (rawOtherPersonaId !== undefined &&
@@ -796,6 +796,7 @@ export default class ClusterMap implements IVisual {
                             if (!countedEntries.hasOwnProperty(countKey)) {
                                 properties[propertyIndex].count += count;
                                 personaValue.count += count;
+                                personaValue.customSize += count;
                                 countedEntries[countKey] = count;
                             }
 
@@ -831,6 +832,7 @@ export default class ClusterMap implements IVisual {
                         'properties': properties,
                         'imageUrl': null,
                         'totalCount': personaValue.count,
+                        'customSize': personaValue.customSize,
                         'selection': [powerbi.data.createDataViewScopeIdentity(personaValue.selection)]
                     };
 
