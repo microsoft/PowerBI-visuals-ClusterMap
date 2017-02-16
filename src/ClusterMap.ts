@@ -307,8 +307,10 @@ export default class ClusterMap implements IVisual {
             this.otherPersona = null;
         }
 
-        this.$personas.remove();
-        this.$personas = null;
+        if (this.$personas) {
+            this.$personas.remove();
+            this.$personas = null;
+        }
 
         this.subSelectionData = null;
         this.serializedData = null;
@@ -339,7 +341,7 @@ export default class ClusterMap implements IVisual {
             return;
         }
 
-        if (options.dataViews && options.dataViews.length > 0) {
+        if (options.dataViews && options.dataViews.length > 0 && options.dataViews[0].table) {
             const dataView = options.dataViews[0];
             const newObjects: any = dataView && dataView.metadata && dataView.metadata.objects;
             if (newObjects) {
@@ -648,20 +650,14 @@ export default class ClusterMap implements IVisual {
                 const personaId = (rawPersonaId !== undefined && rawPersonaId !== null) ? rawPersonaId.toString() : null;
 
                 if (personaId) {
-                    const rawCount: string = row[referenceCountColIndex].toString();
-                    let count: number = parseInt(rawCount, 10);
-                    count = isNaN(count) ? 0 : count;
-
                     const idColumnMetadata = (metadata.columns[personaIdColIndex] as any);
                     const memoIndex = _.findIndex(memo, m => m.id === personaId);
                     if (memoIndex < 0) {
                         memo.push({
                             id: personaId,
-                            count: count,
+                            count: 0,
                             selection: SQExprBuilder.equal(idColumnMetadata.expr, SQExprBuilder.typedConstant(rawPersonaId, idColumnMetadata.type))
                         });
-                    } else {
-                        memo[memoIndex].count += count;
                     }
 
                     /* hijack the loop here to generate the links if needed, that way we have all links! */
@@ -677,8 +673,9 @@ export default class ClusterMap implements IVisual {
                             };
 
                             if (referenceLinkWeightColIndex >= 0) {
-                                const rawLinkWeight: string = row[referenceLinkWeightColIndex].toString();
-                                let linkWeight: number = parseFloat(rawLinkWeight);
+                                const rawLinkWeight: any = row[referenceLinkWeightColIndex];
+                                const stringLinkWeight: string = (rawLinkWeight !== undefined && rawLinkWeight !== null) ? rawLinkWeight.toString() : null;
+                                let linkWeight: number = parseFloat(stringLinkWeight);
                                 if (!isNaN(linkWeight)) {
                                     linkInfo.weight = linkWeight;
                                 }
@@ -721,6 +718,8 @@ export default class ClusterMap implements IVisual {
                 let properties: Array<any> = [];
 
                 /* iterate through all the rows */
+                const countedEntries = {};
+                personaValue.customSize = 0;
                 referencesDv.rows.forEach((row, rowIndex) => {
                     const rawOtherPersonaId = row[personaIdColIndex];
                     const otherPersonaId = (rawOtherPersonaId !== undefined &&
@@ -731,7 +730,7 @@ export default class ClusterMap implements IVisual {
                         /* extract the entity ref info */
                         const rawRefId = row[referenceNameColIndex];
                         let refId: string = personaId.toString();
-                        if (refId) {
+                        if (refId && rawRefId !== undefined && rawRefId !== null) {
                             if (this.hasBuckets) {
                                 refId += '_' + row[referenceBucketColIndex];
                             }
@@ -782,10 +781,28 @@ export default class ClusterMap implements IVisual {
                                 });
                             }
 
-                            const rawCount: string = row[referenceCountColIndex].toString();
-                            let count: number = parseInt(rawCount, 10);
+                            const rawCount: any = row[referenceCountColIndex];
+                            const stringCount: string = (rawCount !== undefined && rawCount !== null) ? rawCount.toString() : null;
+                            let count: number = parseInt(stringCount, 10);
                             count = isNaN(count) ? 0 : count;
-                            properties[propertyIndex].count += count;
+
+                            /* check if the count should be added to */
+                            let countKey = '';
+                            row.forEach((value, i) => {
+                                if (i !== referenceCountColIndex &&
+                                    i !== referenceLinkToColIndex &&
+                                    i !== referenceLinkWeightColIndex &&
+                                    referenceImageUrlColIndices.indexOf(i) === -1) {
+                                    countKey += value.toString();
+                                }
+                            });
+
+                            if (!countedEntries.hasOwnProperty(countKey)) {
+                                properties[propertyIndex].count += count;
+                                personaValue.count += count;
+                                personaValue.customSize += count;
+                                countedEntries[countKey] = count;
+                            }
 
                             if (countFormatter) {
                                 properties[propertyIndex].formattedCount = countFormatter.format(properties[propertyIndex].count);
@@ -819,6 +836,7 @@ export default class ClusterMap implements IVisual {
                         'properties': properties,
                         'imageUrl': null,
                         'totalCount': personaValue.count,
+                        'customSize': personaValue.customSize,
                         'selection': [powerbi.data.createDataViewScopeIdentity(personaValue.selection)]
                     };
 
