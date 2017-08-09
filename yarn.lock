@@ -2470,6 +2470,12 @@ onchange@^3.2.1:
     minimist "~1.2.0"
     tree-kill "~1.1.0"
 
+opentype.js@^0.6.9:
+  version "0.6.9"
+  resolved "https://registry.yarnpkg.com/opentype.js/-/opentype.js-0.6.9.tgz#eb4db21ff58a12b2db78a652d7a4bf9605253089"
+  dependencies:
+    tiny-inflate "^1.0.2"
+
 optimist@^0.6.1:
   version "0.6.1"
   resolved "https://registry.yarnpkg.com/optimist/-/optimist-0.6.1.tgz#da3ea74686fa21a19a111c326e90eb15a0196686"
@@ -3408,6 +3414,10 @@ timers-browserify@^2.0.2:
     global "^4.3.2"
     setimmediate "^1.0.4"
 
+tiny-inflate@^1.0.2:
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/tiny-inflate/-/tiny-inflate-1.0.2.tgz#93d9decffc8805bd57eae4310f0b745e9b6fb3a7"
+
 tmp@0.0.31, tmp@0.0.x:
   version "0.0.31"
   resolved "https://registry.yarnpkg.com/tmp/-/tmp-0.0.31.tgz#8f38ab9438e17315e5dbd8b3657e8bfb277ae4a7"
@@ -3618,6 +3628,10 @@ watchpack@^1.4.0:
     async "^2.1.2"
     chokidar "^1.7.0"
     graceful-fs "^4.1.2"
+
+webcola@3.1.3:
+  version "3.1.3"
+  resolved "https://registry.yarnpkg.com/webcola/-/webcola-3.1.3.tgz#9b63589ac9ed031d25b70815f343b5a5d2c72553"
 
 webpack-dev-middleware@^1.0.11:
   version "1.12.0"

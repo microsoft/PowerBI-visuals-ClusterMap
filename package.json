@@ -62,5 +62,8 @@
     "typescript": "^2.4.2",
     "webpack": "^3.4.1"
   },
-  "dependencies": {}
+  "dependencies": {
+    "opentype.js": "^0.6.9",
+    "webcola": "3.1.3"
+  }
 }
