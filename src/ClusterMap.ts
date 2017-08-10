@@ -102,8 +102,8 @@ export default class ClusterMap implements IVisual {
 
     private personas: any = null;
     private data: any = null;
-    private dataLayerStack: Array = [];
-    private buckets: Array = [];
+    private dataLayerStack: Array<any> = [];
+    private buckets: Array<string> = [];
 
     /**
      * The maximum number of personas to load.
@@ -489,7 +489,7 @@ export default class ClusterMap implements IVisual {
 
                 if (this.hasLinks) {
                     const linkID: string = row[columnIndices.LinkTo[0]].toString();
-                    const linkStrength: number = columnIndices.LinkWeight.length ? row[columnIndices.LinkWeight[0]] : 0;
+                    const linkStrength = columnIndices.LinkWeight.length ? row[columnIndices.LinkWeight[0]] : 0;
 
                     if (!persona.links) {
                         persona.links = [];

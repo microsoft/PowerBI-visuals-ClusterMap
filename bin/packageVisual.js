@@ -38,10 +38,10 @@ const webpackConfig = require('../webpack.config');
 const buildOSSReport = require('./buildOSSReport.js');
 
 const packagingWebpackConfig = {
-    tslint: {
-        emitErrors: true,
-        failOnHint: true
-    },
+    //tslint: {
+    //    emitErrors: true,
+    //    failOnHint: true
+    //},
     output: {
         filename: 'visual.js', path: '/'
     }
