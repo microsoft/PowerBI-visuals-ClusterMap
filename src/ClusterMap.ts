@@ -102,6 +102,7 @@ export default class ClusterMap implements IVisual {
 
     private personas: any = null;
     private data: any = null;
+    private dataLayerStack: Array = [];
     private buckets: Array = [];
 
     /**
@@ -309,7 +310,9 @@ export default class ClusterMap implements IVisual {
                 this.serializedData = serializedData;
                 this.data = data;
                 if (this.personas) {
-                    this.personas.loadData(this.data, false);
+                    this.dataLayerStack.length = 0
+                    this.dataLayerStack.push(this.data.rootPersonas);
+                    this.personas.loadData(this.dataLayerStack[this.dataLayerStack.length - 1], false);
 
                     //this.otherPersona = this.personas.mOtherPersona;
                 }
@@ -358,7 +361,8 @@ export default class ClusterMap implements IVisual {
                 "ImageUrl": [],
                 "BackgroundColor": [],
                 "LinkTo": [],
-                "LinkWeight": []
+                "LinkWeight": [],
+                "ParentID": [],
             };
 
             const columnNames = Object.keys(columnIndices);
@@ -392,9 +396,20 @@ export default class ClusterMap implements IVisual {
             this.buckets.length = 0;
 
             table.rows.forEach(row => {
-                const ID: string = row[columnIndices.ID[0]].toString();
-                const rawName: any = row[columnIndices.Name[0]];
-                const count: number = row[columnIndices.Count[0]] as number;
+                let ID: string;
+                let rawName: any;
+                let count: number;
+
+                try {
+                    ID = row[columnIndices.ID[0]].toString();
+                    rawName = row[columnIndices.Name[0]];
+                    count = row[columnIndices.Count[0]] as number;
+                } catch(e) {
+                    return;
+                }
+
+                const rawParent: any = columnIndices.ParentID.length ? row[columnIndices.ParentID[0]] : null;
+                const parent: string = rawParent !== null && rawParent !== undefined ? rawParent.toString() : null;
 
                 let name: string = rawName.toString();
                 if (defaultFormatter) {
@@ -434,6 +449,7 @@ export default class ClusterMap implements IVisual {
                         color: this.settings.presentation.normalColor.solid.color,
                         select: SQExprBuilder.equal(idColumnMetadata.expr, SQExprBuilder.typedConstant(row[columnIndices.ID[0]], idColumnMetadata.type)),
                         links: null,
+                        parent: parent,
                     };
                     personaMap[ID] = persona;
                 }
@@ -503,7 +519,12 @@ export default class ClusterMap implements IVisual {
             const sizeRange = maxSize - minSize;
 
             const newData = {
-                personas: [],
+                rootPersonas: {
+                    personas: [],
+                },
+                parentedPersonas: {
+
+                },
             };
 
             for (let i = 0, n = personaKeys.length; i < n && i < maxPersonas; ++i) {
@@ -528,7 +549,7 @@ export default class ClusterMap implements IVisual {
 
                 this._colorProperties(properties);
 
-                const processedPersona = {
+                const processedPersona: any = {
                     id: persona.id,
                     scalingFactor: (persona.count - minSize) / sizeRange,
                     totalCount: persona.count,
@@ -539,7 +560,22 @@ export default class ClusterMap implements IVisual {
                     select: persona.select,
                 };
 
-                newData.personas.push(processedPersona);
+                if (countFormatter) {
+                    processedPersona.formattedTotalCount = countFormatter.format(persona.count);
+                }
+
+                if (persona.parent === null) {
+                    newData.rootPersonas.personas.push(processedPersona);
+                } else {
+                    let parentedData: any = newData.parentedPersonas[persona.parent];
+                    if (!parentedData) {
+                        parentedData = {
+                            personas: [],
+                        };
+                        newData.parentedPersonas[persona.parent] = parentedData;
+                    }
+                    parentedData.personas.push(processedPersona);
+                }
             }
 
             if (highlights && this.personas) {
@@ -654,45 +690,48 @@ export default class ClusterMap implements IVisual {
                 sender.selected = shouldSelect;
                 sender.setFocus(true, true);
 
-                if (shouldSelect) {
-                    const properties = [];
-                    const personaData = this.data.personas.find(p => p.id === sender.id);
-                    if (personaData && this.hasBuckets) {
-                        personaData.properties.forEach(property => {
-                            properties.push({
-                                count: property.count / personaData.totalCount,
-                                color: property.selectedColor,
-                            });
-                        });
-                    } else {
-                        properties.push({
-                            count: 1,
-                            color: this.settings.presentation.selectedColor.solid.color,
-                        });
-                    }
-
-                    this.personas.highlight({
-                        personas: [
-                            {
-                                id: sender.id,
-                                totalCount: 1,
-                                properties: properties,
-                            }
-                        ]
-                    });
-                } else {
-                    this.personas.unhighlight();
-                }
-
                 this.selectionManager.clear();
                 if (shouldSelect) {
-                    const personaData = this.data.personas.find(data => data.id === sender.id);
-                    if(personaData) {
+                    const personaData = this.dataLayerStack[this.dataLayerStack.length - 1].personas.find(p => p.id === sender.id);
+                    const properties = [];
+                    if (personaData) {
                         const selectArgs: any = {
                             data: [{data: [powerbi.data.createDataViewScopeIdentity(personaData.select)]}],
                         };
                         this.hostServices.onSelect(selectArgs);
+
+                        const subLayerData = this.data.parentedPersonas[sender.id];
+                        if (subLayerData) {
+                            this.dataLayerStack.push(subLayerData);
+                            this.personas.addDataLayer(sender.position.x, sender.position.y, this.dataLayerStack[this.dataLayerStack.length - 1]);
+                        } else {
+                            if (this.hasBuckets) {
+                                personaData.properties.forEach(property => {
+                                    properties.push({
+                                        count: property.count / personaData.totalCount,
+                                        color: property.selectedColor,
+                                    });
+                                });
+                            } else {
+                                properties.push({
+                                    count: 1,
+                                    color: this.settings.presentation.selectedColor.solid.color,
+                                });
+                            }
+
+                            this.personas.highlight({
+                                personas: [
+                                    {
+                                        id: sender.id,
+                                        totalCount: 1,
+                                        properties: properties,
+                                    }
+                                ]
+                            });
+                        }
                     }
+                } else {
+                    this.personas.unhighlight();
                 }
             });
 
@@ -705,8 +744,18 @@ export default class ClusterMap implements IVisual {
                 this.selectionManager.clear();
             });
 
+            this.personas.on(BreadcrumbEvents.LAYOUT_BREADCRUMB_CLICKED, (sender, index) => {
+                if (index >= 0 && this.personas.breadcrumbs.length > 1) {
+                    const toRemove = this.personas.breadcrumbs.length - index - 1;
+                    this.personas.removeDataLayer(toRemove);
+                    this.dataLayerStack.splice(-toRemove, toRemove);
+                }
+            });
+
             if (this.data) {
-                this.personas.loadData(this.data, false);
+                this.dataLayerStack.length = 0;
+                this.dataLayerStack.push(this.data.rootPersonas);
+                this.personas.loadData(this.dataLayerStack[this.dataLayerStack.length - 1], false);
                 if (this.subSelectionData) {
                     this.personas.highlight(this.subSelectionData, true);
                 }
