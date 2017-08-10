@@ -6,15 +6,11 @@ const regex = path.normalize(ENTRY).replace(/\\/g, '\\\\').replace(/\./g, '\\.')
 module.exports = {
     entry: ENTRY,
     devtool: 'eval',
-    resolve: {
-        extensions: ['', '.webpack.js', '.web.js', '.js', '.ts']
-    },
+    // resolve: {
+    //     extensions: ['', '.webpack.js', '.web.js', '.js', '.ts']
+    // },
     module: {
         loaders: [
-            {
-                test: require.resolve('snapsvg'),
-                loader: 'imports-loader?this=>window,fix=>module.exports=0'
-            },
             {
                 test: new RegExp(regex),
                 loader: path.join(__dirname, 'bin', 'pbiPluginLoader'),

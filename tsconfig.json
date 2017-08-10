@@ -2,8 +2,11 @@
   "compilerOptions": {
     "target": "es5",
     "sourceMap": true,
+    "allowJs": true,
     "types": ["mocha", "sinon-chai", "requirejs"],
-    "experimentalDecorators": true
+    "experimentalDecorators": true,
+    "lib": ["es2015", "DOM"],
+    "outDir": "generated"
   },
   "compileOnSave": false,
   "exclude": [

@@ -3,40 +3,80 @@
 <head>
     <meta charset="UTF-8">
     <title>Personas Example</title>
-    <link rel="stylesheet" href="font-awesome.css">
-    <link rel="stylesheet" href="personas.css">
-
-    <script type="text/javascript" src="uncharted.personas.dependencies.js"></script>
-    <script type="text/javascript" src="uncharted.personas.js"></script>
+    <script type="text/javascript" src="uncharted.personas.browser.js"></script>
     <script type="text/javascript" src="sampledata.js"></script>
+
+    <style>
+        body, html {
+            margin: 0;
+
+            padding: 0;
+
+            min-width: 100%;
+            width: 100%;
+            max-width: 100%;
+
+            min-height: 100%;
+            height: 100%;
+            max-height: 100%;
+        }
+
+        #personas-panel {
+            width: 100%;
+            height: 75%;
+        }
+
+    </style>
 </head>
 <body>
-<svg id="personas-panel" width="100%" height="600" version="1.1"  xmlns="http://www.w3.org/2000/svg"></svg>
+<canvas id="personas-panel"></canvas>
 <a id="moreData" href="javascript:void(0);">load more data...</a><br />
-<a id="subSelectPersonas01" href="javascript:void(0);">sub-select 3 personas...</a><br />
-<a id="subSelectPersonas02" href="javascript:void(0);">sub-select 3 personas and keep previous selection...</a><br />
+<a id="subSelectPersonas01" href="javascript:void(0);">highlight 3 personas...</a><br />
+<a id="subSelectPersonas02" href="javascript:void(0);">highlight 3 personas and keep previous selection...</a><br />
 <a id="orbitalLayout" href="javascript:void(0);">Set layout type to "orbital"</a><br />
 <a id="colaLayout" href="javascript:void(0);">Set layout type to "cola" (Force graph)</a><br />
 <a id="setZoom" href="javascript:void(0);">Set Current Zoom Level</a><br />
 <a id="logZoom" href="javascript:void(0);">Log Current Zoom Level</a><br />
 
 <script type="text/javascript">
-    $(function() {
+    document.addEventListener("DOMContentLoaded", function() {
         var data = getSampleData();
+        var tmp = 0;
         var options = {
-            autoGenerateIconMap: false,
-            entityIcons: getIconMap(),
-            // to disable visual effects on sub selection
-            Persona: {
-                config: {
-                    transitionsDuration: 300,
-                    subSelectEffectEnabled: false,
-                    forceGreyscaleBackgroundColor: false
-                }
-            }
+
         };
 
-        var personas = new Uncharted.Personas($('#personas-panel')[0], options);
+        var personas = new Uncharted.Personas.Personas(document.getElementById('personas-panel'), options);
+        personas.on(Uncharted.Personas.PersonaEvents.PERSONA_CLICKED, function(sender) {
+            if (personas.breadcrumbs.length < 5) {
+                const globalPosition = sender.localToGlobalCoords(sender.size.width * 0.5, sender.size.height * 0.5);
+                if (++tmp % 2) {
+                    personas.addDataLayer(globalPosition.x, globalPosition.y, getExtraSampleData());
+                } else {
+                    personas.addDataLayer(globalPosition.x, globalPosition.y, getSampleData());
+                }
+            } else {
+                var shouldSelect = !sender.selected;
+                for (var i = 0, n = personas.personas.length; i < n; ++i) {
+                    personas.personas[i].object.selected = false;
+                }
+                sender.selected = shouldSelect;
+            }
+        });
+
+        personas.on(Uncharted.Personas.BreadcrumbEvents.LAYOUT_BREADCRUMB_CLICKED, function(sender, index) {
+            if (index >= 0 && personas.breadcrumbs.length > 1) {
+                personas.removeDataLayer(personas.breadcrumbs.length - index - 1);
+            }
+        });
+
+        personas.on(Uncharted.Personas.LayoutEvents.LAYOUT_BLANK_SPACE_CLICKED, function() {
+            for (var i = 0, n = personas.personas.length; i < n; ++i) {
+                personas.personas[i].object.selected = false;
+            }
+            personas.unhighlight(true);
+        });
+
         personas.loadData(data);
 
         var moreDataLink = document.getElementById("moreData");
@@ -47,25 +87,25 @@
 
         var subSelectLink01 = document.getElementById("subSelectPersonas01");
         subSelectLink01.onclick = function() {
-            personas.subSelectPersonas(getSubSelectData01());
+            personas.highlight(getSubSelectData01(), true);
             return false;
         };
 
         var subSelectLink02 = document.getElementById("subSelectPersonas02");
         subSelectLink02.onclick = function() {
-            personas.subSelectPersonas(getSubSelectData02(), true);
+            personas.highlight(getSubSelectData02(), true, true);
             return false;
         };
 
         var orbitalLink = document.getElementById("orbitalLayout");
         orbitalLink.onclick = function() {
-            personas.layoutSystemType = 'orbital';
+            personas.layoutType = 'orbital';
             return false;
         };
 
         var colaLink = document.getElementById("colaLayout");
         colaLink.onclick = function() {
-            personas.layoutSystemType = 'cola';
+            personas.layoutType = 'cola';
             return false;
         };
 
