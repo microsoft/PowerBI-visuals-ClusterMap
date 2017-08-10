@@ -1,0 +1,9 @@
+{
+  "name": "revi",
+  "version": "0.0.1",
+  "description": "es6 data visualization toolkit",
+  "main": "index.js",
+  "repository": "https://stash.uncharted.software/scm/stories/revi.git",
+  "author": "Dario Segura <dsegura@uncharted.software>",
+  "license": "MIT"
+}

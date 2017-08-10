@@ -24,34 +24,21 @@
 /// <reference path="../node_modules/powerbi-visuals/lib/powerbi-visuals.d.ts"/>
 
 import IVisual = powerbi.extensibility.v110.IVisual;
-import IEnumType = powerbi.IEnumType;
-import VisualCapabilities = powerbi.VisualCapabilities;
-import VisualDataRoleKind = powerbi.VisualDataRoleKind;
-import IVisualHostServices = powerbi.IVisualHostServices;
 import VisualConstructorOptions = powerbi.extensibility.v110.VisualConstructorOptions;
 import VisualUpdateOptions = powerbi.VisualUpdateOptions;
+import ISelectionManager = powerbi.extensibility.ISelectionManager;
+import IVisualHost = powerbi.extensibility.v110.IVisualHost;
+import IVisualHostServices = powerbi.IVisualHostServices;
 import DataView = powerbi.DataView;
 import VisualObjectInstance = powerbi.VisualObjectInstance;
 import EnumerateVisualObjectInstancesOptions = powerbi.EnumerateVisualObjectInstancesOptions;
-import DataViewCategoricalSegment = powerbi.data.segmentation.DataViewCategoricalSegment;
 import SQExprBuilder = powerbi.data.SQExprBuilder;
-
-import SelectionManager = powerbi.extensibility.ISelectionManager;
-import SelectionId = powerbi.extensibility.ISelectionId;
-
-import {IPersonas, IPersonasData, IPersonasOptions, IPersonasSubSelection, IPersonasVisualConfiguration, IClusterMapSettings} from './interfaces';
 
 import * as $ from 'jquery';
 import * as _ from 'lodash';
 
-const Personas = require('@uncharted/personas/src/personas');
-const DOCUMENT_REQUEST_COUNT = 5000;
+import { Personas, PersonaEvents, BreadcrumbEvents, LayoutEvents } from '../lib/@uncharted/personas/src/Personas.js';
 
-/**
- * Cluster Map PowerBI visual class.
- *
- * @class ClusterMap
- */
 export default class ClusterMap implements IVisual {
 
     /**
@@ -92,7 +79,7 @@ export default class ClusterMap implements IVisual {
      * @type {IClusterMapSettings}
      * @private
      */
-    private static DEFAULT_SETTINGS: IClusterMapSettings = {
+    private static DEFAULT_SETTINGS: any = {
         presentation: {
             layout: 'cola',
             imageBlur: false,
@@ -106,61 +93,17 @@ export default class ClusterMap implements IVisual {
         },
     };
 
-    /**
-     * The element to which the Personas component will be added.
-     *
-     * @type {JQuery}
-     * @private
-     */
-    private element: JQuery;
+    private settings: any = $.extend(true, {}, ClusterMap.DEFAULT_SETTINGS);
 
-    /**
-     * Is the visual running in sandbox mode.
-     *
-     * @type {boolean}
-     * @private
-     */
-    private inSandbox: boolean;
+    private element: any;
+    private host: IVisualHost;
+    private hostServices: IVisualHostServices;
+    private selectionManager: ISelectionManager;
 
-    /**
-     * Visual's settings.
-     *
-     * @type {IClusterMapSettings}
-     * @private
-     */
-    private settings: IClusterMapSettings = $.extend(true, {}, ClusterMap.DEFAULT_SETTINGS);
-
-    /**
-     * PowerBI's host services instance.
-     *
-     * @type {IVisualHostServices}
-     * @private
-     */
-    private host: IVisualHostServices;
-
-    /**
-     * Personas component instance.
-     *
-     * @type {IPersonas}
-     * @private
-     */
-    private personas: IPersonas;
-
-    /**
-     * The element in which personas is being rendered.
-     *
-     * @type {JQuery}
-     * @private
-     */
-    private $personas: JQuery;
-
-    /**
-     * Should the "other" persona be rendered.
-     *
-     * @type {boolean}
-     * @private
-     */
-    private showOther: boolean;
+    private personas: any = null;
+    private data: any = null;
+    private dataLayerStack: Array<any> = [];
+    private buckets: Array<string> = [];
 
     /**
      * The maximum number of personas to load.
@@ -168,39 +111,7 @@ export default class ClusterMap implements IVisual {
      * @type {number}
      * @private
      */
-    private maxPersonas: number;
-
-    /**
-     * PowerBI's selection manager instance.
-     *
-     * @type {SelectionManager}
-     * @private
-     */
-    private selectionManager: SelectionManager;
-
-    /**
-     * The data used by the Personas component.
-     *
-     * @type {IPersonasData}
-     * @private
-     */
-    private data: IPersonasData;
-
-    /**
-     * The “other” persona, if visible; otherwise, null.
-     *
-     * @type {any}
-     * @private
-     */
-    private otherPersona: any;
-
-    /**
-     * The data view as received by this visual in the `update` function.
-     *
-     * @type {DataView}
-     * @private
-     */
-    private dataView: DataView;
+    private maxPersonas: number = this.settings.presentation.initialCount;
 
     /**
      * Whether this visual has links between personas.
@@ -211,12 +122,20 @@ export default class ClusterMap implements IVisual {
     private hasLinks: boolean;
 
     /**
-     * Whether this visual has buckets to split the data.
+     * The data view as received by this visual in the `update` function.
+     *
+     * @type {DataView}
+     * @private
+     */
+    private dataView: DataView;
+
+    /**
+     * Whether there is more data available to be loaded by this visual.
      *
      * @type {boolean}
      * @private
      */
-    private hasBuckets: boolean;
+    private hasMoreData: boolean = false;
 
     /**
      * A JSON serialized version of the data used by the Personas component.
@@ -225,6 +144,14 @@ export default class ClusterMap implements IVisual {
      * @private
      */
     private serializedData: any = null;
+
+    /**
+     * Whether this visual has buckets to split the data.
+     *
+     * @type {boolean}
+     * @private
+     */
+    private hasBuckets: boolean;
 
     /**
      * Sub-selection data, if any; otherwise, null.
@@ -243,49 +170,16 @@ export default class ClusterMap implements IVisual {
     private ignoreSelectionNextUpdate: boolean = false;
 
     /**
-     * Whether there is more data available to be loaded by this visual.
-     *
-     * @type {boolean}
-     * @private
-     */
-    private hasMoreData: boolean = false;
-
-    /**
-     * Converts an array of data objects to a lookup table object.
-     *
-     * @method convertToLookup
-     * @param {Array<{id: string}>} data - The data array to convert.
-     * @param {Function} assignmentFunc - Callback function used to assign the array object to the lookup object.
-     * @returns {{}}
-     * @static
-     */
-    public static convertToLookup(data: Array<{id: string}>, assignmentFunc: Function): any {
-        let lookup = {};
-        if (data && data.length) {
-            data.forEach((d) => {
-                lookup[d.id] = assignmentFunc.call(this, d);
-            });
-        }
-        return lookup;
-    }
-
-    /**
-     * ClusterMap class constructor.
-     *
      * @constructor
-     * @param {VisualConstructorOptions} options - The initialization options as provided by PowerBI.
+     * @param {VisualConstructorOptions} options - The PowerBI options for this visual's initialization.
      */
     constructor(options: VisualConstructorOptions) {
-        this.$personas = $('<svg id="personas-panel" class="personas" style="stroke: none;"></svg>');
-        this.element = $(options.element).append(this.$personas);
+        this.element = options.element;
 
-        this.inSandbox = this.element.parents('body.visual-sandbox').length > 0;
-
+        /* example to get the host (services) and selection manager using the new API */
+        this.host = options.host;
         this.selectionManager = options.host.createSelectionManager();
-        this.host = (this.selectionManager as any).hostServices;
-
-        this.maxPersonas = ClusterMap.MAX_PERSONAS_DEFAULT;
-        this.showOther = true;
+        this.hostServices = (this.selectionManager as any).hostServices; // `hostServices` is now what we used to call `host`
     }
 
     /**
@@ -295,29 +189,8 @@ export default class ClusterMap implements IVisual {
      */
     public destroy(): void {
         if (this.personas) {
-            this.personas.layoutSystem.invalidate();
-            this.personas.layoutSystem.removeAllObjects();
-            this.personas.layoutSystem.remove();
-
-            this.personas.unregisterEvents();
+            this.personas.release();
         }
-
-        if (this.otherPersona) {
-            this.otherPersona.invalidate();
-            this.otherPersona = null;
-        }
-
-        if (this.$personas) {
-            this.$personas.remove();
-            this.$personas = null;
-        }
-
-        this.subSelectionData = null;
-        this.serializedData = null;
-        this.dataView = null;
-        this.data = null;
-        this.selectionManager = null;
-        this.host = null;
     }
 
     /**
@@ -326,15 +199,18 @@ export default class ClusterMap implements IVisual {
      * @method update
      * @param {VisualUpdateOptions} options - Update options object as provided by PowerBI.
      */
-    public update(options: VisualUpdateOptions): void {
-        /* always set the width and height of the SVG element, solves https://msrp.visualstudio.com/Essex/_workitems?id=1870&_a=edit
-         * this seems to be a browser specific bug dealing with the sizing of svg and starting drawing before the DOM has been updated
-         * it seems to only appears in specific spect ratios */
-        this.$personas.width(options.viewport.width);
-        this.$personas.height(options.viewport.height);
-        if (options.type & powerbi.VisualUpdateType.ResizeEnd && this.personas) {
-            this.personas.resize();
-            this.personas.autoZoom();
+    public update(options: VisualUpdateOptions) {
+        const viewport: any = options.viewport;
+        if (this.personas) {
+            if (options.type & powerbi.VisualUpdateType.Resize) {
+                this.personas.resize(viewport.width, viewport.height);
+
+                if (viewport.hasOwnProperty('scale')) {
+                    this.personas.deviceScale = viewport.scale * 2;
+                }
+            } else if (options.type & powerbi.VisualUpdateType.ResizeEnd) {
+                this.personas.autoZoom();
+            }
         }
 
         if (!(options.type & powerbi.VisualUpdateType.Data)) {
@@ -343,52 +219,35 @@ export default class ClusterMap implements IVisual {
 
         if (options.dataViews && options.dataViews.length > 0 && options.dataViews[0].table) {
             const dataView = options.dataViews[0];
-            const newObjects: any = dataView && dataView.metadata && dataView.metadata.objects;
-            if (newObjects) {
-                /* update settings */
-                if (newObjects && !_.isMatch(this.settings, newObjects)) {
-                    const oldGaugeColor = this.settings.presentation.normalColor.solid.color;
-                    $.extend(true, this.settings, newObjects);
-                    this.settings.presentation.initialCount = Math.max(this.settings.presentation.initialCount, 1);
-                    this.settings.dataLoading.maxDataRows = Math.max(this.settings.dataLoading.maxDataRows, 1);
+            const newObjects: any = options.dataViews[0] && options.dataViews[0].metadata && options.dataViews[0].metadata.objects;
+            if (newObjects && !_.isMatch(this.settings, newObjects)) {
+                const oldGaugeColor = this.settings.presentation.normalColor.solid.color;
+                $.extend(true, this.settings, newObjects);
+                this.settings.presentation.initialCount = Math.max(this.settings.presentation.initialCount, 1);
+                this.settings.dataLoading.maxDataRows = Math.max(this.settings.dataLoading.maxDataRows, 1);
 
-                    const maxPersonasChanged = (this.maxPersonas !== this.settings.presentation.initialCount);
-                    this.maxPersonas = this.settings.presentation.initialCount;
+                const maxPersonasChanged = (this.maxPersonas !== this.settings.presentation.initialCount);
+                this.maxPersonas = this.settings.presentation.initialCount;
 
-                    const normalColorChanged = (oldGaugeColor !== this.settings.presentation.normalColor.solid.color);
+                const normalColorChanged = (oldGaugeColor !== this.settings.presentation.normalColor.solid.color);
 
-                    if (this.personas) {
-                        /* set the layout type in personas */
-                        this.personas.layoutSystemType = this.hasLinks ? this.settings.presentation.layout : 'orbital';
-                        /* set the blur for the images */
-                        this.personas.enableBlur(this.settings.presentation.imageBlur);
+                if (this.personas) {
+                    /* set the layout type in personas */
+                    this.personas.layoutType = this.hasLinks ? this.settings.presentation.layout : 'orbital';
+                    /* set the blur for the images */
+                    //this.personas.enableBlur(this.settings.presentation.imageBlur);
 
-                        if (!this.inSandbox) {
-                            (<JQuery>(<any>this.$personas).find('[filter^="url("]', '[FILTER^="url("]')).each((index, element) => {
-                                const currentUrl = $(element).attr('filter');
-                                const filtermatch = /url\(['"]?(#[a-zA-Z0-9]+)['"]?\)/ig.exec(currentUrl);
-                                const $element = $(element);
-                                if (filtermatch && filtermatch.length > 1) {
-                                    $element.attr('filter', 'url("' + element.ownerDocument.URL + filtermatch[1] + '")');
-                                }
-                            });
-                        }
-
-                        /* the update was triggered by a change in the settings, retrun if the max number of personas or the gauge color didn't change */
-                        if (!maxPersonasChanged && !normalColorChanged) {
-                            return;
-                        }
+                    /* the update was triggered by a change in the settings, retrun if the max number of personas or the gauge color didn't change */
+                    if (!maxPersonasChanged && !normalColorChanged) {
+                        return;
                     }
                 }
             }
+
             const append = (options.operationKind === powerbi.VisualDataChangeOperationKind.Append);
             this.updateDataView(dataView, append);
-            if (this.personas) {
-                /* set the layout type in personas */
-                this.personas.layoutSystemType = this.hasLinks ? this.settings.presentation.layout : 'orbital';
-                /* set the blur for the images */
-                this.personas.enableBlur(this.settings.presentation.imageBlur);
-            }
+            this.initializePersonas(viewport);
+            this.personas.layoutType = this.hasLinks ? this.settings.presentation.layout : 'orbital';
         }
     }
 
@@ -437,202 +296,334 @@ export default class ClusterMap implements IVisual {
         this.hasMoreData = !!dataView.metadata.segment;
         /* if there's more data to load and the configured number of rows hasn't been reached, load more data */
         if (dataView.table.rows.length < this.settings.dataLoading.maxDataRows && this.hasMoreData) {
-            this.host.loadMoreData();
+            this.hostServices.loadMoreData();
             return;
         }
 
         /* convert the data */
-        const data: any = this.converter(dataView);
+        const data: any = this.convert(dataView);
 
         if (data) {
-            this.element.show();
+            this.element.style.visibility = 'visible';
             let serializedData: string = JSON.stringify(data);
             if (!this.serializedData || !_.isEqual(this.serializedData, serializedData)) {
-                if (!this.personas) {
-                    const personasOptions: IPersonasOptions = {
-                        autoGenerateIconMap: true,
-                        Persona: {
-                            layout: {
-                                systemtype: this.hasLinks ? this.settings.presentation.layout as string : 'orbital',
-                            },
-                            config: {
-                                transitionsDuration: 300,
-                                moveEnabled: false,
-                                mergeEnabled: false,
-                                autoGenerateFallbackColors: false,
-                                fallbackBackgroundColor: '#777777',
-                                registerWindowResize: false,
-                                displayTotalCountLabel: false,
-                                displayLabelsAtOneCount: false,
-                                renderSubSelectionBackground: false,
-                                forceGreyscaleBackgroundColor: false,
-                            },
-                        },
-                        hooks: {
-                            onSelectPersona: this._handleOnSelectPersona.bind(this)
-                        }
-                    };
-
-                    this.personas = new Personas(this.$personas[0], personasOptions);
-                    this.personas.enableBlur(this.settings.presentation.imageBlur);
-                    this.personas.mViewport.mMinScale = 0.1;
-                }
                 this.serializedData = serializedData;
                 this.data = data;
-                this.personas.loadData(this.data, false);
+                if (this.personas) {
+                    this.dataLayerStack.length = 0
+                    this.dataLayerStack.push(this.data.rootPersonas);
+                    this.personas.loadData(this.dataLayerStack[this.dataLayerStack.length - 1], false);
 
-                this.otherPersona = this.personas.mOtherPersona;
-
-                if (!this.inSandbox) {
-                    (<JQuery>(<any>this.$personas).find('[mask^="url("]', '[MASK^="url("]')).each((index, element) => {
-                        const currentUrl = $(element).attr('mask');
-                        const maskmatch = /url\(['"]?(#[a-zA-Z0-9]+)['"]?\)/ig.exec(currentUrl);
-                        if (maskmatch && maskmatch.length > 1) {
-                            $(element).attr('mask', 'url("' + element.ownerDocument.URL + maskmatch[1] + '")');
-                        }
-                    });
-                    (<JQuery>(<any>this.$personas).find('[filter^="url("]', '[FILTER^="url("]')).each((index, element) => {
-                        const currentUrl = $(element).attr('filter');
-                        const filtermatch = /url\(['"]?(#[a-zA-Z0-9]+)['"]?\)/ig.exec(currentUrl);
-                        const $element = $(element);
-                        if (filtermatch && filtermatch.length > 1) {
-                            $element.attr('filter', 'url("' + element.ownerDocument.URL + filtermatch[1] + '")');
-                        }
-                    });
-                    (<JQuery>(<any>this.$personas).find('[fill^="url("]', '[FILL^="url("]')).each((index, element) => {
-                        const currentUrl = $(element).attr('fill');
-                        const fillmatch = /url\(['"]?(#[a-zA-Z0-9]+)['"]?\)/ig.exec(currentUrl);
-                        if (fillmatch && fillmatch.length > 1) {
-                            $(element).attr('fill', 'url("' + element.ownerDocument.URL + fillmatch[1] + '")');
-                        }
-                    });
+                    //this.otherPersona = this.personas.mOtherPersona;
                 }
             }
 
             if (this.ignoreSelectionNextUpdate) {
                 this.ignoreSelectionNextUpdate = false;
-            } else {
+            } else if (this.personas) {
                 if (this.subSelectionData) {
-                    this.personas.subSelectPersonas(this.subSelectionData, false);
-                    if (!this.inSandbox) {
-                        (<JQuery>(<any>this.$personas).find('[filter^="url("]', '[FILTER^="url("]')).each((index, element) => {
-                            const currentUrl = $(element).attr('filter');
-                            const filtermatch = /url\(['"]?(#[a-zA-Z0-9]+)['"]?\)/ig.exec(currentUrl);
-                            const $element = $(element);
-                            if (filtermatch && filtermatch.length > 1) {
-                                $element.attr('filter', 'url("' + element.ownerDocument.URL + filtermatch[1] + '")');
-                            }
-                        });
-                    }
+                    this.personas.personas.forEach(wrapper => {
+                        wrapper.object.selected = false;
+                        wrapper.object.setFocus(Boolean(this.subSelectionData.personas.find(p => p.id === wrapper.id)), true);
+                    });
+                    this.personas.highlight(this.subSelectionData, true);
                 } else {
-                    this.personas.subSelectPersonas(null, false);
+                    this.personas.personas.forEach(wrapper => {
+                        wrapper.object.selected = false;
+                        wrapper.object.setFocus(true, true);
+                    });
+                    this.personas.unhighlight(true);
                 }
             }
+
         } else if (this.personas) {
-            this.element.hide();
-            this.personas.layoutSystem.invalidate();
-            this.personas.layoutSystem.removeAllObjects();
+            this.element.style.visibility = 'hidden';
             this.serializedData = null;
             this.data = null;
         }
     }
 
-    /**
-     * Converts the data in the data view to the Personas component format.
-     *
-     * @method converter
-     * @param {DataView} dataView - The data view which will be converted.
-     * @returns {IPersonasData}
-     */
-    public converter(dataView: DataView): IPersonasData {
+    public convert(dataView: DataView): any {
+        const maxPersonas = this.maxPersonas;
         const metadata = dataView.metadata;
-        const referencesDv = dataView.table;
+        const table = dataView.table;
         const highlights = (dataView.categorical &&
-        dataView.categorical.values &&
-        dataView.categorical.values.length &&
-        dataView.categorical.values[0].highlights);
+                            dataView.categorical.values &&
+                            dataView.categorical.values.length &&
+                            dataView.categorical.values[0].highlights);
 
-        if (referencesDv &&
-            referencesDv &&
-            referencesDv.columns.length > 0 &&
-            referencesDv.rows.length > 0) {
+        if (table && table.columns.length > 0 && table.rows.length > 0) {
+            const columnIndices = {
+                "ID": [],
+                "Name": [],
+                "Count": [],
+                "Bucket": [],
+                "ImageUrl": [],
+                "BackgroundColor": [],
+                "LinkTo": [],
+                "LinkWeight": [],
+                "ParentID": [],
+            };
 
-            // get personas size
-            const personaIdColIndex = _.findIndex(metadata.columns, c => {
-                return c.roles['PersonaGroup'];
+            const columnNames = Object.keys(columnIndices);
+            metadata.columns.forEach((column, i) => {
+                columnNames.forEach(name => {
+                    if (column.roles[name]) {
+                        columnIndices[name].push(i);
+                    }
+                });
             });
-            const referenceNameColIndex = _.findIndex(metadata.columns, c => {
-                return c.roles['ReferenceName'];
-            });
-            const referenceCountColIndex = _.findIndex(metadata.columns, c => {
-                return c.roles['ReferenceCount'];
-            });
-            const referenceBucketColIndex = _.findIndex(metadata.columns, c => {
-                return c.roles['ReferenceBucket'];
-            });
-            const referenceImageUrlColIndices = metadata.columns.reduce((memo, column, index) => {
-                if (column.roles['ReferenceImageUrl']) {
-                    memo.push(index);
-                }
-                return memo;
-            }, []);
-            const referenceBackgroundColor = _.findIndex(metadata.columns, c => {
-                return c.roles['ReferenceBackgroundColor'];
-            });
-            const referenceLinkToColIndex = _.findIndex(metadata.columns, c => {
-                return c.roles['ReferenceLinkTo'];
-            });
-            const referenceLinkWeightColIndex = _.findIndex(metadata.columns, c => {
-                return c.roles['ReferenceLinkWeight'];
-            });
-            if (personaIdColIndex < 0 || referenceCountColIndex < 0 || referenceNameColIndex < 0) {
-                return;
+
+            if (!columnIndices.ID.length || !columnIndices.Name.length || !columnIndices.Count.length) {
+                return null;
             }
 
-            this.hasLinks = (referenceLinkToColIndex >= 0);
-            this.hasBuckets = (referenceBucketColIndex >= 0);
+            this.hasLinks = Boolean(columnIndices.LinkTo.length);
+            this.hasBuckets = Boolean(columnIndices.Bucket.length);
+
+            const viz: any = powerbi.visuals;
+            const labelFormat = metadata.columns[columnIndices.Name[0]].format;
+            const countFormat = metadata.columns[columnIndices.Count[0]].format;
+            const defaultFormatter = labelFormat ? viz.valueFormatter.create({format: labelFormat}) : null;
+            const countFormatter = countFormat ? viz.valueFormatter.create({format: countFormat}) : null;
+            const smallFormatter = viz.valueFormatter.create({format: 'O', value: 0});
+            const bigFormatter = viz.valueFormatter.create({format: 'O', value: 1e6});
+
+            const idColumnMetadata = metadata.columns[columnIndices.ID[0]] as any;
+            const personaMap = {};
+            const countedEntries = {};
+
+            this.buckets.length = 0;
+
+            table.rows.forEach(row => {
+                let ID: string;
+                let rawName: any;
+                let count: number;
+
+                try {
+                    ID = row[columnIndices.ID[0]].toString();
+                    rawName = row[columnIndices.Name[0]];
+                    count = row[columnIndices.Count[0]] as number;
+                } catch(e) {
+                    return;
+                }
+
+                const rawParent: any = columnIndices.ParentID.length ? row[columnIndices.ParentID[0]] : null;
+                const parent: string = rawParent !== null && rawParent !== undefined ? rawParent.toString() : null;
+
+                let name: string = rawName.toString();
+                if (defaultFormatter) {
+                    name = defaultFormatter.format(rawName);
+                } else if (rawName instanceof Date) {
+                    name = rawName.toDateString();
+                } else if (typeof(rawName) === 'number') {
+                    if (rawName < 1e6 && rawName > -1e6) {
+                        name = smallFormatter.format(rawName);
+                    } else {
+                        name = bigFormatter.format(rawName);
+                    }
+                } else {
+                    name = this._decodeText(name);
+                }
+
+                const bucketName = this.hasBuckets ? String(row[columnIndices.Bucket[0]]) : '';
+                if (this.buckets.indexOf(bucketName) === -1) {
+                    this.buckets.push(bucketName);
+                }
+
+                const countKey = ID + name + bucketName;
+
+                let persona = null;
+                if (personaMap[ID]) {
+                    persona = personaMap[ID];
+                    if (!countedEntries.hasOwnProperty(countKey)) {
+                        persona.count += count;
+                    }
+                } else {
+                    persona = {
+                        id: ID,
+                        label: name,
+                        count: parseFloat(count.toString()),
+                        properties: [],
+                        images: [],
+                        color: this.settings.presentation.normalColor.solid.color,
+                        select: SQExprBuilder.equal(idColumnMetadata.expr, SQExprBuilder.typedConstant(row[columnIndices.ID[0]], idColumnMetadata.type)),
+                        links: null,
+                        parent: parent,
+                    };
+                    personaMap[ID] = persona;
+                }
+
+                /* build the property key */
+                if (!countedEntries.hasOwnProperty(countKey)) {
+                    if (this.hasBuckets || !persona.properties.length) {
+                        const propertyID = this.hasBuckets ? bucketName : 'ONE';
+                        const propertyIndex = persona.properties.findIndex(p => p.id === propertyID);
+                        let property = null;
+
+                        if (propertyIndex === -1) {
+                            property = {
+                                count: 0,
+                                color: persona.color,
+                                id: propertyID
+                            };
+                            persona.properties.push(property);
+                        } else {
+                            property = persona.properties[propertyIndex];
+                        }
+
+                        property.count += count;
+                    } else {
+                        persona.properties[0].count += count;
+                    }
+                    countedEntries[countKey] = count;
+                }
+
+                if (columnIndices.ImageUrl.length) {
+                    columnIndices.ImageUrl.forEach(index => {
+                        if (persona.images.indexOf(row[index]) < 0) {
+                            persona.images.push(row[index]);
+                        }
+                    });
+                }
+
+                if (this.hasLinks) {
+                    const linkID: string = row[columnIndices.LinkTo[0]].toString();
+                    const linkStrength = columnIndices.LinkWeight.length ? row[columnIndices.LinkWeight[0]] : 0;
+
+                    if (!persona.links) {
+                        persona.links = [];
+                    }
+
+                    persona.links.push({
+                        target: linkID,
+                        weight: linkStrength,
+                    });
+                }
+            });
+
+            this.buckets.sort();
+
+            const personaKeys = Object.keys(personaMap);
+
+            /* find the min max -.- */
+            let minSize = Number.MAX_SAFE_INTEGER;
+            let maxSize = 0;
+
+            personaKeys.sort((keyA, keyB) => personaMap[keyB].count - personaMap[keyA].count);
+            personaKeys.forEach(key => {
+                minSize = Math.min(minSize, personaMap[key].count);
+                maxSize = Math.max(maxSize, personaMap[key].count);
+            });
+
+            const sizeRange = maxSize - minSize;
+
+            const newData = {
+                rootPersonas: {
+                    personas: [],
+                },
+                parentedPersonas: {
+
+                },
+            };
+
+            for (let i = 0, n = personaKeys.length; i < n && i < maxPersonas; ++i) {
+                const key = personaKeys[i];
+                const persona = personaMap[key];
+
+                const properties = !this.hasBuckets ? [] : persona.properties.sort((pa, pb) => {
+                    if (pa.id < pb.id) {
+                        return -1;
+                    }
+                    if (pa.id > pb.id) {
+                        return 1;
+                    }
+                    return 0;
+                });
+
+                properties.forEach(property => {
+                    if (countFormatter) {
+                        property.formattedCount = countFormatter.format(property.count);
+                    }
+                });
+
+                this._colorProperties(properties);
+
+                const processedPersona: any = {
+                    id: persona.id,
+                    scalingFactor: (persona.count - minSize) / sizeRange,
+                    totalCount: persona.count,
+                    label: persona.label,
+                    properties: properties,
+                    images: persona.images,
+                    links: persona.links,
+                    select: persona.select,
+                };
+
+                if (countFormatter) {
+                    processedPersona.formattedTotalCount = countFormatter.format(persona.count);
+                }
+
+                if (persona.parent === null) {
+                    newData.rootPersonas.personas.push(processedPersona);
+                } else {
+                    let parentedData: any = newData.parentedPersonas[persona.parent];
+                    if (!parentedData) {
+                        parentedData = {
+                            personas: [],
+                        };
+                        newData.parentedPersonas[persona.parent] = parentedData;
+                    }
+                    parentedData.personas.push(processedPersona);
+                }
+            }
 
             if (highlights && this.personas) {
-                const subSelectionData: IPersonasSubSelection = {};
-                const rows = referencesDv.rows;
+                const subSelectionData: any = { personas: [] };
+                const rows = table.rows;
                 highlights.forEach((highlight: number, index: number) => {
                     if (highlight !== null) {
                         const row = rows[index];
-                        const rawPersonaId = row[personaIdColIndex];
+                        const rawPersonaId = row[columnIndices.ID[0]];
                         let personaId = (rawPersonaId !== undefined && rawPersonaId !== null) ? rawPersonaId.toString() : null;
 
                         if (personaId) {
                             /* check if the persona is in the "Other" persona */
-                            if (this.otherPersona &&
-                                this.data.aggregates.other &&
-                                this.data.aggregates.other.metadata &&
-                                this.data.aggregates.other.metadata.personaIds.indexOf(personaId) >= 0) {
-                                personaId = Personas.OTHER_PERSONA_DEFAULT_ID;
+                            /* if (this.otherPersona &&
+                             this.data.aggregates.other &&
+                             this.data.aggregates.other.metadata &&
+                             this.data.aggregates.other.metadata.personaIds.indexOf(personaId) >= 0) {
+                             personaId = Personas.OTHER_PERSONA_DEFAULT_ID;
 
-                                const newCount = subSelectionData[personaId] ? subSelectionData[personaId].bars[0].count + highlight : highlight;
-                                this._addSubSelectionInfo(subSelectionData, personaId, [newCount]);
-                            } else {
-                                const persona = this.personas.findPersona(personaId);
-                                if (persona) {
-                                    const counts = [];
-                                    const properties = persona.data.properties;
-                                    if (!subSelectionData[personaId]) {
-                                        properties.forEach(() => counts.push(0));
-                                    } else {
-                                        const oldData = subSelectionData[personaId];
-                                        oldData.bars.forEach(bar => counts.push(bar.count));
-                                    }
+                             const newCount = subSelectionData[personaId] ? subSelectionData[personaId].bars[0].count + highlight : highlight;
+                             this._addSubSelectionInfo(subSelectionData, personaId, [newCount]);
+                             } else { */
+                            const personaData = personaMap[personaId];
+                            if (personaData) {
+                                let highlightData = subSelectionData.personas.find(hd => hd.id === personaData.id);
+                                if (!highlightData) {
+                                    highlightData = {
+                                        id: personaData.id,
+                                        totalCount: personaData.count,
+                                        properties: [],
+                                    };
 
-                                    const propertyId = this.hasBuckets
-                                        ? personaId + '_' + row[referenceBucketColIndex]
-                                        : personaId;
-                                    for (let i = 0, n = properties.length; i < n; ++i) {
-                                        if (properties[i].entityRefId === propertyId) {
-                                            counts[i] += highlight;
-                                        }
-                                    }
+                                    personaData.properties.forEach(p => {
+                                        highlightData.properties.push({
+                                            id: p.id,
+                                            count: 0,
+                                            color: p.selectedColor || this.settings.presentation.selectedColor.solid.color,
+                                        });
+                                    });
 
-                                    this._addSubSelectionInfo(subSelectionData, personaId, counts);
+                                    subSelectionData.personas.push(highlightData);
+                                }
+
+                                const bucketName = this.hasBuckets ? String(row[columnIndices.Bucket[0]]) : '';
+                                const propertyID = this.hasBuckets ? bucketName : 'ONE';
+                                const property = highlightData.properties.find(p => p.id === propertyID);
+                                if (property) {
+                                    property.count += highlight;
                                 }
                             }
                         }
@@ -644,236 +635,10 @@ export default class ClusterMap implements IVisual {
                 this.subSelectionData = null;
             }
 
-            let links: any[] = [];
-            const personaCounts = referencesDv.rows.reduce((memo, row) => {
-                const rawPersonaId = row[personaIdColIndex];
-                const personaId = (rawPersonaId !== undefined && rawPersonaId !== null) ? rawPersonaId.toString() : null;
-
-                if (personaId) {
-                    const idColumnMetadata = (metadata.columns[personaIdColIndex] as any);
-                    const memoIndex = _.findIndex(memo, m => m.id === personaId);
-                    if (memoIndex < 0) {
-                        memo.push({
-                            id: personaId,
-                            count: 0,
-                            selection: SQExprBuilder.equal(idColumnMetadata.expr, SQExprBuilder.typedConstant(rawPersonaId, idColumnMetadata.type))
-                        });
-                    }
-
-                    /* hijack the loop here to generate the links if needed, that way we have all links! */
-                    if (referenceLinkToColIndex >= 0) {
-                        const rawTargetId = row[referenceLinkToColIndex];
-                        const targetId = (rawTargetId !== undefined && rawTargetId !== null) ? rawTargetId.toString() : null;
-                        if (targetId && targetId !== personaId && !links.some(link => (
-                            (link.source === personaId || link.target === personaId) &&
-                            (link.source === targetId || link.target === targetId)))) {
-                            const linkInfo: any = {
-                                source: personaId,
-                                target: targetId
-                            };
-
-                            if (referenceLinkWeightColIndex >= 0) {
-                                const rawLinkWeight: any = row[referenceLinkWeightColIndex];
-                                const stringLinkWeight: string = (rawLinkWeight !== undefined && rawLinkWeight !== null) ? rawLinkWeight.toString() : null;
-                                let linkWeight: number = parseFloat(stringLinkWeight);
-                                if (!isNaN(linkWeight)) {
-                                    linkInfo.weight = linkWeight;
-                                }
-                            }
-
-                            links.push(linkInfo);
-                        }
-                    }
-                }
-
-                return memo;
-            }, []);
-
-
-            // retrieve the top X personas, ordered by count.
-            const sortedPersonas = personaCounts.sort((a, b) => b.count - a.count);
-            let entityRefs: any[] = [];
-
-            const personaInfos: any[] = [];
-            let otherPersonaInfo: any = {
-                'count': 0,
-                'metadata': {
-                    'selection': null,
-                    'personaIds': []
-                }
-            };
-
-            const viz: any = powerbi.visuals;
-            const labelFormat = metadata.columns[referenceNameColIndex].format;
-            const countFormat = metadata.columns[referenceCountColIndex].format;
-            const defaultFormatter = labelFormat ? viz.valueFormatter.create({format: labelFormat}) : null;
-            const countFormatter = countFormat ? viz.valueFormatter.create({format: countFormat}) : null;
-            const smallFormatter = viz.valueFormatter.create({format: 'O', value: 0});
-            const bigFormatter = viz.valueFormatter.create({format: 'O', value: 1e6});
-
-            sortedPersonas.forEach((personaValue, i) => {
-                const personaId = personaValue.id;
-
-                /* information fields to extract */
-                let properties: Array<any> = [];
-
-                /* iterate through all the rows */
-                const countedEntries = {};
-                personaValue.customSize = 0;
-                referencesDv.rows.forEach((row, rowIndex) => {
-                    const rawOtherPersonaId = row[personaIdColIndex];
-                    const otherPersonaId = (rawOtherPersonaId !== undefined &&
-                    rawOtherPersonaId !== null) ?
-                        rawOtherPersonaId.toString() : null;
-                    /* only process rows that belong to this persona */
-                    if (otherPersonaId === personaId) {
-                        /* extract the entity ref info */
-                        const rawRefId = row[referenceNameColIndex];
-                        let refId: string = personaId.toString();
-                        if (refId && rawRefId !== undefined && rawRefId !== null) {
-                            if (this.hasBuckets) {
-                                refId += '_' + row[referenceBucketColIndex];
-                            }
-
-                            if (!entityRefs.some(entityRef => entityRef.id === refId)) {
-                                let name = rawRefId.toString();
-                                if (defaultFormatter) {
-                                    name = defaultFormatter.format(rawRefId);
-                                } else if (rawRefId instanceof Date) {
-                                    name = rawRefId.toDateString();
-                                } else if (typeof(rawRefId) === 'number') {
-                                    if (rawRefId < 1e6 && rawRefId > -1e6) {
-                                        name = smallFormatter.format(rawRefId);
-                                    } else {
-                                        name = bigFormatter.format(rawRefId);
-                                    }
-                                } else {
-                                    name = this._decodeText(name);
-                                }
-                                entityRefs.push({
-                                    'id': refId,
-                                    'name': name,
-                                    'imageUrl': referenceImageUrlColIndices.reduce((memo, imageIndex) => {
-                                        const pattern = /^(https?):\/\/[^\s/$.?#].[^\s]*/i;
-                                        const rawImageURL = row[imageIndex];
-                                        const imageURL = (rawImageURL !== undefined &&
-                                        rawImageURL !== null) ?
-                                            rawImageURL.toString() : null;
-                                        if (imageURL && pattern.test(imageURL)) {
-                                            memo.push(imageURL);
-                                        }
-                                        return memo;
-                                    }, []),
-                                    'backgroundColor': row[referenceBackgroundColor],
-                                });
-                            }
-
-                            /* extract the property info */
-                            let propertyIndex: number = _.findIndex(properties, p => p.entityRefId === refId);
-                            if (propertyIndex < 0) {
-                                propertyIndex = properties.length;
-                                properties.push({
-                                    'entityRefId': refId,
-                                    'count': 0,
-                                    'formattedCount': null,
-                                    'isPrimary': false,
-                                    'color': 'rgba(0,186,211,0)'
-                                });
-                            }
-
-                            const rawCount: any = row[referenceCountColIndex];
-                            const stringCount: string = (rawCount !== undefined && rawCount !== null) ? rawCount.toString() : null;
-                            let count: number = parseInt(stringCount, 10);
-                            count = isNaN(count) ? 0 : count;
-
-                            /* check if the count should be added to */
-                            let countKey = '';
-                            row.forEach((value, i) => {
-                                if (i !== referenceCountColIndex &&
-                                    i !== referenceLinkToColIndex &&
-                                    i !== referenceLinkWeightColIndex &&
-                                    referenceImageUrlColIndices.indexOf(i) === -1) {
-                                    countKey += value.toString();
-                                }
-                            });
-
-                            if (!countedEntries.hasOwnProperty(countKey)) {
-                                properties[propertyIndex].count += count;
-                                personaValue.count += count;
-                                personaValue.customSize += count;
-                                countedEntries[countKey] = count;
-                            }
-
-                            if (countFormatter) {
-                                properties[propertyIndex].formattedCount = countFormatter.format(properties[propertyIndex].count);
-                            }
-                        }
-                    }
-                });
-
-                /* if this persona's index is within the limits of personas to load, process its info */
-                if (i < this.maxPersonas) {
-                    /* sort the properties */
-                    properties = properties.sort((pa, pb) => {
-                        if (pa.entityRefId < pb.entityRefId) {
-                            return -1;
-                        }
-                        if (pa.entityRefId > pb.entityRefId) {
-                            return 1;
-                        }
-                        return 0;
-                    });
-                    /* color the properties */
-                    this._colorProperties(properties);
-                    /* set the first property (biggest one) as the primary property */
-                    if (properties.length) {
-                        properties[0].isPrimary = true;
-                    }
-
-                    /* create the persona info */
-                    const info: any = {
-                        'id': personaId,
-                        'properties': properties,
-                        'imageUrl': null,
-                        'totalCount': personaValue.count,
-                        'customSize': personaValue.customSize,
-                        'selection': [powerbi.data.createDataViewScopeIdentity(personaValue.selection)]
-                    };
-
-                    /* save the persona info */
-                    /* save only if properties length > 0*/
-                    if (info.properties.length > 0) {
-                        personaInfos.push(info);
-                    }
-
-                } else if (this.showOther) { /* else if we the "other" persona is enabled, add the info to it */
-                    otherPersonaInfo.count += personaValue.count;
-                    otherPersonaInfo.metadata.personaIds.push(personaId);
-                    if (personaValue.selection) {
-                        if (otherPersonaInfo.metadata.selection) {
-                            otherPersonaInfo.metadata.selection = SQExprBuilder.or(otherPersonaInfo.metadata.selection, personaValue.selection);
-                        } else {
-                            otherPersonaInfo.metadata.selection = personaValue.selection;
-                        }
-                    }
-                }
-            });
-
-            if (otherPersonaInfo.metadata.selection) {
-                otherPersonaInfo.metadata.selection = [powerbi.data.createDataViewScopeIdentity(otherPersonaInfo.metadata.selection)];
-            }
-
-            const returnValue: IPersonasData = {
-                entityRefs: ClusterMap.convertToLookup.call(this, entityRefs, (d) => d),
-                aggregates: {
-                    personas: ClusterMap.convertToLookup.call(this, personaInfos, (d) => d),
-                    links: links,
-                    other: otherPersonaInfo
-                }
-            };
-
-            return returnValue;
+            return newData;
         }
+
+        return null;
     }
 
     /**
@@ -889,8 +654,113 @@ export default class ClusterMap implements IVisual {
             objectName: options.objectName,
             properties: {}
         }];
+
         $.extend(true, instances[0].properties, this.settings[options.objectName]);
+
         return instances;
+    }
+
+    public initializePersonas(viewport) {
+        if (!this.personas) {
+            const personasOptions: any = {
+                general: {
+                    initialDeviceScale: viewport.scale * 2,
+                },
+                layout: {
+                    layoutType: this.hasLinks ? this.settings.presentation.layout.toString() : 'orbital',
+                },
+                persona: {
+                    selectedBorderColor: '#000000',
+                    backgroundColor: 'rgb(73,73,73)',
+                }
+            };
+
+            this.personas = new Personas(this.element, personasOptions);
+            //this.personas.enableBlur(this.settings.presentation.imageBlur);
+
+            this.personas.on(PersonaEvents.PERSONA_CLICKED, sender => {
+                this.ignoreSelectionNextUpdate = Boolean(this.subSelectionData);
+                const shouldSelect = !sender.selected;
+                this.personas.personas.forEach(wrapper => {
+                    if (wrapper.object !== sender) {
+                        wrapper.object.selected = false;
+                        wrapper.object.setFocus(!shouldSelect, true);
+                    }
+                });
+                sender.selected = shouldSelect;
+                sender.setFocus(true, true);
+
+                this.selectionManager.clear();
+                if (shouldSelect) {
+                    const personaData = this.dataLayerStack[this.dataLayerStack.length - 1].personas.find(p => p.id === sender.id);
+                    const properties = [];
+                    if (personaData) {
+                        const selectArgs: any = {
+                            data: [{data: [powerbi.data.createDataViewScopeIdentity(personaData.select)]}],
+                        };
+                        this.hostServices.onSelect(selectArgs);
+
+                        const subLayerData = this.data.parentedPersonas[sender.id];
+                        if (subLayerData) {
+                            this.dataLayerStack.push(subLayerData);
+                            this.personas.addDataLayer(sender.position.x, sender.position.y, this.dataLayerStack[this.dataLayerStack.length - 1]);
+                        } else {
+                            if (this.hasBuckets) {
+                                personaData.properties.forEach(property => {
+                                    properties.push({
+                                        count: property.count / personaData.totalCount,
+                                        color: property.selectedColor,
+                                    });
+                                });
+                            } else {
+                                properties.push({
+                                    count: 1,
+                                    color: this.settings.presentation.selectedColor.solid.color,
+                                });
+                            }
+
+                            this.personas.highlight({
+                                personas: [
+                                    {
+                                        id: sender.id,
+                                        totalCount: 1,
+                                        properties: properties,
+                                    }
+                                ]
+                            });
+                        }
+                    }
+                } else {
+                    this.personas.unhighlight();
+                }
+            });
+
+            this.personas.on(LayoutEvents.LAYOUT_BLANK_SPACE_CLICKED, () => {
+                this.personas.personas.forEach(wrapper => {
+                    wrapper.object.selected = false;
+                    wrapper.object.setFocus(true, true);
+                });
+                this.personas.unhighlight();
+                this.selectionManager.clear();
+            });
+
+            this.personas.on(BreadcrumbEvents.LAYOUT_BREADCRUMB_CLICKED, (sender, index) => {
+                if (index >= 0 && this.personas.breadcrumbs.length > 1) {
+                    const toRemove = this.personas.breadcrumbs.length - index - 1;
+                    this.personas.removeDataLayer(toRemove);
+                    this.dataLayerStack.splice(-toRemove, toRemove);
+                }
+            });
+
+            if (this.data) {
+                this.dataLayerStack.length = 0;
+                this.dataLayerStack.push(this.data.rootPersonas);
+                this.personas.loadData(this.dataLayerStack[this.dataLayerStack.length - 1], false);
+                if (this.subSelectionData) {
+                    this.personas.highlight(this.subSelectionData, true);
+                }
+            }
+        }
     }
 
     /**
@@ -905,96 +775,6 @@ export default class ClusterMap implements IVisual {
         const txt: HTMLTextAreaElement = document.createElement('textarea');
         txt.innerHTML = text;
         return txt.value;
-    }
-
-    /**
-     * Adds the specified sub selection counts to the `subSelection` object corresponding to the given persona ID.
-     *
-     * @method _addSubSelectionInfo
-     * @param {IPersonasSubSelection} subSelection - The subselection object to modify.
-     * @param {string} personaId - The persona ID for which the counts will be added..
-     * @param {number[]} counts - An array containing the counts that will be sub-selected in the specified persona.
-     * @private
-     */
-    private _addSubSelectionInfo(subSelection: IPersonasSubSelection, personaId: string, counts: number[]): void {
-        const colorCount = counts.length <= 3 ? 3 : counts.length;
-        const palette = this._colorInterpolation(this.settings.presentation.selectedColor.solid.color, colorCount, true);
-        subSelection[personaId] = {
-            computePercentages: true,
-            bars: counts.map((count, i) => {
-                const rgb = palette[i];
-                return {
-                    color: 'rgb(' + rgb.r + ',' + rgb.g + ',' + rgb.b + ')',
-                    count: count
-                };
-            })
-        };
-    }
-
-    /**
-     * Handles the `onSelectPersona` event.
-     *
-     * @method _handleOnSelectPersona
-     * @param {any} selection - Selection info.
-     * @private
-     */
-    private _handleOnSelectPersona(selection) {
-        this.ignoreSelectionNextUpdate = !!this.subSelectionData;
-        const selectionId = selection.id;
-        let persona = this.personas.findPersona(selectionId);
-
-        if (selection.selected) {
-            const subSelection: any = {};
-
-            if (selectionId === Personas.OTHER_PERSONA_DEFAULT_ID) {
-                if (this.otherPersona && this.data.aggregates.other) {
-                    const selectArgs: any = {
-                        data: this.data.aggregates.other.metadata.selection.map((identity: any) => ({ data: [identity] }))
-                    };
-                    this.host.onSelect(selectArgs);
-                    persona = this.otherPersona;
-                    this._addSubSelectionInfo(subSelection, selectionId, [persona.data.totalCount]);
-                }
-            } else {
-                const personaInfo = this.data.aggregates.personas[selectionId];
-                if (personaInfo && personaInfo.selection) {
-                    const selectArgs: any = {
-                        data: personaInfo.selection.map((identity: any) => ({data: [identity]}))
-                    };
-                    this.host.onSelect(selectArgs);
-
-                    this._addSubSelectionInfo(subSelection, selectionId, persona.data.properties.map(property => property.count));
-
-                    if (this.hasLinks) {
-                        const links = this.personas.mSortedData.original.aggregates.links;
-                        links.forEach(link => {
-                            if (link.source === selectionId) {
-                                this._addSubSelectionInfo(subSelection, link.target, [0]);
-                            } else if (link.target === selectionId) {
-                                this._addSubSelectionInfo(subSelection, link.source, [0]);
-                            }
-                        });
-                    }
-                }
-            }
-
-            setTimeout(() => {
-                this.personas.subSelectPersonas(subSelection, false);
-                if (!this.inSandbox) {
-                    (<JQuery>(<any>this.$personas).find('[filter^="url("]', '[FILTER^="url("]')).each((index, element) => {
-                        const currentUrl = $(element).attr('filter');
-                        const filtermatch = /url\(['"]?(#[a-zA-Z0-9]+)['"]?\)/ig.exec(currentUrl);
-                        const $element = $(element);
-                        if (filtermatch && filtermatch.length > 1) {
-                            $element.attr('filter', 'url("' + element.ownerDocument.URL + filtermatch[1] + '")');
-                        }
-                    });
-                }
-                persona.isSelected = true;
-            });
-        } else {
-            this.selectionManager.clear();
-        }
     }
 
     /**
@@ -1141,12 +921,17 @@ export default class ClusterMap implements IVisual {
      */
     private _colorProperties(properties) {
         if (this.hasBuckets) {
-            const colorCount = properties.length <= 3 ? 3 : properties.length;
+            const colorCount = this.buckets.length <= 3 ? 3 : this.buckets.length;
             const palette = this._colorInterpolation(this.settings.presentation.normalColor.solid.color, colorCount, false);
+            const selectedPalette = this._colorInterpolation(this.settings.presentation.selectedColor.solid.color, colorCount, true);
 
             for (let i = 0, n = properties.length; i < n; ++i) {
-                const rgb = palette[i];
+                const index = this.buckets.indexOf(properties[i].id);
+                let rgb = palette[index];
                 properties[i].color = 'rgb(' + rgb.r + ',' + rgb.g + ',' + rgb.b + ')';
+
+                rgb = selectedPalette[index];
+                properties[i].selectedColor = 'rgb(' + rgb.r + ',' + rgb.g + ',' + rgb.b + ')';
             }
         }
     }
