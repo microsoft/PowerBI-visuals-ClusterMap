@@ -151,7 +151,17 @@ function pbivizPluginTemplate (pbiviz) {
                         ${pbiviz.apiVersion ?
                             `${pbiviz.visual.visualClassName}.apply(instance, arguments);`
                         :
-                            `var oldInit = instance.init;
+                            `
+                            var adapter = this;
+                            var originalUpdate = adapter.update;
+                            var originalOptions = null;
+
+                            adapter.update = function (options) {
+                                originalOptions = powerbi.Prototype.inherit(options);
+                                originalUpdate.call(adapter, options);
+                            }
+
+                            var oldInit = instance.init;
                             instance.init = function(options) {
                                 instance.init = oldInit;
                                 var adaptedOptions = {
@@ -165,9 +175,9 @@ function pbivizPluginTemplate (pbiviz) {
                                 };
                                 ${pbiviz.visual.visualClassName}.call(instance, adaptedOptions);
 
-                                instance.update = function(options) {
-                                    options.type = powerbi.extensibility.v100.convertLegacyUpdateType(options);
-                                    ${pbiviz.visual.visualClassName}.prototype.update.call(instance, options);
+                                instance.update = function(/* options */) {
+                                    originalOptions.type = powerbi.extensibility.v100.convertLegacyUpdateType(originalOptions);
+                                    ${pbiviz.visual.visualClassName}.prototype.update.call(instance, originalOptions);
                                 }
                             }`
                         }
