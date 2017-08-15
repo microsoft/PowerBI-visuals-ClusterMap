@@ -82,7 +82,7 @@ export default class ClusterMap implements IVisual {
     private static DEFAULT_SETTINGS: any = {
         presentation: {
             layout: 'cola',
-            imageBlur: false,
+            //imageBlur: false,
             initialCount: ClusterMap.MAX_PERSONAS_DEFAULT,
             loadMoreCount: ClusterMap.LOAD_MORE_PERSONAS_STEP,
             normalColor: { solid: { color: ClusterMap.GAUGE_DEFAULT_COLOR } },
