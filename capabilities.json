@@ -26,11 +26,6 @@
       "displayName": "Image Url",
       "description": "Up to four optional images to display as the cluster's background."
     }, {
-      "name": "BackgroundColor",
-      "kind": 0,
-      "displayName": "Background Color",
-      "description": "The background color to display as the cluster's background when images are not present."
-    }, {
       "name": "LinkTo",
       "kind": 0,
       "displayName": "Related To",
@@ -111,13 +106,6 @@
               {"value": "orbital", "displayName": "Spiral"},
               {"value": "cola", "displayName": "Relational"}
             ]
-          }
-        },
-        "imageBlur": {
-          "displayName": "Blur",
-          "description": "Defines if the background images in clusters should be blurred.",
-          "type": {
-            "bool": true
           }
         },
         "normalColor": {
