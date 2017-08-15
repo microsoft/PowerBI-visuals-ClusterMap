@@ -677,19 +677,10 @@ export default class ClusterMap implements IVisual {
             };
 
             this.personas = new Personas(this.element, personasOptions);
-            //this.personas.enableBlur(this.settings.presentation.imageBlur);
 
             this.personas.on(PersonaEvents.PERSONA_CLICKED, sender => {
                 this.ignoreSelectionNextUpdate = Boolean(this.subSelectionData);
                 const shouldSelect = !sender.selected;
-                this.personas.personas.forEach(wrapper => {
-                    if (wrapper.object !== sender) {
-                        wrapper.object.selected = false;
-                        wrapper.object.setFocus(!shouldSelect, true);
-                    }
-                });
-                sender.selected = shouldSelect;
-                sender.setFocus(true, true);
 
                 this.selectionManager.clear();
                 if (shouldSelect) {
@@ -704,8 +695,17 @@ export default class ClusterMap implements IVisual {
                         const subLayerData = this.data.parentedPersonas[sender.id];
                         if (subLayerData) {
                             this.dataLayerStack.push(subLayerData);
-                            this.personas.addDataLayer(sender.position.x, sender.position.y, this.dataLayerStack[this.dataLayerStack.length - 1]);
+                            this.personas.addDataLayer(this.dataLayerStack[this.dataLayerStack.length - 1], sender);
                         } else {
+                            this.personas.personas.forEach(wrapper => {
+                                if (wrapper.object !== sender) {
+                                    wrapper.object.selected = false;
+                                    wrapper.object.setFocus(false, true);
+                                }
+                            });
+                            sender.selected = true;
+                            sender.setFocus(true, true);
+
                             if (this.hasBuckets) {
                                 personaData.properties.forEach(property => {
                                     properties.push({
@@ -732,6 +732,10 @@ export default class ClusterMap implements IVisual {
                         }
                     }
                 } else {
+                    this.personas.personas.forEach(wrapper => {
+                        wrapper.object.selected = false;
+                        wrapper.object.setFocus(true, true);
+                    });
                     this.personas.unhighlight();
                 }
             });
