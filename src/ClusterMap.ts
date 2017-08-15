@@ -549,9 +549,10 @@ export default class ClusterMap implements IVisual {
 
                 this._colorProperties(properties);
 
+                const scalingFactor = (persona.count - minSize) / sizeRange;
                 const processedPersona: any = {
                     id: persona.id,
-                    scalingFactor: (persona.count - minSize) / sizeRange,
+                    scalingFactor: isNaN(scalingFactor) ? 1 : scalingFactor,
                     totalCount: persona.count,
                     label: persona.label,
                     properties: properties,
