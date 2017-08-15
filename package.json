@@ -1,6 +1,6 @@
 {
   "name": "ClusterMap",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "description": "Cluster Map - PowerBI custom visual.",
   "main": "src/index.js",
   "scripts": {
