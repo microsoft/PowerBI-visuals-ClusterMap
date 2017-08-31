@@ -334,6 +334,7 @@ export default class ClusterMap implements IVisual {
                 this.ignoreSelectionNextUpdate = false;
             } else if (this.personas) {
                 if (this.subSelectionData) {
+                    this.lastSelectionArgs = null;
                     this.personas.personas.forEach(wrapper => {
                         wrapper.object.selected = false;
                         wrapper.object.setFocus(Boolean(this.subSelectionData.personas.find(p => p.id === wrapper.id)), true);
@@ -709,6 +710,12 @@ export default class ClusterMap implements IVisual {
 
                         const subLayerData = this.data.parentedPersonas[sender.id];
                         if (subLayerData) {
+                            this.personas.personas.forEach(wrapper => {
+                                wrapper.object.selected = false;
+                                wrapper.object.setFocus(true, false);
+                            });
+                            this.personas.unhighlight();
+
                             this.dataLayerStack.push({
                                 data: subLayerData,
                                 select: selectArgs,
@@ -799,6 +806,7 @@ export default class ClusterMap implements IVisual {
                 });
                 this.personas.loadData(this.dataLayerStack[this.dataLayerStack.length - 1].data, false);
                 if (this.subSelectionData) {
+                    this.lastSelectionArgs = null;
                     this.personas.highlight(this.subSelectionData, true);
                 }
             }
