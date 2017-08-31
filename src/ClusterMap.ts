@@ -775,7 +775,7 @@ export default class ClusterMap implements IVisual {
                     wrapper.object.setFocus(true, true);
                 });
                 this.personas.unhighlight();
-                if (this.lastSelectionArgs !== this.dataLayerStack[this.dataLayerStack.length - 1].select) {
+                if (this.lastSelectionArgs !== this.dataLayerStack[this.dataLayerStack.length - 1].select || this.dataLayerStack[this.dataLayerStack.length - 1].select === null) {
                     this.selectionManager.clear();
                     if (this.dataLayerStack[this.dataLayerStack.length - 1].select) {
                         this.hostServices.onSelect(this.dataLayerStack[this.dataLayerStack.length - 1].select);
