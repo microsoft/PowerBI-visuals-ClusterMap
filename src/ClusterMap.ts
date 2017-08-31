@@ -162,6 +162,14 @@ export default class ClusterMap implements IVisual {
     private subSelectionData: any = null;
 
     /**
+     * Last selection data sent to PowerBI
+     *
+     * @type {any}
+     * @private
+     */
+    private lastSelectionArgs: any = null;
+
+    /**
      * Flag used to ignore the next call to the `update` function, triggered when performing sub-selection.
      *
      * @type {boolean}
@@ -310,9 +318,13 @@ export default class ClusterMap implements IVisual {
                 this.serializedData = serializedData;
                 this.data = data;
                 if (this.personas) {
+                    this.lastSelectionArgs = null;
                     this.dataLayerStack.length = 0
-                    this.dataLayerStack.push(this.data.rootPersonas);
-                    this.personas.loadData(this.dataLayerStack[this.dataLayerStack.length - 1], false);
+                    this.dataLayerStack.push({
+                        data: this.data.rootPersonas,
+                        select: null,
+                    });
+                    this.personas.loadData(this.dataLayerStack[this.dataLayerStack.length - 1].data, false);
 
                     //this.otherPersona = this.personas.mOtherPersona;
                 }
@@ -666,9 +678,11 @@ export default class ClusterMap implements IVisual {
             const personasOptions: any = {
                 general: {
                     initialDeviceScale: viewport.scale * 2,
+                    breadcrumbsSegmentedBackground: false,
                 },
                 layout: {
                     layoutType: this.hasLinks ? this.settings.presentation.layout.toString() : 'orbital',
+                    zoomControlsPosition: 'bottom-right',
                 },
                 persona: {
                     selectedBorderColor: '#000000',
@@ -684,18 +698,22 @@ export default class ClusterMap implements IVisual {
 
                 this.selectionManager.clear();
                 if (shouldSelect) {
-                    const personaData = this.dataLayerStack[this.dataLayerStack.length - 1].personas.find(p => p.id === sender.id);
+                    const personaData = this.dataLayerStack[this.dataLayerStack.length - 1].data.personas.find(p => p.id === sender.id);
                     const properties = [];
                     if (personaData) {
                         const selectArgs: any = {
                             data: [{data: [powerbi.data.createDataViewScopeIdentity(personaData.select)]}],
                         };
                         this.hostServices.onSelect(selectArgs);
+                        this.lastSelectionArgs = selectArgs;
 
                         const subLayerData = this.data.parentedPersonas[sender.id];
                         if (subLayerData) {
-                            this.dataLayerStack.push(subLayerData);
-                            this.personas.addDataLayer(this.dataLayerStack[this.dataLayerStack.length - 1], sender);
+                            this.dataLayerStack.push({
+                                data: subLayerData,
+                                select: selectArgs,
+                            });
+                            this.personas.addDataLayer(this.dataLayerStack[this.dataLayerStack.length - 1].data, sender);
                         } else {
                             this.personas.personas.forEach(wrapper => {
                                 if (wrapper.object !== sender) {
@@ -737,6 +755,10 @@ export default class ClusterMap implements IVisual {
                         wrapper.object.setFocus(true, true);
                     });
                     this.personas.unhighlight();
+                    if (this.dataLayerStack[this.dataLayerStack.length - 1].select) {
+                        this.hostServices.onSelect(this.dataLayerStack[this.dataLayerStack.length - 1].select);
+                        this.lastSelectionArgs = this.dataLayerStack[this.dataLayerStack.length - 1].select;
+                    }
                 }
             });
 
@@ -746,7 +768,13 @@ export default class ClusterMap implements IVisual {
                     wrapper.object.setFocus(true, true);
                 });
                 this.personas.unhighlight();
-                this.selectionManager.clear();
+                if (this.lastSelectionArgs !== this.dataLayerStack[this.dataLayerStack.length - 1].select) {
+                    this.selectionManager.clear();
+                    if (this.dataLayerStack[this.dataLayerStack.length - 1].select) {
+                        this.hostServices.onSelect(this.dataLayerStack[this.dataLayerStack.length - 1].select);
+                        this.lastSelectionArgs = this.dataLayerStack[this.dataLayerStack.length - 1].select;
+                    }
+                }
             });
 
             this.personas.on(BreadcrumbEvents.LAYOUT_BREADCRUMB_CLICKED, (sender, index) => {
@@ -754,12 +782,21 @@ export default class ClusterMap implements IVisual {
                     const toRemove = this.personas.breadcrumbs.length - index - 1;
                     this.personas.removeDataLayer(toRemove);
                     this.dataLayerStack.splice(-toRemove, toRemove);
+                    this.selectionManager.clear();
+                    if (this.dataLayerStack[this.dataLayerStack.length - 1].select) {
+                        this.hostServices.onSelect(this.dataLayerStack[this.dataLayerStack.length - 1].select);
+                        this.lastSelectionArgs = this.dataLayerStack[this.dataLayerStack.length - 1].select;
+                    }
                 }
             });
 
             if (this.data) {
+                this.lastSelectionArgs = null;
                 this.dataLayerStack.length = 0;
-                this.dataLayerStack.push(this.data.rootPersonas);
+                this.dataLayerStack.push({
+                    data: this.data.rootPersonas,
+                    select: null
+                });
                 this.personas.loadData(this.dataLayerStack[this.dataLayerStack.length - 1], false);
                 if (this.subSelectionData) {
                     this.personas.highlight(this.subSelectionData, true);
