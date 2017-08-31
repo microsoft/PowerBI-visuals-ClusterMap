@@ -797,7 +797,7 @@ export default class ClusterMap implements IVisual {
                     data: this.data.rootPersonas,
                     select: null
                 });
-                this.personas.loadData(this.dataLayerStack[this.dataLayerStack.length - 1], false);
+                this.personas.loadData(this.dataLayerStack[this.dataLayerStack.length - 1].data, false);
                 if (this.subSelectionData) {
                     this.personas.highlight(this.subSelectionData, true);
                 }
