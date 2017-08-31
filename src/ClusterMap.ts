@@ -591,7 +591,7 @@ export default class ClusterMap implements IVisual {
                 }
             }
 
-            if (highlights && this.personas) {
+            if (highlights) {
                 const subSelectionData: any = { personas: [] };
                 const rows = table.rows;
                 highlights.forEach((highlight: number, index: number) => {
