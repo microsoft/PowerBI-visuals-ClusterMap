@@ -592,6 +592,17 @@ export default class ClusterMap implements IVisual {
                 }
             }
 
+            while (newData.rootPersonas.personas.length === 1) {
+                const id = newData.rootPersonas.personas[0].id;
+                const childData = newData.parentedPersonas[id];
+                if (childData) {
+                    newData.rootPersonas = newData.parentedPersonas[id];
+                    delete newData.parentedPersonas[id];
+                } else {
+                    break;
+                }
+            }
+
             if (highlights) {
                 const subSelectionData: any = { personas: [] };
                 const rows = table.rows;
