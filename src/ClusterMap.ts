@@ -717,55 +717,38 @@ export default class ClusterMap implements IVisual {
                             data: [{data: [powerbi.data.createDataViewScopeIdentity(personaData.select)]}],
                         };
                         this.hostServices.onSelect(selectArgs);
-                        this.lastSelectionArgs = selectArgs;
-
-                        const subLayerData = this.data.parentedPersonas[sender.id];
-                        if (subLayerData) {
-                            this.personas.personas.forEach(wrapper => {
+                        this.personas.personas.forEach(wrapper => {
+                            if (wrapper.object !== sender) {
                                 wrapper.object.selected = false;
-                                wrapper.object.setFocus(true, false);
-                            });
-                            this.personas.unhighlight();
-
-                            this.dataLayerStack.push({
-                                data: subLayerData,
-                                select: selectArgs,
-                            });
-                            this.personas.addDataLayer(this.dataLayerStack[this.dataLayerStack.length - 1].data, sender);
-                        } else {
-                            this.personas.personas.forEach(wrapper => {
-                                if (wrapper.object !== sender) {
-                                    wrapper.object.selected = false;
-                                    wrapper.object.setFocus(false, true);
-                                }
-                            });
-                            sender.selected = true;
-                            sender.setFocus(true, true);
-
-                            if (this.hasBuckets) {
-                                personaData.properties.forEach(property => {
-                                    properties.push({
-                                        count: property.count / personaData.totalCount,
-                                        color: property.selectedColor,
-                                    });
-                                });
-                            } else {
-                                properties.push({
-                                    count: 1,
-                                    color: this.settings.presentation.selectedColor.solid.color,
-                                });
+                                wrapper.object.setFocus(false, true);
                             }
+                        });
+                        sender.selected = true;
+                        sender.setFocus(true, true);
 
-                            this.personas.highlight({
-                                personas: [
-                                    {
-                                        id: sender.id,
-                                        totalCount: 1,
-                                        properties: properties,
-                                    }
-                                ]
+                        if (this.hasBuckets) {
+                            personaData.properties.forEach(property => {
+                                properties.push({
+                                    count: property.count / personaData.totalCount,
+                                    color: property.selectedColor,
+                                });
+                            });
+                        } else {
+                            properties.push({
+                                count: 1,
+                                color: this.settings.presentation.selectedColor.solid.color,
                             });
                         }
+
+                        this.personas.highlight({
+                            personas: [
+                                {
+                                    id: sender.id,
+                                    totalCount: 1,
+                                    properties: properties,
+                                }
+                            ]
+                        });
                     }
                 } else {
                     this.personas.personas.forEach(wrapper => {
@@ -778,6 +761,44 @@ export default class ClusterMap implements IVisual {
                         this.lastSelectionArgs = this.dataLayerStack[this.dataLayerStack.length - 1].select;
                     }
                 }
+            });
+
+            this.personas.on(PersonaEvents.PERSONA_SUB_LEVEL_CLICKED, sender => {
+                const personaData = this.dataLayerStack[this.dataLayerStack.length - 1].data.personas.find(p => p.id === sender.id);
+                if (personaData) {
+                    const selectArgs:any = {
+                        data: [{data: [powerbi.data.createDataViewScopeIdentity(personaData.select)]}],
+                    };
+                    this.hostServices.onSelect(selectArgs);
+                    this.lastSelectionArgs = selectArgs;
+
+                    const subLayerData = this.data.parentedPersonas[sender.id];
+                    if (subLayerData) {
+                        sender.hideSubLevelBadge();
+                        this.personas.personas.forEach(wrapper => {
+                            wrapper.object.selected = false;
+                            wrapper.object.setFocus(true, false);
+                        });
+                        this.personas.unhighlight();
+
+                        this.dataLayerStack.push({
+                            data: subLayerData,
+                            select: selectArgs,
+                        });
+                        this.personas.addDataLayer(this.dataLayerStack[this.dataLayerStack.length - 1].data, sender);
+                    }
+                }
+            });
+
+            this.personas.on(PersonaEvents.PERSONA_POINTER_OVER, sender => {
+                const subLayerData = this.data.parentedPersonas[sender.id];
+                if (subLayerData) {
+                    sender.showSubLevelBadge();
+                }
+            });
+
+            this.personas.on(PersonaEvents.PERSONA_POINTER_OUT, sender => {
+                    sender.hideSubLevelBadge();
             });
 
             this.personas.on(LayoutEvents.LAYOUT_BLANK_SPACE_CLICKED, () => {
@@ -796,7 +817,9 @@ export default class ClusterMap implements IVisual {
             });
 
             this.personas.on(BreadcrumbEvents.LAYOUT_BREADCRUMB_CLICKED, (sender, index) => {
-                if (index >= 0 && this.personas.breadcrumbs.length > 1) {
+                if (index === this.personas.breadcrumbs.length - 1) {
+                    this.personas.autoZoom();
+                } else if (index >= 0 && this.personas.breadcrumbs.length > 1) {
                     const toRemove = this.personas.breadcrumbs.length - index - 1;
                     this.personas.removeDataLayer(toRemove);
                     this.dataLayerStack.splice(-toRemove, toRemove);
