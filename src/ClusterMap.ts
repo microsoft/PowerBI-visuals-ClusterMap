@@ -422,7 +422,7 @@ export default class ClusterMap implements IVisual {
                 }
 
                 const rawParent: any = columnIndices.ParentID.length ? row[columnIndices.ParentID[0]] : null;
-                const parent: string = rawParent !== null && rawParent !== undefined ? rawParent.toString() : null;
+                const parent: string = rawParent !== null && rawParent !== undefined && rawParent.toString() !== ID ? rawParent.toString() : null;
 
                 let name: string = rawName.toString();
                 if (defaultFormatter) {
