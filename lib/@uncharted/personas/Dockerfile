@@ -1,10 +1,10 @@
 #Dockerfile for CI (bamboo is configured to look at root)
-FROM node:4.2.6
+FROM node:6.11.3
 
 WORKDIR /app
 
-ADD package.json .npmrc /dependencies/
+ADD . /app/
 
-RUN cd /dependencies && npm install -q
+RUN cd /app && npm install -q
 
-CMD ./personas.sh --ci -b
+CMD npm run ci

@@ -48,19 +48,37 @@
 
         var personas = new Uncharted.Personas.Personas(document.getElementById('personas-panel'), options);
         personas.on(Uncharted.Personas.PersonaEvents.PERSONA_CLICKED, function(sender) {
+            var shouldSelect = !sender.selected;
+            for (var i = 0, n = personas.personas.length; i < n; ++i) {
+                personas.personas[i].object.selected = false;
+            }
+            sender.selected = shouldSelect;
+        });
+
+        personas.on(Uncharted.Personas.PersonaEvents.PERSONA_SUB_LEVEL_CLICKED, function(sender) {
             if (personas.breadcrumbs.length < 5) {
-                const globalPosition = sender.localToGlobalCoords(sender.size.width * 0.5, sender.size.height * 0.5);
-                if (++tmp % 2) {
-                    personas.addDataLayer(globalPosition.x, globalPosition.y, getExtraSampleData());
-                } else {
-                    personas.addDataLayer(globalPosition.x, globalPosition.y, getSampleData());
-                }
-            } else {
-                var shouldSelect = !sender.selected;
+                sender.hideSubLevelBadge();
                 for (var i = 0, n = personas.personas.length; i < n; ++i) {
                     personas.personas[i].object.selected = false;
                 }
-                sender.selected = shouldSelect;
+                
+                if (++tmp % 2) {
+                    personas.addDataLayer(getExtraSampleData(), sender);
+                } else {
+                    personas.addDataLayer(getSampleData(), sender);
+                }
+            }
+        });
+
+        personas.on(Uncharted.Personas.PersonaEvents.PERSONA_POINTER_OVER, function(sender) {
+            if (personas.breadcrumbs.length < 5) {
+                sender.showSubLevelBadge();
+            }
+        });
+
+        personas.on(Uncharted.Personas.PersonaEvents.PERSONA_POINTER_OUT, function(sender) {
+            if (personas.breadcrumbs.length < 5) {
+                sender.hideSubLevelBadge();
             }
         });
 
