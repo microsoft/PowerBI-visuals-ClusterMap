@@ -59,7 +59,7 @@
     "categorical": {
       "categories": {
         "for": {"in": "ID"},
-        "dataReductionAlgorithm": {"window": {"count": 5000}}
+        "dataReductionAlgorithm": {"window": {"count": 500000}}
       },
       "values": {
         "select": [
@@ -72,16 +72,16 @@
           {"for": {"in": "LinkWeight"}},
           {"for": {"in": "ParentID"}}
         ],
-        "dataReductionAlgorithm": {"window": {"count": 5000}}
+        "dataReductionAlgorithm": {"window": {"count": 500000}}
       },
       "rowCount": {
         "preferred": {
           "min": 5000,
-          "max": 20000
+          "max": 500000
         },
         "supported": {
           "min": 0,
-          "max": 50000
+          "max": 500000
         }
       }
     }
