@@ -761,6 +761,7 @@ export default class ClusterMap implements IVisual {
                             data: [{data: [powerbi.data.createDataViewScopeIdentity(personaData.select)]}],
                         };
                         this.hostServices.onSelect(selectArgs);
+                        this.lastSelectionArgs = selectArgs;
                         this.personas.personas.forEach(wrapper => {
                             if (wrapper.object !== sender) {
                                 wrapper.object.selected = false;
