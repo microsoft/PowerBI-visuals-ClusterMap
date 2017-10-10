@@ -98,6 +98,13 @@
             "numeric": true
           }
         },
+        "imageCount": {
+          "displayName": "Max Image Count",
+          "description": "The maximum number of images to display in a cluster.",
+          "type": {
+            "numeric": true
+          }
+        },
         "layout": {
           "displayName": "Layout",
           "description": "Defines how the clusters are positioned on the screen.",
