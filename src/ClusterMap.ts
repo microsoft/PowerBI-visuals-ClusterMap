@@ -739,10 +739,12 @@ export default class ClusterMap implements IVisual {
                 layout: {
                     layoutType: this.hasLinks ? this.settings.presentation.layout.toString() : 'orbital',
                     zoomControlsPosition: 'bottom-right',
+                    viewportMinZoomMultiplier: 0.15,
                 },
                 persona: {
                     selectedBorderColor: '#000000',
                     backgroundColor: 'rgb(73,73,73)',
+                    labelMinFontSize: 8,
                 }
             };
 
