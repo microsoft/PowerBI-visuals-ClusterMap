@@ -348,6 +348,8 @@ export default class ClusterMap implements IVisual {
                     this.personas.loadData(this.dataLayerStack[this.dataLayerStack.length - 1].data, false);
 
                     //this.otherPersona = this.personas.mOtherPersona;
+
+                    this.personas.displayBreadcrumbs = Object.keys(data.parentedPersonas).length > 0;
                 }
             }
 
