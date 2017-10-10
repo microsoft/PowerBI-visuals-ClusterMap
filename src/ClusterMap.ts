@@ -58,6 +58,14 @@ export default class ClusterMap implements IVisual {
     private static MAX_PERSONAS_DEFAULT: number = 20;
 
     /**
+     * Default maximum number of images to load.
+     *
+     * @type {number}
+     * @private
+     */
+    private static MAX_IMAGES_DEFAULT: number = 4;
+
+    /**
      * Default color for the persona gauge bars.
      *
      * @type {string}
@@ -84,6 +92,7 @@ export default class ClusterMap implements IVisual {
             layout: 'cola',
             //imageBlur: false,
             initialCount: ClusterMap.MAX_PERSONAS_DEFAULT,
+            imageCount: ClusterMap.MAX_IMAGES_DEFAULT,
             loadMoreCount: ClusterMap.LOAD_MORE_PERSONAS_STEP,
             normalColor: { solid: { color: ClusterMap.GAUGE_DEFAULT_COLOR } },
             selectedColor: { solid: { color: ClusterMap.SELECTED_GAUGE_DEFAULT_COLOR } }
@@ -112,6 +121,14 @@ export default class ClusterMap implements IVisual {
      * @private
      */
     private maxPersonas: number = this.settings.presentation.initialCount;
+
+    /**
+     * The maximum number of images to load.
+     *
+     * @type {number}
+     * @private
+     */
+    private maxImages: number = this.settings.presentation.imageCount;
 
     /**
      * Whether this visual has links between personas.
@@ -232,10 +249,14 @@ export default class ClusterMap implements IVisual {
                 const oldGaugeColor = this.settings.presentation.normalColor.solid.color;
                 $.extend(true, this.settings, newObjects);
                 this.settings.presentation.initialCount = Math.max(this.settings.presentation.initialCount, 1);
+                this.settings.presentation.imageCount = Math.max(this.settings.presentation.imageCount, 0);
                 this.settings.dataLoading.maxDataRows = Math.max(this.settings.dataLoading.maxDataRows, 1);
 
                 const maxPersonasChanged = (this.maxPersonas !== this.settings.presentation.initialCount);
                 this.maxPersonas = this.settings.presentation.initialCount;
+
+                const maxImagesChanged = (this.maxImages !== this.settings.presentation.imageCount);
+                this.maxImages = this.settings.presentation.imageCount;
 
                 const normalColorChanged = (oldGaugeColor !== this.settings.presentation.normalColor.solid.color);
 
@@ -246,7 +267,7 @@ export default class ClusterMap implements IVisual {
                     //this.personas.enableBlur(this.settings.presentation.imageBlur);
 
                     /* the update was triggered by a change in the settings, retrun if the max number of personas or the gauge color didn't change */
-                    if (!maxPersonasChanged && !normalColorChanged) {
+                    if (!maxPersonasChanged && !normalColorChanged && !maxImagesChanged) {
                         return;
                     }
                 }
@@ -358,6 +379,7 @@ export default class ClusterMap implements IVisual {
 
     public convert(dataView: DataView): any {
         const maxPersonas = this.maxPersonas;
+        const maxImages = this.maxImages;
         const metadata = dataView.metadata;
         const table = dataView.table;
         const highlights = (dataView.categorical &&
@@ -422,7 +444,7 @@ export default class ClusterMap implements IVisual {
                 }
 
                 const rawParent: any = columnIndices.ParentID.length ? row[columnIndices.ParentID[0]] : null;
-                const parent: string = rawParent !== null && rawParent !== undefined && rawParent.toString() !== ID ? rawParent.toString() : null;
+                const parent: string = rawParent !== null && rawParent !== undefined && rawParent !== 'null' && rawParent.toString() !== ID ? rawParent.toString() : null;
 
                 let name: string = rawName.toString();
                 if (defaultFormatter) {
@@ -494,7 +516,7 @@ export default class ClusterMap implements IVisual {
 
                 if (columnIndices.ImageUrl.length) {
                     columnIndices.ImageUrl.forEach(index => {
-                        if (persona.images.indexOf(row[index]) < 0) {
+                        if (persona.images.length < maxImages && persona.images.indexOf(row[index]) < 0) {
                             persona.images.push(row[index]);
                         }
                     });
@@ -518,29 +540,20 @@ export default class ClusterMap implements IVisual {
             this.buckets.sort();
 
             const personaKeys = Object.keys(personaMap);
-
-            /* find the min max -.- */
-            let minSize = Number.MAX_SAFE_INTEGER;
-            let maxSize = 0;
-
             personaKeys.sort((keyA, keyB) => personaMap[keyB].count - personaMap[keyA].count);
-            personaKeys.forEach(key => {
-                minSize = Math.min(minSize, personaMap[key].count);
-                maxSize = Math.max(maxSize, personaMap[key].count);
-            });
-
-            const sizeRange = maxSize - minSize;
 
             const newData = {
                 rootPersonas: {
                     personas: [],
+                    minSize: Number.MAX_SAFE_INTEGER,
+                    maxSize: 0,
                 },
                 parentedPersonas: {
 
                 },
             };
 
-            for (let i = 0, n = personaKeys.length; i < n && i < maxPersonas; ++i) {
+            for (let i = 0, n = personaKeys.length; i < n; ++i) {
                 const key = personaKeys[i];
                 const persona = personaMap[key];
 
@@ -562,10 +575,9 @@ export default class ClusterMap implements IVisual {
 
                 this._colorProperties(properties);
 
-                const scalingFactor = (persona.count - minSize) / sizeRange;
                 const processedPersona: any = {
                     id: persona.id,
-                    scalingFactor: isNaN(scalingFactor) ? 1 : scalingFactor,
+                    scalingFactor: 1,
                     totalCount: persona.count,
                     label: persona.label,
                     properties: properties,
@@ -579,16 +591,26 @@ export default class ClusterMap implements IVisual {
                 }
 
                 if (persona.parent === null) {
-                    newData.rootPersonas.personas.push(processedPersona);
+                    if (newData.rootPersonas.personas.length < maxPersonas) {
+                        newData.rootPersonas.personas.push(processedPersona);
+                        newData.rootPersonas.minSize = Math.min(newData.rootPersonas.minSize, processedPersona.totalCount);
+                        newData.rootPersonas.maxSize = Math.max(newData.rootPersonas.maxSize, processedPersona.totalCount);
+                    }
                 } else {
                     let parentedData: any = newData.parentedPersonas[persona.parent];
                     if (!parentedData) {
                         parentedData = {
                             personas: [],
+                            minSize: Number.MAX_SAFE_INTEGER,
+                            maxSize: 0,
                         };
                         newData.parentedPersonas[persona.parent] = parentedData;
                     }
-                    parentedData.personas.push(processedPersona);
+                    if (parentedData.personas.length < maxPersonas) {
+                        parentedData.personas.push(processedPersona);
+                        parentedData.minSize = Math.min(parentedData.minSize, processedPersona.totalCount);
+                        parentedData.maxSize = Math.max(parentedData.maxSize, processedPersona.totalCount);
+                    }
                 }
             }
 
@@ -602,6 +624,26 @@ export default class ClusterMap implements IVisual {
                     break;
                 }
             }
+
+            /* scale personas per level */
+            let minSize = newData.rootPersonas.minSize;
+            let sizeRange = newData.rootPersonas.maxSize - minSize;
+            let scalingFactor = 0;
+
+            newData.rootPersonas.personas.forEach(persona => {
+                scalingFactor = (persona.totalCount - minSize) / sizeRange;
+                persona.scalingFactor = isNaN(scalingFactor) ? 1 : scalingFactor;
+            });
+
+            Object.keys(newData.parentedPersonas).forEach(key => {
+                const parentedData = newData.parentedPersonas[key];
+                minSize = parentedData.minSize;
+                sizeRange = parentedData.maxSize - minSize;
+                parentedData.personas.forEach(persona => {
+                    scalingFactor = (persona.totalCount - minSize) / sizeRange;
+                    persona.scalingFactor = isNaN(scalingFactor) ? 1 : scalingFactor;
+                });
+            });
 
             if (highlights) {
                 const subSelectionData: any = { personas: [] };
