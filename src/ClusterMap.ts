@@ -33,6 +33,7 @@ import DataView = powerbi.DataView;
 import VisualObjectInstance = powerbi.VisualObjectInstance;
 import EnumerateVisualObjectInstancesOptions = powerbi.EnumerateVisualObjectInstancesOptions;
 import SQExprBuilder = powerbi.data.SQExprBuilder;
+import InputManager from '../lib/@uncharted/personas/src/revi/plugins/input/InputManager.js';
 
 import * as $ from 'jquery';
 import * as _ from 'lodash';
@@ -113,6 +114,8 @@ export default class ClusterMap implements IVisual {
     private data: any = null;
     private dataLayerStack: Array<any> = [];
     private buckets: Array<string> = [];
+
+    private isSandboxed: Boolean;
 
     /**
      * The maximum number of personas to load.
@@ -205,6 +208,7 @@ export default class ClusterMap implements IVisual {
         this.host = options.host;
         this.selectionManager = options.host.createSelectionManager();
         this.hostServices = (this.selectionManager as any).hostServices; // `hostServices` is now what we used to call `host`
+        this.isSandboxed = this.hostServices['messageProxy'];
     }
 
     /**
@@ -229,10 +233,7 @@ export default class ClusterMap implements IVisual {
         if (this.personas) {
             if (options.type & powerbi.VisualUpdateType.Resize) {
                 this.personas.resize(viewport.width, viewport.height);
-
-                if (viewport.hasOwnProperty('scale')) {
-                    this.personas.deviceScale = viewport.scale * 2;
-                }
+                this._updateScale(viewport);
             } else if (options.type & powerbi.VisualUpdateType.ResizeEnd) {
                 this.personas.autoZoom();
             }
@@ -385,9 +386,9 @@ export default class ClusterMap implements IVisual {
         const metadata = dataView.metadata;
         const table = dataView.table;
         const highlights = (dataView.categorical &&
-                            dataView.categorical.values &&
-                            dataView.categorical.values.length &&
-                            dataView.categorical.values[0].highlights);
+        dataView.categorical.values &&
+        dataView.categorical.values.length &&
+        dataView.categorical.values[0].highlights);
 
         if (table && table.columns.length > 0 && table.rows.length > 0) {
             const columnIndices = {
@@ -745,7 +746,7 @@ export default class ClusterMap implements IVisual {
                     selectedBorderColor: '#000000',
                     backgroundColor: 'rgb(73,73,73)',
                     labelMinFontSize: 8,
-                }
+                },
             };
 
             this.personas = new Personas(this.element, personasOptions);
@@ -845,7 +846,7 @@ export default class ClusterMap implements IVisual {
             });
 
             this.personas.on(PersonaEvents.PERSONA_POINTER_OUT, sender => {
-                    sender.hideSubLevelBadge();
+                sender.hideSubLevelBadge();
             });
 
             this.personas.on(LayoutEvents.LAYOUT_BLANK_SPACE_CLICKED, () => {
@@ -891,6 +892,8 @@ export default class ClusterMap implements IVisual {
                     this.personas.highlight(this.subSelectionData, true);
                 }
             }
+
+            this._updateScale(viewport);
         }
     }
 
@@ -1064,6 +1067,14 @@ export default class ClusterMap implements IVisual {
                 rgb = selectedPalette[index];
                 properties[i].selectedColor = 'rgb(' + rgb.r + ',' + rgb.g + ',' + rgb.b + ')';
             }
+        }
+    }
+
+    private _updateScale(viewport) {
+        if (this.personas && viewport.hasOwnProperty('scale')) {
+            this.personas.deviceScale = viewport.scale * 2;
+            const inputManager = InputManager.instanceForContext(this.personas.mCanvas.reviContext);
+            inputManager.inputScale = this.isSandboxed ? 1 : viewport.scale;
         }
     }
 }
