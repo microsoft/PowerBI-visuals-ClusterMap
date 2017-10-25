@@ -67,6 +67,6 @@
     "webcola": "3.1.3"
   },
   "privateSubmodules": {
-    "@uncharted/personas": "0.6.0"
+    "@uncharted/personas": "0.6.1"
   }
 }
