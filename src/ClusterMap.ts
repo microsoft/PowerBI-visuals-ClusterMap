@@ -491,6 +491,7 @@ export default class ClusterMap implements IVisual {
                         links: null,
                         parent: parent,
                     };
+                    persona.count = isNaN(persona.count) ? null : persona.count;
                     personaMap[ID] = persona;
                 }
 
