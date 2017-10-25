@@ -1,10 +1,10 @@
 {
   "name": "ClusterMap",
-  "version": "0.6.1",
+  "version": "0.6.2",
   "description": "Cluster Map - PowerBI custom visual.",
   "main": "src/index.js",
   "scripts": {
-    "preinstall:prereq": "npm install tar.gz mv --save-dev",
+    "preinstall:prereq": "npm install targz mv --save-dev",
     "preinstall:submodules": "node bin/downloadPrivateSubmodules",
     "preinstall:dependencies": "node bin/installSubmoduleDeps",
     "preinstall": "npm run preinstall:prereq && npm run preinstall:submodules && npm run preinstall:dependencies",
@@ -55,7 +55,7 @@
     "serve-static": "^1.12.3",
     "sinon": "^2.4.1",
     "sinon-chai": "^2.12.0",
-    "tar.gz": "^1.0.5",
+    "targz": "^1.0.1",
     "ts-loader": "^2.3.2",
     "tslint": "^5.5.0",
     "tslint-loader": "^3.5.3",
@@ -65,5 +65,8 @@
   "dependencies": {
     "opentype.js": "^0.6.9",
     "webcola": "3.1.3"
+  },
+  "privateSubmodules": {
+    "@uncharted/personas": "0.6.0"
   }
 }
