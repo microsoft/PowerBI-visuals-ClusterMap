@@ -209,6 +209,8 @@ export default class ClusterMap implements IVisual {
         this.selectionManager = options.host.createSelectionManager();
         this.hostServices = (this.selectionManager as any).hostServices; // `hostServices` is now what we used to call `host`
         this.isSandboxed = this.hostServices['messageProxy'];
+
+        $(this.element).on('mousedown pointerdown', (e) => e.stopPropagation());
     }
 
     /**
