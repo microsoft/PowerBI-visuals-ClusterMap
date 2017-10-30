@@ -27,6 +27,7 @@ import IVisual = powerbi.extensibility.v110.IVisual;
 import VisualConstructorOptions = powerbi.extensibility.v110.VisualConstructorOptions;
 import VisualUpdateOptions = powerbi.VisualUpdateOptions;
 import ISelectionManager = powerbi.extensibility.ISelectionManager;
+import ISelectionIdBuilder = powerbi.extensibility.ISelectionIdBuilder;
 import IVisualHost = powerbi.extensibility.v110.IVisualHost;
 import IVisualHostServices = powerbi.IVisualHostServices;
 import DataView = powerbi.DataView;
@@ -435,7 +436,7 @@ export default class ClusterMap implements IVisual {
 
             this.buckets.length = 0;
 
-            table.rows.forEach(row => {
+            table.rows.forEach((row, rowIndex) => {
                 let ID: string;
                 let rawName: any;
                 let count: number;
@@ -487,7 +488,7 @@ export default class ClusterMap implements IVisual {
                         properties: [],
                         images: [],
                         color: this.settings.presentation.normalColor.solid.color,
-                        select: SQExprBuilder.equal(idColumnMetadata.expr, SQExprBuilder.typedConstant(row[columnIndices.ID[0]], idColumnMetadata.type)),
+                        select: this.host.createSelectionIdBuilder().withCategory(dataView.categorical.categories[0], rowIndex).createSelectionId(),//SQExprBuilder.equal(idColumnMetadata.expr, SQExprBuilder.typedConstant(row[columnIndices.ID[0]], idColumnMetadata.type)),
                         links: null,
                         parent: parent,
                     };
@@ -763,10 +764,8 @@ export default class ClusterMap implements IVisual {
                     const personaData = this.dataLayerStack[this.dataLayerStack.length - 1].data.personas.find(p => p.id === sender.id);
                     const properties = [];
                     if (personaData) {
-                        const selectArgs: any = {
-                            data: [{data: [powerbi.data.createDataViewScopeIdentity(personaData.select)]}],
-                        };
-                        this.hostServices.onSelect(selectArgs);
+                        const selectArgs = [personaData.select];
+                        this.selectionManager.select(selectArgs);
                         this.lastSelectionArgs = selectArgs;
                         this.personas.personas.forEach(wrapper => {
                             if (wrapper.object !== sender) {
@@ -808,7 +807,7 @@ export default class ClusterMap implements IVisual {
                     });
                     this.personas.unhighlight();
                     if (this.dataLayerStack[this.dataLayerStack.length - 1].select) {
-                        this.hostServices.onSelect(this.dataLayerStack[this.dataLayerStack.length - 1].select);
+                        this.selectionManager.select(this.dataLayerStack[this.dataLayerStack.length - 1].select);
                         this.lastSelectionArgs = this.dataLayerStack[this.dataLayerStack.length - 1].select;
                     }
                 }
@@ -817,10 +816,9 @@ export default class ClusterMap implements IVisual {
             this.personas.on(PersonaEvents.PERSONA_SUB_LEVEL_CLICKED, sender => {
                 const personaData = this.dataLayerStack[this.dataLayerStack.length - 1].data.personas.find(p => p.id === sender.id);
                 if (personaData) {
-                    const selectArgs:any = {
-                        data: [{data: [powerbi.data.createDataViewScopeIdentity(personaData.select)]}],
-                    };
-                    this.hostServices.onSelect(selectArgs);
+                    const selectArgs = [personaData.select];
+                    this.selectionManager.clear();
+                    this.selectionManager.select(selectArgs);
                     this.lastSelectionArgs = selectArgs;
 
                     const subLayerData = this.data.parentedPersonas[sender.id];
@@ -861,7 +859,7 @@ export default class ClusterMap implements IVisual {
                 if (this.lastSelectionArgs !== this.dataLayerStack[this.dataLayerStack.length - 1].select || this.dataLayerStack[this.dataLayerStack.length - 1].select === null) {
                     this.selectionManager.clear();
                     if (this.dataLayerStack[this.dataLayerStack.length - 1].select) {
-                        this.hostServices.onSelect(this.dataLayerStack[this.dataLayerStack.length - 1].select);
+                        this.selectionManager.select(this.dataLayerStack[this.dataLayerStack.length - 1].select);
                         this.lastSelectionArgs = this.dataLayerStack[this.dataLayerStack.length - 1].select;
                     }
                 }
@@ -876,7 +874,7 @@ export default class ClusterMap implements IVisual {
                     this.dataLayerStack.splice(-toRemove, toRemove);
                     this.selectionManager.clear();
                     if (this.dataLayerStack[this.dataLayerStack.length - 1].select) {
-                        this.hostServices.onSelect(this.dataLayerStack[this.dataLayerStack.length - 1].select);
+                        this.selectionManager.select(this.dataLayerStack[this.dataLayerStack.length - 1].select);
                         this.lastSelectionArgs = this.dataLayerStack[this.dataLayerStack.length - 1].select;
                     }
                 }
