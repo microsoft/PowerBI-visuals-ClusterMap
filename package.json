@@ -3,6 +3,11 @@
   "version": "1.1.0",
   "description": "Cluster Map - PowerBI custom visual.",
   "main": "src/index.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Microsoft/PowerBI-visuals-ClusterMap"
+  },
+  "license": "MIT",
   "scripts": {
     "preinstall:prereq": "npm install targz mv --save-dev",
     "preinstall:submodules": "node bin/downloadPrivateSubmodules",
@@ -21,7 +26,6 @@
   "config": {},
   "keywords": [],
   "author": "Microsoft (experimental)",
-  "license": "https://raw.githubusercontent.com/Microsoft/PowerBI-visuals-ClusterMap/master/LICENSE",
   "privacyTerms": "https://privacy.microsoft.com/en-US/privacystatement/",
   "devDependencies": {
     "@types/jquery": "^3.2.10",
@@ -30,6 +34,7 @@
     "@types/requirejs": "^2.1.30",
     "@types/sinon": "^2.3.3",
     "@types/sinon-chai": "^2.7.28",
+    "ajv": "^5.3.0",
     "chai": "^4.1.0",
     "chokidar": "^1.7.0",
     "clean-css": "^4.1.7",
@@ -60,7 +65,7 @@
     "tslint": "^5.5.0",
     "tslint-loader": "^3.5.3",
     "typescript": "^2.4.2",
-    "webpack": "^1.13.3"
+    "webpack": "^3.4.1"
   },
   "dependencies": {
     "opentype.js": "^0.6.9",

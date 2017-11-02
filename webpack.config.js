@@ -6,16 +6,10 @@ const regex = path.normalize(ENTRY).replace(/\\/g, '\\\\').replace(/\./g, '\\.')
 module.exports = {
     entry: ENTRY,
     devtool: 'eval',
-    resolve: {
-        extensions: ['', '.webpack.js', '.web.js', '.js', '.ts']
-    },
+    // resolve: {
+    //     extensions: ['', '.webpack.js', '.web.js', '.js', '.ts']
+    // },
     module: {
-        preLoaders: [
-            {
-                test: /\.ts$/,
-                loader: "tslint"
-            }
-        ],
         loaders: [
             {
                 test: new RegExp(regex),
@@ -25,13 +19,12 @@ module.exports = {
                 test: /\.ts?$/,
                 loader: 'ts-loader',
             },
-            { test: /\.handlebars$/, loader: "handlebars-loader" },
         ]
     },
     externals: [
         {
             jquery: "jQuery",
-            lodash: "_"
+            "lodash": "_"
         },
-    ],
+    ]
 };

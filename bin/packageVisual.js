@@ -37,6 +37,10 @@ const capabilities = require(path.join('..', pbivizJson.capabilities));
 const webpackConfig = require('../webpack.config');
 const buildOSSReport = require('./buildOSSReport.js');
 
+const config = {
+    sassPaths: ['lib/@uncharted/strippets/sass'],
+};
+
 const packagingWebpackConfig = {
     //tslint: {
     //    emitErrors: true,
@@ -145,7 +149,7 @@ const _buildPackageJson = () => {
 const buildPackageJson = pbivizJson.apiVersion ? _buildPackageJson() : _buildLegacyPackageJson();
 
 const compileSass = () => {
-    const sassOutput = sass.renderSync({ file: pbivizJson.style }).css.toString();
+    const sassOutput = sass.renderSync({ file: pbivizJson.style, includePaths: config.sassPaths }).css.toString();
     const options = { level: { 2: { all: true } } };
     const cssContent = new CleanCSS(options).minify(sassOutput).styles;
     return cssContent;

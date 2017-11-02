@@ -41,7 +41,7 @@ import * as _ from 'lodash';
 
 import { Personas, PersonaEvents, BreadcrumbEvents, LayoutEvents } from '../lib/@uncharted/personas/src/Personas.js';
 
-export default class ClusterMap1652434605854 implements IVisual {
+export default class ClusterMap implements IVisual {
 
     /**
      * Default number of personas to load when paginating.
@@ -93,18 +93,18 @@ export default class ClusterMap1652434605854 implements IVisual {
         presentation: {
             layout: 'cola',
             // imageBlur: false,
-            initialCount: ClusterMap1652434605854.MAX_PERSONAS_DEFAULT,
-            imageCount: ClusterMap1652434605854.MAX_IMAGES_DEFAULT,
-            loadMoreCount: ClusterMap1652434605854.LOAD_MORE_PERSONAS_STEP,
-            normalColor: { solid: { color: ClusterMap1652434605854.GAUGE_DEFAULT_COLOR } },
-            selectedColor: { solid: { color: ClusterMap1652434605854.SELECTED_GAUGE_DEFAULT_COLOR } }
+            initialCount: ClusterMap.MAX_PERSONAS_DEFAULT,
+            imageCount: ClusterMap.MAX_IMAGES_DEFAULT,
+            loadMoreCount: ClusterMap.LOAD_MORE_PERSONAS_STEP,
+            normalColor: { solid: { color: ClusterMap.GAUGE_DEFAULT_COLOR } },
+            selectedColor: { solid: { color: ClusterMap.SELECTED_GAUGE_DEFAULT_COLOR } }
         },
         dataLoading: {
             maxDataRows: 20000
         },
     };
 
-    private settings: any = $.extend(true, {}, ClusterMap1652434605854.DEFAULT_SETTINGS);
+    private settings: any = $.extend(true, {}, ClusterMap.DEFAULT_SETTINGS);
 
     private element: any;
     private host: IVisualHost;
