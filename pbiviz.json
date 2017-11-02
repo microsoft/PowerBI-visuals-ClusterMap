@@ -3,7 +3,7 @@
     "name": "ClusterMap",
     "displayName": "Cluster Map",
     "guid": "ClusterMap1652434605854",
-    "visualClassName": "ClusterMap",
+    "visualClassName": "ClusterMap1652434605854",
     "description": "This visual is currently in beta testing and is undergoing active development. Cluster Map displays labeled groups of related documents using image mosaics. Clusters can be arranged in a “spiral” layout around a dominant cluster or in a “relational” layout in which clusters are arranged by degree of relatedness.  Click a cluster to invoke highlighting in linked visuals, or invoke highlighting from a linked visual to see the proportion of documents in each cluster that match the highlight criteria. Cluster Map is designed for use with Facet Key and Strippet Browser.",
     "supportUrl": "http://community.powerbi.com",
     "gitHubUrl": "https://github.com/Microsoft/PowerBI-visuals-ClusterMap"
@@ -12,7 +12,7 @@
     "name": "Microsoft (experimental)",
     "email": "msrvizsupport@microsoft.com"
   },
-  "apiVersion": "1.1.0",
+  "apiVersion": "",
   "assets": {
     "icon": "assets/icon.svg",
     "thumbnail": "assets/thumbnail.png",

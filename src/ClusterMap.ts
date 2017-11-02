@@ -41,7 +41,7 @@ import * as _ from 'lodash';
 
 import { Personas, PersonaEvents, BreadcrumbEvents, LayoutEvents } from '../lib/@uncharted/personas/src/Personas.js';
 
-export default class ClusterMap implements IVisual {
+export default class ClusterMap1652434605854 implements IVisual {
 
     /**
      * Default number of personas to load when paginating.
@@ -92,19 +92,19 @@ export default class ClusterMap implements IVisual {
     private static DEFAULT_SETTINGS: any = {
         presentation: {
             layout: 'cola',
-            //imageBlur: false,
-            initialCount: ClusterMap.MAX_PERSONAS_DEFAULT,
-            imageCount: ClusterMap.MAX_IMAGES_DEFAULT,
-            loadMoreCount: ClusterMap.LOAD_MORE_PERSONAS_STEP,
-            normalColor: { solid: { color: ClusterMap.GAUGE_DEFAULT_COLOR } },
-            selectedColor: { solid: { color: ClusterMap.SELECTED_GAUGE_DEFAULT_COLOR } }
+            // imageBlur: false,
+            initialCount: ClusterMap1652434605854.MAX_PERSONAS_DEFAULT,
+            imageCount: ClusterMap1652434605854.MAX_IMAGES_DEFAULT,
+            loadMoreCount: ClusterMap1652434605854.LOAD_MORE_PERSONAS_STEP,
+            normalColor: { solid: { color: ClusterMap1652434605854.GAUGE_DEFAULT_COLOR } },
+            selectedColor: { solid: { color: ClusterMap1652434605854.SELECTED_GAUGE_DEFAULT_COLOR } }
         },
         dataLoading: {
             maxDataRows: 20000
         },
     };
 
-    private settings: any = $.extend(true, {}, ClusterMap.DEFAULT_SETTINGS);
+    private settings: any = $.extend(true, {}, ClusterMap1652434605854.DEFAULT_SETTINGS);
 
     private element: any;
     private host: IVisualHost;
@@ -268,7 +268,7 @@ export default class ClusterMap implements IVisual {
                     /* set the layout type in personas */
                     this.personas.layoutType = this.hasLinks ? this.settings.presentation.layout : 'orbital';
                     /* set the blur for the images */
-                    //this.personas.enableBlur(this.settings.presentation.imageBlur);
+                    // this.personas.enableBlur(this.settings.presentation.imageBlur);
 
                     /* the update was triggered by a change in the settings, retrun if the max number of personas or the gauge color didn't change */
                     if (!maxPersonasChanged && !normalColorChanged && !maxImagesChanged) {
@@ -344,14 +344,14 @@ export default class ClusterMap implements IVisual {
                 this.data = data;
                 if (this.personas) {
                     this.lastSelectionArgs = null;
-                    this.dataLayerStack.length = 0
+                    this.dataLayerStack.length = 0;
                     this.dataLayerStack.push({
                         data: this.data.rootPersonas,
                         select: null,
                     });
                     this.personas.loadData(this.dataLayerStack[this.dataLayerStack.length - 1].data, false);
 
-                    //this.otherPersona = this.personas.mOtherPersona;
+                    // this.otherPersona = this.personas.mOtherPersona;
 
                     this.personas.displayBreadcrumbs = Object.keys(data.parentedPersonas).length > 0;
                 }
@@ -395,15 +395,15 @@ export default class ClusterMap implements IVisual {
 
         if (table && table.columns.length > 0 && table.rows.length > 0) {
             const columnIndices = {
-                "ID": [],
-                "Name": [],
-                "Count": [],
-                "Bucket": [],
-                "ImageUrl": [],
-                "BackgroundColor": [],
-                "LinkTo": [],
-                "LinkWeight": [],
-                "ParentID": [],
+                'ID': [],
+                'Name': [],
+                'Count': [],
+                'Bucket': [],
+                'ImageUrl': [],
+                'BackgroundColor': [],
+                'LinkTo': [],
+                'LinkWeight': [],
+                'ParentID': [],
             };
 
             const columnNames = Object.keys(columnIndices);
@@ -445,7 +445,7 @@ export default class ClusterMap implements IVisual {
                     ID = row[columnIndices.ID[0]].toString();
                     rawName = row[columnIndices.Name[0]];
                     count = row[columnIndices.Count[0]] as number;
-                } catch(e) {
+                } catch (e) {
                     return;
                 }
 
@@ -488,7 +488,7 @@ export default class ClusterMap implements IVisual {
                         properties: [],
                         images: [],
                         color: this.settings.presentation.normalColor.solid.color,
-                        select: this.host.createSelectionIdBuilder().withCategory(dataView.categorical.categories[0], rowIndex).createSelectionId(),//SQExprBuilder.equal(idColumnMetadata.expr, SQExprBuilder.typedConstant(row[columnIndices.ID[0]], idColumnMetadata.type)),
+                        // select: this.host.createSelectionIdBuilder().withCategory(dataView.categorical.categories[0], rowIndex).createSelectionId(),//SQExprBuilder.equal(idColumnMetadata.expr, SQExprBuilder.typedConstant(row[columnIndices.ID[0]], idColumnMetadata.type)),
                         links: null,
                         parent: parent,
                     };
