@@ -37,15 +37,7 @@ const capabilities = require(path.join('..', pbivizJson.capabilities));
 const webpackConfig = require('../webpack.config');
 const buildOSSReport = require('./buildOSSReport.js');
 
-const config = {
-    sassPaths: ['lib/@uncharted/strippets/sass'],
-};
-
 const packagingWebpackConfig = {
-    //tslint: {
-    //    emitErrors: true,
-    //    failOnHint: true
-    //},
     output: {
         filename: 'visual.js', path: '/'
     }
@@ -149,8 +141,15 @@ const _buildPackageJson = () => {
 const buildPackageJson = pbivizJson.apiVersion ? _buildPackageJson() : _buildLegacyPackageJson();
 
 const compileSass = () => {
-    const sassOutput = sass.renderSync({ file: pbivizJson.style, includePaths: config.sassPaths }).css.toString();
-    const options = { level: { 2: { all: true } } };
+    const sassOutput = sass.renderSync({ file: pbivizJson.style }).css.toString();
+    const options = { 
+        level: { 
+            2: {
+                all: true,
+                mergeNonAdjacentRules: false,
+            },
+        },
+    };
     const cssContent = new CleanCSS(options).minify(sassOutput).styles;
     return cssContent;
 };
@@ -185,7 +184,6 @@ const _buildLegacyPackage = (fileContent) => {
     const iconType = pbivizJson.assets.icon.indexOf('.svg') >= 0 ? 'svg+xml' : 'png';
     const iconBase64 = `data:image/${iconType};base64,` + icon.toString('base64');
     const cssContent = compileSass() + `\n.visual-icon.${pbivizJson.visual.guid} {background-image: url(${iconBase64});}`;
-
     zip.file('package.json', JSON.stringify(buildPackageJson, null, 2));
     zip.file(`resources/${pbivizJson.visual.guid}.js`, fileContent);
     zip.file(`resources/${pbivizJson.visual.guid}.ts`, `/** See ${pbivizJson.visual.guid}.js **/`);

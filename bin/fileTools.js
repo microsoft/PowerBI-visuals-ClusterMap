@@ -21,7 +21,6 @@
  * SOFTWARE.
  */
 
-"use strict";
 
 const fs = require('fs');
 const path = require('path');
@@ -34,11 +33,11 @@ const fileTools = {
      * @param {String} filePath - The path to the file to check.
      * @returns {boolean}
      */
-    pathExists: function(filePath) {
+    pathExists: function (filePath) {
         try {
             fs.accessSync(filePath, fs.F_OK);
             return true;
-        } catch (err) {}
+        } catch (err) { }
         return false;
     },
 
@@ -49,8 +48,8 @@ const fileTools = {
      * @param {String} folder - The path to the folder to iterate.
      * @param {Function} onEntry - A callback with signature (entryPath, entryName) => {}
      */
-    findEntriesInFolder: function(folder, onEntry) {
-        if(onEntry && fileTools.pathExists(folder) && fs.lstatSync(folder).isDirectory()) {
+    findEntriesInFolder: function (folder, onEntry) {
+        if (onEntry && fileTools.pathExists(folder) && fs.lstatSync(folder).isDirectory()) {
             fs.readdirSync(folder).forEach(entry => {
                 onEntry(path.join(folder, entry), entry);
             });
@@ -63,16 +62,20 @@ const fileTools = {
      * @method deleteFolder
      * @param {String} folderPath - The path to the folder to delete.
      */
-    deleteFolder: function(folderPath) {
-        if(fileTools.pathExists(folderPath)) {
-            fileTools.findEntriesInFolder(folderPath, entry => {
-                if(fs.lstatSync(entry).isDirectory()) { // recurse
-                    fileTools.deleteFolder(entry);
-                } else { // delete file
-                    fs.unlinkSync(entry);
-                }
-            });
-            fs.rmdirSync(folderPath);
+    deleteFolder: function (folderPath) {
+        try {
+            if (fileTools.pathExists(folderPath)) {
+                fileTools.findEntriesInFolder(folderPath, entry => {
+                    if (fs.lstatSync(entry).isDirectory()) { // recurse
+                        fileTools.deleteFolder(entry);
+                    } else { // delete file
+                        fs.unlinkSync(entry);
+                    }
+                });
+                fs.rmdirSync(folderPath);
+            }
+        } catch (err) {
+            console.log('deleteFolder: ' + err);
         }
     },
 
@@ -82,11 +85,16 @@ const fileTools = {
      * @method createFilePath
      * @param {String} filePath - The path to create.
      */
-    createFilePath: function(filePath) {
-        const folderPath = path.dirname(filePath);
-        if (!fileTools.pathExists(folderPath)) {
-            fileTools.createFilePath(folderPath);
-            fs.mkdirSync(folderPath);
+    createFilePath: function (filePath) {
+        try {
+            const folderPath = path.dirname(filePath);
+            if (!fileTools.pathExists(folderPath)) {
+                fileTools.createFilePath(folderPath);
+                fs.mkdirSync(folderPath, '0777');
+            }
+        }
+        catch (err) {
+            console.log(err);
         }
     }
 };

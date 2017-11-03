@@ -65,7 +65,7 @@ const patchAPI = function (version) {
             }
 
             var proxy = {
-                update: function(/*...*/) {
+                update: function (/*...*/) {
                     var args = Array.prototype.slice.call(arguments);
 
                     if (proxy.options) {
@@ -87,7 +87,7 @@ const patchAPI = function (version) {
             var overloadedProxy = overloads ? overloads(proxy, host) : proxy;
 
             return {
-                update: function(options) {
+                update: function (options) {
                     if (visual.update) {
                         proxy.options = options;
                         overloadedProxy.update(options);
@@ -107,7 +107,7 @@ const patchAPI = function (version) {
     }
 };
 
-const patchCapabilities = function(capabilities) {
+const patchCapabilities = function (capabilities) {
     if (capabilities.objects) {
         var objects = capabilities.objects;
         for (var objectKey in objects) {
@@ -130,7 +130,7 @@ const patchCapabilities = function(capabilities) {
     return capabilities;
 };
 
-function pbivizPluginTemplate (pbiviz) {
+function pbivizPluginTemplate(pbiviz) {
     return `(function (powerbi) {
         var visuals;
         (function (visuals) {
@@ -144,14 +144,24 @@ function pbivizPluginTemplate (pbiviz) {
                     displayName: '${pbiviz.visual.name}',
                     class: '${pbiviz.visual.visualClassName}',
                     version: '${packageJson.version}',
-                    apiVersion: ${pbiviz.apiVersion ? `'${pbiviz.apiVersion}'` : undefined },
+                    apiVersion: ${pbiviz.apiVersion ? `'${pbiviz.apiVersion}'` : undefined},
                     capabilities: ${pbiviz.apiVersion ? '{}' : 'patchCapabilities(' + `${JSON.stringify(capabilitiesJson)}` + ')'},
                     create: function (/*options*/) {
                         var instance = Object.create(${pbiviz.visual.visualClassName}.prototype);
                         ${pbiviz.apiVersion ?
-                            `${pbiviz.visual.visualClassName}.apply(instance, arguments);`
-                        :
-                            `var oldInit = instance.init;
+            `${pbiviz.visual.visualClassName}.apply(instance, arguments);`
+            :
+            `
+                            var adapter = this;
+                            var originalUpdate = adapter.update;
+                            var originalOptions = null;
+
+                            adapter.update = function (options) {
+                                originalOptions = powerbi.Prototype.inherit(options);
+                                originalUpdate.call(adapter, options);
+                            }
+
+                            var oldInit = instance.init;
                             instance.init = function(options) {
                                 instance.init = oldInit;
                                 var adaptedOptions = {
@@ -165,9 +175,9 @@ function pbivizPluginTemplate (pbiviz) {
                                 };
                                 ${pbiviz.visual.visualClassName}.call(instance, adaptedOptions);
 
-                                instance.update = function(options) {
-                                    options.type = powerbi.extensibility.v100.convertLegacyUpdateType(options);
-                                    ${pbiviz.visual.visualClassName}.prototype.update.call(instance, options);
+                                instance.update = function(/* options */) {
+                                    originalOptions.type = powerbi.extensibility.v100.convertLegacyUpdateType(originalOptions);
+                                    ${pbiviz.visual.visualClassName}.prototype.update.call(instance, originalOptions);
                                 }
                             }`
         }
@@ -191,7 +201,7 @@ function pbivizPluginTemplate (pbiviz) {
 /**
  * Webpack loader function that appends pbiviz plugin code at the end of the provided source
  */
-function pluginLoader (source, map) {
+function pluginLoader(source, map) {
     this.cacheable();
     source = source + '\n' + pbivizPluginTemplate(pbiviz);
     this.callback(null, source, map);
