@@ -21,7 +21,23 @@ module.exports = function(config) {
                 loaders: [
                     {
                         test: /\.ts?$/,
-                        loader: 'ts-loader',
+                        loaders: [{
+                            loader: 'babel-loader',
+                            options: {
+                                presets: [
+                                    ['latest', {es2015: {modules: false}}],
+                                ],
+                            },
+                        }, 'ts-loader'],
+                    },
+                    {
+                        test: /\.js?$/,
+                        loader: 'babel-loader',
+                        options: {
+                            presets: [
+                                [ 'latest', { es2015: { modules: false } } ],
+                            ],
+                        },
                     },
                 ]
             },
