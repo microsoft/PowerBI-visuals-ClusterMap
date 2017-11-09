@@ -21,8 +21,12 @@
   "config": {},
   "keywords": [],
   "author": "Microsoft (experimental)",
-  "license": "https://raw.githubusercontent.com/Microsoft/PowerBI-visuals-ClusterMap/master/LICENSE",
+  "license": "SEE LICENSE IN LICENSE",
   "privacyTerms": "https://privacy.microsoft.com/en-US/privacystatement/",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Microsoft/PowerBI-visuals-ClusterMap"
+  },
   "devDependencies": {
     "@types/jquery": "^3.2.10",
     "@types/lodash": "^4.14.71",
