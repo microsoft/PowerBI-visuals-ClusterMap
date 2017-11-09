@@ -4,7 +4,7 @@ const ENTRY = './src/ClusterMap.ts';
 const regex = path.normalize(ENTRY).replace(/\\/g, '\\\\').replace(/\./g, '\\.');
 
 module.exports = {
-    entry: ENTRY,
+    entry: ['babel-polyfill', ENTRY],
     devtool: 'eval',
     // resolve: {
     //     extensions: ['', '.webpack.js', '.web.js', '.js', '.ts']
@@ -17,7 +17,23 @@ module.exports = {
             },
             {
                 test: /\.ts?$/,
-                loader: 'ts-loader',
+                loaders: [{
+                    loader: 'babel-loader',
+                    options: {
+                        presets: [
+                            ['latest', {es2015: {modules: false}}],
+                        ],
+                    },
+                }, 'ts-loader'],
+            },
+            {
+                test: /\.js?$/,
+                loader: 'babel-loader',
+                options: {
+                    presets: [
+                        [ 'latest', { es2015: { modules: false } } ],
+                    ],
+                },
             },
         ]
     },
