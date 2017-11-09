@@ -145,5 +145,6 @@
     }
   },
 
-  "supportsHighlight": true
+  "supportsHighlight": true,
+  "suppressDefaultTitle": true
 }
