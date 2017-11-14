@@ -102,6 +102,9 @@ export default class ClusterMap implements IVisual {
         dataLoading: {
             maxDataRows: 20000
         },
+        general: {
+            displayBuildVersion: false,
+        },
     };
 
     private settings: any = $.extend(true, {}, ClusterMap.DEFAULT_SETTINGS);
@@ -199,6 +202,14 @@ export default class ClusterMap implements IVisual {
     private ignoreSelectionNextUpdate: boolean = false;
 
     /**
+     * Element that will hold the build information of this visual.
+     *
+     * @type {any}
+     * @private
+     */
+    private buildInfo: any;
+
+    /**
      * @constructor
      * @param {VisualConstructorOptions} options - The PowerBI options for this visual's initialization.
      */
@@ -212,6 +223,18 @@ export default class ClusterMap implements IVisual {
         this.isSandboxed = this.hostServices['messageProxy'];
 
         $(this.element).on('mousedown pointerdown', (e) => e.stopPropagation());
+
+        this.buildInfo = document.createElement('div');
+        this.buildInfo.innerText = (this as any).__essex_build_info__;
+
+        this.buildInfo.style.position = 'absolute';
+        this.buildInfo.style.bottom = 0;
+        this.buildInfo.style.left = 0;
+        this.buildInfo.style.color = '#888888';
+        this.buildInfo.style.fontSize = '10px';
+        this.buildInfo.style.visibility = 'hidden';
+
+        this.element.parentNode.appendChild(this.buildInfo);
     }
 
     /**
@@ -255,6 +278,8 @@ export default class ClusterMap implements IVisual {
                 this.settings.presentation.initialCount = Math.max(this.settings.presentation.initialCount, 1);
                 this.settings.presentation.imageCount = Math.max(this.settings.presentation.imageCount, 0);
                 this.settings.dataLoading.maxDataRows = Math.max(this.settings.dataLoading.maxDataRows, 1);
+
+                this.buildInfo.style.visibility = this.settings.general.displayBuildVersion ? 'visible' : 'hidden';
 
                 const maxPersonasChanged = (this.maxPersonas !== this.settings.presentation.initialCount);
                 this.maxPersonas = this.settings.presentation.initialCount;
