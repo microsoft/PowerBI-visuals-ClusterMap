@@ -888,10 +888,13 @@ export default class ClusterMap implements IVisual {
                     select: null
                 });
                 this.personas.loadData(this.dataLayerStack[this.dataLayerStack.length - 1].data, false);
+                this.personas.displayBreadcrumbs = Object.keys(this.data.parentedPersonas).length > 0;
                 if (this.subSelectionData) {
                     this.lastSelectionArgs = null;
                     this.personas.highlight(this.subSelectionData, true);
                 }
+            } else {
+                this.element.style.visibility = 'hidden';
             }
 
             this._updateScale(viewport);
