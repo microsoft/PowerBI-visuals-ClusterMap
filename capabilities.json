@@ -1,37 +1,37 @@
 {
   "dataRoles": [
     {
-      "name": "ID",
+      "name": "PersonaGroup",
       "kind": 0,
       "displayName": "Cluster ID",
       "description": "A unique ID that identifies each cluster."
     }, {
-      "name": "Name",
+      "name": "ReferenceName",
       "kind": 0,
       "displayName": "Label",
       "description": "A label to display on top of each cluster."
     }, {
-      "name": "Count",
+      "name": "ReferenceCount",
       "kind": 1,
       "displayName": "Count",
       "description": "The number of members of this cluster."
     }, {
-      "name": "Bucket",
+      "name": "ReferenceBucket",
       "kind": 0,
       "displayName": "Segmented By",
       "description": "Optional values to be used to segment the members of this cluster in groups."
     }, {
-      "name": "ImageUrl",
+      "name": "ReferenceImageUrl",
       "kind": 0,
       "displayName": "Image Url",
       "description": "Up to four optional images to display as the cluster's background."
     }, {
-      "name": "LinkTo",
+      "name": "ReferenceLinkTo",
       "kind": 0,
       "displayName": "Related To",
       "description": "Optional IDs of other clusters related to this cluster."
     }, {
-      "name": "LinkWeight",
+      "name": "ReferenceLinkWeight",
       "kind": 0,
       "displayName": "Relatedness Strength",
       "description": "Optional strength of the link between this cluster and the other clusters it is related to."
@@ -45,31 +45,31 @@
   "dataViewMappings": [{
     "conditions": [
       {
-        "ID": {"max": 1},
-        "Name": {"max": 1},
-        "Count": {"max": 1},
-        "Bucket": {"max": 1},
-        "ImageUrl": {"max": 4},
-        "BackgroundColor": {"max": 1},
-        "LinkTo": {"max": 1},
-        "LinkWeight": {"max": 1},
+        "PersonaGroup": {"max": 1},
+        "ReferenceName": {"max": 1},
+        "ReferenceCount": {"max": 1},
+        "ReferenceBucket": {"max": 1},
+        "ReferenceImageUrl": {"max": 4},
+        "ReferenceBackgroundColor": {"max": 1},
+        "ReferenceLinkTo": {"max": 1},
+        "ReferenceLinkWeight": {"max": 1},
         "ParentID": {"max": 1}
       }
     ],
     "categorical": {
       "categories": {
-        "for": {"in": "ID"},
+        "for": {"in": "PersonaGroup"},
         "dataReductionAlgorithm": {"window": {"count": 500000}}
       },
       "values": {
         "select": [
-          {"for": {"in": "Name"}},
-          {"for": {"in": "Count"}},
-          {"for": {"in": "Bucket"}},
-          {"for": {"in": "ImageUrl"}},
-          {"for": {"in": "BackgroundColor"}},
-          {"for": {"in": "LinkTo"}},
-          {"for": {"in": "LinkWeight"}},
+          {"for": {"in": "ReferenceName"}},
+          {"for": {"in": "ReferenceCount"}},
+          {"for": {"in": "ReferenceBucket"}},
+          {"for": {"in": "ReferenceImageUrl"}},
+          {"for": {"in": "ReferenceBackgroundColor"}},
+          {"for": {"in": "ReferenceLinkTo"}},
+          {"for": {"in": "ReferenceLinkWeight"}},
           {"for": {"in": "ParentID"}}
         ],
         "dataReductionAlgorithm": {"window": {"count": 500000}}

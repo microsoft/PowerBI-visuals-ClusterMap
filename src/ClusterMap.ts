@@ -420,22 +420,34 @@ export default class ClusterMap implements IVisual {
 
         if (table && table.columns.length > 0 && table.rows.length > 0) {
             const columnIndices = {
-                "ID": [],
-                "Name": [],
-                "Count": [],
-                "Bucket": [],
-                "ImageUrl": [],
-                "BackgroundColor": [],
-                "LinkTo": [],
-                "LinkWeight": [],
-                "ParentID": [],
+                'ID': [],
+                'Name': [],
+                'Count': [],
+                'Bucket': [],
+                'ImageUrl': [],
+                'BackgroundColor': [],
+                'LinkTo': [],
+                'LinkWeight': [],
+                'ParentID': [],
             };
 
-            const columnNames = Object.keys(columnIndices);
+            const columnNameMappings = {
+                'PersonaGroup': 'ID',
+                'ReferenceName': 'Name',
+                'ReferenceCount': 'Count',
+                'ReferenceBucket': 'Bucket',
+                'ReferenceImageUrl': 'ImageUrl',
+                'ReferenceBackgroundColor': 'BackgroundColor',
+                'ReferenceLinkTo': 'LinkTo',
+                'ReferenceLinkWeight': 'LinkWeight',
+                'ParentID': 'ParentID',
+            };
+
+            const nameMappings = Object.keys(columnNameMappings);
             metadata.columns.forEach((column, i) => {
-                columnNames.forEach(name => {
+                nameMappings.forEach(name => {
                     if (column.roles[name]) {
-                        columnIndices[name].push(i);
+                        columnIndices[columnNameMappings[name]].push(i);
                     }
                 });
             });
