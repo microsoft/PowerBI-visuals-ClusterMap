@@ -958,7 +958,7 @@ export default class ClusterMap implements IVisual {
      */
     private _decodeText(text: string): string {
         const txt: HTMLTextAreaElement = document.createElement('textarea');
-        txt.innerHTML = text;
+        txt.textContent = text;
         return txt.value;
     }
 
