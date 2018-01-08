@@ -3,9 +3,11 @@
     "target": "es6",
     "sourceMap": true,
     "allowJs": true,
-    "types": ["mocha", "sinon-chai", "requirejs"],
     "experimentalDecorators": true,
-    "lib": ["es2015", "DOM"],
+    "lib": [
+      "es2015",
+      "DOM"
+    ],
     "outDir": "generated"
   },
   "compileOnSave": false,
