@@ -37,6 +37,7 @@
 <a id="colaLayout" href="javascript:void(0);">Set layout type to "cola" (Force graph)</a><br />
 <a id="setZoom" href="javascript:void(0);">Set Current Zoom Level</a><br />
 <a id="logZoom" href="javascript:void(0);">Log Current Zoom Level</a><br />
+<div style='font-family: "Oswald"'>Hello World! - 你好，世界</div>
 
 <script type="text/javascript">
     document.addEventListener("DOMContentLoaded", function() {
@@ -61,7 +62,7 @@
                 for (var i = 0, n = personas.personas.length; i < n; ++i) {
                     personas.personas[i].object.selected = false;
                 }
-                
+
                 if (++tmp % 2) {
                     personas.addDataLayer(getExtraSampleData(), sender);
                 } else {
