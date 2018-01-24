@@ -5,10 +5,16 @@ const regex = path.normalize(ENTRY).replace(/\\/g, '\\\\').replace(/\./g, '\\.')
 
 module.exports = {
     entry: ['babel-polyfill', ENTRY],
+    plugins: [
+        new webpack.ProvidePlugin({
+            setImmediate: ['setimmediate', 'setImmedate'],
+            clearImmediate: ['setimmediate', 'clearImmedate'],
+            $: 'jquery',
+            jQuery: 'jquery',
+            _: 'lodash',
+        }),
+    ],
     devtool: 'eval',
-    // resolve: {
-    //     extensions: ['', '.webpack.js', '.web.js', '.js', '.ts']
-    // },
     module: {
         loaders: [
             {
@@ -37,10 +43,4 @@ module.exports = {
             },
         ]
     },
-    externals: [
-        {
-            jquery: "jQuery",
-            "lodash": "_"
-        },
-    ]
 };
