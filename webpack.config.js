@@ -7,8 +7,6 @@ module.exports = {
     entry: ['babel-polyfill', ENTRY],
     plugins: [
         new webpack.ProvidePlugin({
-            setImmediate: ['setimmediate', 'setImmedate'],
-            clearImmediate: ['setimmediate', 'clearImmedate'],
             $: 'jquery',
             jQuery: 'jquery',
             _: 'lodash',
