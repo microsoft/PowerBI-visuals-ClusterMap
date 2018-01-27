@@ -10,6 +10,8 @@ module.exports = {
             $: 'jquery',
             jQuery: 'jquery',
             _: 'lodash',
+            Promise: 'es6-promise',
+            Symbol: 'es6-symbol',
         }),
     ],
     devtool: 'eval',
