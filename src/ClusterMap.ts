@@ -36,9 +36,6 @@ import EnumerateVisualObjectInstancesOptions = powerbi.EnumerateVisualObjectInst
 import SQExprBuilder = powerbi.data.SQExprBuilder;
 import InputManager from '../lib/@uncharted/personas/src/revi/plugins/input/InputManager.js';
 
-import * as $ from 'jquery';
-import * as _ from 'lodash';
-
 import { Personas, PersonaEvents, BreadcrumbEvents, LayoutEvents } from '../lib/@uncharted/personas/src/Personas.js';
 
 // copied from powerbi.extensibility.utils.dataview

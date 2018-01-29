@@ -5,15 +5,6 @@ const regex = path.normalize(ENTRY).replace(/\\/g, '\\\\').replace(/\./g, '\\.')
 
 module.exports = {
     entry: ['babel-polyfill', ENTRY],
-    plugins: [
-        new webpack.ProvidePlugin({
-            $: 'jquery',
-            jQuery: 'jquery',
-            _: 'lodash',
-            Promise: 'es6-promise',
-            Symbol: 'es6-symbol',
-        }),
-    ],
     devtool: 'eval',
     module: {
         loaders: [
@@ -43,4 +34,10 @@ module.exports = {
             },
         ]
     },
+    externals: [
+        {
+            jquery: 'jQuery',
+            lodash: '_'
+        },
+    ],
 };
