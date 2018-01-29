@@ -22,6 +22,7 @@
  */
 
 /// <reference path="../node_modules/powerbi-visuals/lib/powerbi-visuals.d.ts"/>
+/// <reference path='../node_modules/powerbi-visuals-utils-formattingutils/lib/index.d.ts'/>
 
 import IVisual = powerbi.extensibility.v110.IVisual;
 import VisualConstructorOptions = powerbi.extensibility.v110.VisualConstructorOptions;
@@ -464,13 +465,13 @@ export default class ClusterMap implements IVisual {
             this.hasLinks = Boolean(columnIndices.LinkTo.length);
             this.hasBuckets = Boolean(columnIndices.Bucket.length);
 
-            const viz: any = powerbi.visuals;
+            const formatting = powerbi.extensibility.utils.formatting;
             const labelFormat = metadata.columns[columnIndices.Name[0]].format;
             const countFormat = metadata.columns[columnIndices.Count[0]].format;
-            const defaultFormatter = labelFormat ? viz.valueFormatter.create({format: labelFormat}) : null;
-            const countFormatter = countFormat ? viz.valueFormatter.create({format: countFormat}) : null;
-            const smallFormatter = viz.valueFormatter.create({format: 'O', value: 0});
-            const bigFormatter = viz.valueFormatter.create({format: 'O', value: 1e6});
+            const defaultFormatter = labelFormat ? formatting.valueFormatter.create({format: labelFormat}) : null;
+            const countFormatter = countFormat ? formatting.valueFormatter.create({format: countFormat}) : null;
+            const smallFormatter = formatting.valueFormatter.create({format: 'O', value: 0});
+            const bigFormatter = formatting.valueFormatter.create({format: 'O', value: 1e6});
 
             const idColumnMetadata = metadata.columns[columnIndices.ID[0]] as any;
             const personaMap = {};
