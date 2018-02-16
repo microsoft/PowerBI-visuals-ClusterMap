@@ -589,6 +589,27 @@ export default class ClusterMap implements IVisual {
                 }
             });
 
+            /* check links */
+            let linkedPersonas = 0;
+            Object.keys(personaMap).forEach(key => {
+                const persona = personaMap[key];
+                if (persona.links) {
+                    persona.links = persona.links.filter(link => {
+                        return personaMap.hasOwnProperty(link.target);
+                    });
+
+                    if (!persona.links.length) {
+                        persona.links = null;
+                    } else {
+                        ++linkedPersonas;
+                    }
+                }
+            });
+
+            if (linkedPersonas <= 0) {
+                this.hasLinks = false;
+            }
+
             this.buckets.sort();
 
             const personaKeys = Object.keys(personaMap);
