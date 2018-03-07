@@ -103,7 +103,8 @@ export default class ClusterMap implements IVisual {
             imageCount: ClusterMap.MAX_IMAGES_DEFAULT,
             loadMoreCount: ClusterMap.LOAD_MORE_PERSONAS_STEP,
             normalColor: { solid: { color: ClusterMap.GAUGE_DEFAULT_COLOR } },
-            selectedColor: { solid: { color: ClusterMap.SELECTED_GAUGE_DEFAULT_COLOR } }
+            selectedColor: { solid: { color: ClusterMap.SELECTED_GAUGE_DEFAULT_COLOR } },
+            showNameLabels: true,
         },
         dataLoading: {
             maxDataRows: 20000
@@ -280,6 +281,7 @@ export default class ClusterMap implements IVisual {
             const newObjects: any = options.dataViews[0] && options.dataViews[0].metadata && options.dataViews[0].metadata.objects;
             if (newObjects && !_.isMatch(this.settings, newObjects)) {
                 const oldGaugeColor = this.settings.presentation.normalColor.solid.color;
+                const oldLabels = this.settings.presentation.showNameLabels;
                 $.extend(true, this.settings, newObjects);
                 this.settings.presentation.initialCount = Math.max(this.settings.presentation.initialCount, 1);
                 this.settings.presentation.imageCount = Math.max(this.settings.presentation.imageCount, 0);
@@ -295,6 +297,7 @@ export default class ClusterMap implements IVisual {
 
                 const normalColorChanged = (oldGaugeColor !== this.settings.presentation.normalColor.solid.color);
 
+                const labelsChanged = oldLabels !== this.settings.presentation.showNameLabels;
                 if (this.personas) {
                     /* set the layout type in personas */
                     this.personas.layoutType = this.hasLinks ? this.settings.presentation.layout : 'orbital';
@@ -302,7 +305,7 @@ export default class ClusterMap implements IVisual {
                     // this.personas.enableBlur(this.settings.presentation.imageBlur);
 
                     /* the update was triggered by a change in the settings, retrun if the max number of personas or the gauge color didn't change */
-                    if (!maxPersonasChanged && !normalColorChanged && !maxImagesChanged) {
+                    if (!maxPersonasChanged && !normalColorChanged && !maxImagesChanged && !labelsChanged) {
                         return;
                     }
                 }
@@ -396,12 +399,14 @@ export default class ClusterMap implements IVisual {
                     this.personas.personas.forEach(wrapper => {
                         wrapper.object.selected = false;
                         wrapper.object.setFocus(Boolean(this.subSelectionData.personas.find(p => p.id === wrapper.id)), true);
+                        wrapper.object.label.showName = this.settings.presentation.showNameLabels;
                     });
                     this.personas.highlight(this.subSelectionData, true);
                 } else {
                     this.personas.personas.forEach(wrapper => {
                         wrapper.object.selected = false;
                         wrapper.object.setFocus(true, true);
+                        wrapper.object.label.showName = this.settings.presentation.showNameLabels;
                     });
                     this.personas.unhighlight(true);
                 }
@@ -816,6 +821,7 @@ export default class ClusterMap implements IVisual {
                     selectedBorderColor: '#000000',
                     backgroundColor: 'rgb(73,73,73)',
                     labelMinFontSize: 8,
+                    labelNameShow: this.settings.presentation.showNameLabels,
                 },
             };
 

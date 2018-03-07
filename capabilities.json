@@ -117,16 +117,23 @@
         },
         "normalColor": {
           "displayName": "Gauge Color",
-          "description": "Defined the base color for the persona's gauges.",
+          "description": "Defines the base color for the persona's gauges.",
           "type": {
             "fill": { "solid": { "color": true } }
           }
         },
         "selectedColor": {
           "displayName": "Selection Color",
-          "description": "Defined the base color of the persona's gauges when selection is active.",
+          "description": "Defines the base color of the persona's gauges when selection is active.",
           "type": {
             "fill": { "solid": { "color": true } }
+          }
+        },
+        "showNameLabels": {
+          "displayName": "Show Labels",
+          "description": "Show cluster name labels",
+          "type": {
+            "bool": true
           }
         }
       }

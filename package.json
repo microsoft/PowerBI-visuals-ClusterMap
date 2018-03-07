@@ -81,6 +81,6 @@
     "powerbi-visuals-utils-formattingutils": "^3.0.1"
   },
   "privateSubmodules": {
-    "@uncharted/personas": "0.6.2"
+    "@uncharted/personas": "0.6.3"
   }
 }
