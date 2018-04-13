@@ -1,3 +1,3 @@
 [submodule "src/revi"]
 	path = src/revi
-	url = ssh://git@stash.uncharted.software:7999/stories/revi.git
+    url=../revi.git

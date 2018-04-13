@@ -1,0 +1,40 @@
+image: docker.uncharted.software/chrome-headless-test:0.0.1
+
+variables:
+    GIT_SUBMODULE_STRATEGY: recursive
+
+cache:
+  key: ${CI_COMMIT_REF_SLUG}
+  paths:
+    - node_modules/
+    - package-lock.json
+
+
+before_script:
+  - npm install
+
+stages:
+    - build
+    - test
+    - deploy
+
+npm-build:
+    stage: build
+    script:
+        - npm run build
+    artifacts:
+        paths:
+            - dist/
+
+npm-test:
+    stage: test
+    dependencies: []
+    script:
+        - npm test
+
+npm-publish:
+    stage: deploy
+    script:
+        - npm run ci-publish
+    only:
+        - master
