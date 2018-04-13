@@ -1,16 +1,15 @@
-#Personas  
+# Personas
+  
+A Javascript UI component for visualizing clusters and groups 
 
-***  
-
-##Overview  
-*TBD*
-
-##Getting Started  
-#### Prerequisites
+## Getting Started
+  
+### Prerequisites
 - Node.js v4.2.2 or higher  
 - Docker & Docker Tools are supported but **optional**  
   
-#### Setup
+### Setup
+
 1. Create a new folder for the Personas source code:  
   
     `mkdir ~/projects/personas`  
@@ -37,16 +36,17 @@
 
 7. **[Optional]** Verify that the Docker application is working correctly by navigating to the url specified in the console window.  
 
-####Data format  
+### Data format  
+
 The data that personas will display should be in structured as follows:  
   
     {
         "entityRefs": { // Reference ids linking the entity information provided here with personas.
-            "PERSON_2": { // Object containing information about the entity, it must be defined by its id.
-                "id": "PERSON_2", // Id of the entity, must be the same as the key defining this object.
-                "name": "Trump", // Name of the entity
-                "type": "person", // Type of the entity 
-                "imageUrl": ["http://photos1.blogger.com/blogger/2678/1252/1600/trumpdoll.jpg"] // URL of an image of the entity, an array can be passed to draw multiple images on the persona.
+            "ANIMAL_1": { // Object containing information about the entity, it must be defined by its id.
+                "id": "ANIMAL_1", // Id of the entity, must be the same as the key defining this object.
+                "name": "Smokey", // Name of the entity
+                "type": "animal", // Type of the entity 
+                "imageUrl": ["./images/cat1.jpg"] // URL of an image of the entity, an array can be passed to draw multiple images on the persona.
             }
         },
         "aggregates": {
@@ -55,7 +55,7 @@ The data that personas will display should be in structured as follows:
                     "id": "0", // Id of the persona, must be the same as the key defining this object.
                     "properties": [ // Array of properties for this persona.
                         {
-                            "entityRefId": "PERSON_2", // Reference id of te entity thi property represents.
+                            "entityRefId": "ANIMAL_1", // Reference id of te entity thi property represents.
                             "count": 37, // Count, out of the total count of this hits for this persona, that this property represents.
                             "isPrimary": true, // Is this the primary/owner property of this persona. If det to `true`, the information in this property and its linked entity will be displayed on the persona.
                             "color": null // OPTIONAL. Color to use for this property in the case that no other color can be found.
@@ -79,8 +79,9 @@ The data that personas will display should be in structured as follows:
     }
     
   
-##Usage  
-#### Direct instantiation  
+## Usage  
+### Direct instantiation
+  
 To instantiate `Personas` directly first create, position and size a DOM element which will contain the module. The container element can either be `<div>` or `<svg>`.  
 
 Instantiate `Personas` as follows:
@@ -106,7 +107,8 @@ And then load the data:
   
 If the `append` parameter us set to `true` and data has been loaded already, the new data will be merged with the old data and the module will be updated to reflect the changes resulting from merging the data.
 
-####As jQuery Plugin  
+### As jQuery Plugin
+  
 Load the personas scripts in your document's head:  
   
     <head>
@@ -136,7 +138,8 @@ Finally, load `Personas` as a jQuery plugin:
         });
     </script>
   
-##Options  
+## Options
+  
 The options passed to `Personas` should look like this:  
   
     {
@@ -148,14 +151,14 @@ The options passed to `Personas` should look like this:
         autoGenerateIconMap: false, // Should the `entityIcons` be auto generated, if set to `false` the `entityIcons` field must be present.
         entityIcons: [ // OPTIONAL. Array containing information about entities within the clusters which a personas represent.
             {
-                "type": "person", // Type of entity. what is it.
-                "class": "fa fa-male",
+                "type": "animal", // Type of entity. what is it.
+                "class": "fa fa-square",
                 "color": "#400000", // Overall color of this entity.
-                "entityRefId": "PERSON_137", // The id by which this entity will be referenced.
-                "name": "Clinton" // Name of the entity
+                "entityRefId": "ANIMAL_1", // The id by which this entity will be referenced.
+                "name": "Lola" // Name of the entity
             },
             { // Special `default` entries can be created as follows:
-                "type": "person", // Type of the entity this default represents.
+                "type": "animal", // Type of the entity this default represents.
                 "color": "#d26502", // Overall color of the entities of this type
                 "isDefault": true // Must be set to `true`
             } // Default entries are used in the case that an entity of the specified `type` appears in the data to be displayed but it cannot be linked to an entity through its `entityRefId`
@@ -190,7 +193,7 @@ The options passed to `Personas` should look like this:
     }
   
 
-##Troubleshooting / FAQ  
+## Troubleshooting / FAQ  
 **Q:** How is `Personas` rendered to the screen?    
 **A:** `Personas` is implemented to run in SVG using the Snap.svg library.  
   
@@ -199,12 +202,4 @@ The options passed to `Personas` should look like this:
 that they are added to the DOM and be visible, please make sure that your framework has completely created the document
 and added it to the DOM before loading data into `Personas`.  *NOTE:* Instantiation of `Personas` can be done at any point
 in time, if you are having issues instantiating `Personas` please contact us.  
-
-##Contact  
-Main Contact: *TBD*  
-Technical Manager: Isaac Wong <iwong@uncharted.software>  
-Development Support: Dario Segura <dsegura@uncharted.software>  
-  
-## License  
-*TBD*
 

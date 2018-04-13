@@ -77,10 +77,10 @@
     "matter-attractors": "^0.1.6",
     "matter-js": "^0.13.0",
     "opentype.js": "^0.6.9",
-    "webcola": "^3.3.8",
-    "powerbi-visuals-utils-formattingutils": "^3.0.1"
+    "powerbi-visuals-utils-formattingutils": "^3.0.1",
+    "webcola": "^3.1.3"
   },
   "privateSubmodules": {
-    "@uncharted/personas": "0.6.2"
+    "@uncharted/personas": "0.7.0"
   }
 }
