@@ -8,7 +8,8 @@
       "es2015",
       "DOM"
     ],
-    "outDir": "generated"
+    "outDir": "generated",
+    "moduleResolution": "node"
   },
   "compileOnSave": false,
   "exclude": [

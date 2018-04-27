@@ -28,6 +28,7 @@ import IVisual = powerbi.extensibility.v110.IVisual;
 import VisualConstructorOptions = powerbi.extensibility.v110.VisualConstructorOptions;
 import VisualUpdateOptions = powerbi.VisualUpdateOptions;
 import ISelectionManager = powerbi.extensibility.ISelectionManager;
+import ISelectionId = powerbi.extensibility.ISelectionId;
 import ISelectionIdBuilder = powerbi.extensibility.ISelectionIdBuilder;
 import IVisualHost = powerbi.extensibility.v110.IVisualHost;
 import IVisualHostServices = powerbi.IVisualHostServices;
@@ -242,6 +243,15 @@ export default class ClusterMap implements IVisual {
         this.buildInfo.style.visibility = 'hidden';
 
         this.element.parentNode.appendChild(this.buildInfo);
+
+        this.selectionManager['registerOnSelectCallback'](
+            (ids: ISelectionId[]) => {
+                this.lastSelectionArgs = null;
+                if (ids.length) {
+                    this.lastSelectionArgs = ids;
+                    this.loadSelectionFromPowerBI();
+                }
+            });
     }
 
     /**
@@ -315,6 +325,8 @@ export default class ClusterMap implements IVisual {
             this.updateDataView(dataView, append);
             this.initializePersonas(viewport);
             this.personas.layoutType = this.hasLinks ? this.settings.presentation.layout : 'orbital';
+
+            requestAnimationFrame(this.loadSelectionFromPowerBI.bind(this));
         }
     }
 
@@ -828,61 +840,7 @@ export default class ClusterMap implements IVisual {
             this.personas = new Personas(this.element, personasOptions);
 
             this.personas.on(PersonaEvents.PERSONA_CLICKED, sender => {
-                this.ignoreSelectionNextUpdate = Boolean(this.subSelectionData);
-                const shouldSelect = !sender.selected;
-
-                this.selectionManager.clear();
-                if (shouldSelect) {
-                    const personaData = this.dataLayerStack[this.dataLayerStack.length - 1].data.personas.find(p => p.id === sender.id);
-                    const properties = [];
-                    if (personaData) {
-                        const selectArgs = [personaData.select];
-                        this.selectionManager.select(selectArgs);
-                        this.lastSelectionArgs = selectArgs;
-                        this.personas.personas.forEach(wrapper => {
-                            if (wrapper.object !== sender) {
-                                wrapper.object.selected = false;
-                                wrapper.object.setFocus(false, true);
-                            }
-                        });
-                        sender.selected = true;
-                        sender.setFocus(true, true);
-
-                        if (this.hasBuckets) {
-                            personaData.properties.forEach(property => {
-                                properties.push({
-                                    count: property.count / personaData.totalCount,
-                                    color: property.selectedColor,
-                                });
-                            });
-                        } else {
-                            properties.push({
-                                count: 1,
-                                color: this.settings.presentation.selectedColor.solid.color,
-                            });
-                        }
-
-                        this.personas.highlight({
-                            personas: [
-                                {
-                                    id: sender.id,
-                                    totalCount: 1,
-                                    properties: properties,
-                                }
-                            ]
-                        });
-                    }
-                } else {
-                    this.personas.personas.forEach(wrapper => {
-                        wrapper.object.selected = false;
-                        wrapper.object.setFocus(true, true);
-                    });
-                    this.personas.unhighlight();
-                    if (this.dataLayerStack[this.dataLayerStack.length - 1].select) {
-                        this.selectionManager.select(this.dataLayerStack[this.dataLayerStack.length - 1].select);
-                        this.lastSelectionArgs = this.dataLayerStack[this.dataLayerStack.length - 1].select;
-                    }
-                }
+                this.handleSelection(sender);
             });
 
             this.personas.on(PersonaEvents.PERSONA_SUB_LEVEL_CLICKED, sender => {
@@ -1152,5 +1110,79 @@ export default class ClusterMap implements IVisual {
             const inputManager = InputManager.instanceForContext(this.personas.mCanvas.reviContext);
             inputManager.inputScale = this.isSandboxed ? 1 : viewport.scale;
         }
+    }
+
+    private loadSelectionFromPowerBI() {
+        if (this.lastSelectionArgs !== null) {
+            const key = this.lastSelectionArgs[0].key;
+            if (this.lastSelectionArgs) {
+                const personaData = this.dataLayerStack[this.dataLayerStack.length - 1].data.personas.find(p => p.select.key === key);
+                if (personaData) {
+                    const sender = this.personas.personas.find(p => p.id === personaData.id);
+                    if (sender) {
+                        this.handleSelection(sender.object);
+                    }
+                }
+            }
+        }
+    }
+
+    private handleSelection(sender) {
+        this.ignoreSelectionNextUpdate = Boolean(this.subSelectionData);
+        const shouldSelect = !sender.selected;
+
+        this.selectionManager.clear();
+        if (shouldSelect) {
+            const personaData = this.dataLayerStack[this.dataLayerStack.length - 1].data.personas.find(p => p.id === sender.id);
+            const properties = [];
+            if (personaData) {
+                const selectArgs = [personaData.select] as ISelectionId;
+                this.selectionManager.select(selectArgs);
+                this.lastSelectionArgs = selectArgs;
+                this.personas.personas.forEach(wrapper => {
+                    if (wrapper.object !== sender) {
+                        wrapper.object.selected = false;
+                        wrapper.object.setFocus(false, true);
+                    }
+                });
+                sender.selected = true;
+                sender.setFocus(true, true);
+
+                if (this.hasBuckets) {
+                    personaData.properties.forEach(property => {
+                        properties.push({
+                            count: property.count / personaData.totalCount,
+                            color: property.selectedColor,
+                        });
+                    });
+                } else {
+                    properties.push({
+                        count: 1,
+                        color: this.settings.presentation.selectedColor.solid.color,
+                    });
+                }
+
+                this.personas.highlight({
+                    personas: [
+                        {
+                            id: sender.id,
+                            totalCount: 1,
+                            properties: properties,
+                        }
+                    ]
+                });
+            }
+        } else {
+            this.personas.personas.forEach(wrapper => {
+                wrapper.object.selected = false;
+                wrapper.object.setFocus(true, true);
+            });
+            this.personas.unhighlight();
+            if (this.dataLayerStack[this.dataLayerStack.length - 1].select) {
+                this.selectionManager.select(this.dataLayerStack[this.dataLayerStack.length - 1].select);
+                this.lastSelectionArgs = this.dataLayerStack[this.dataLayerStack.length - 1].select;
+            }
+        }
+
     }
 }
