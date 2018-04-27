@@ -4,3 +4,8 @@
 node_modules
 typings
 dist
+compilation-stats.json
+coverage/
+package-lock.json
+test-report.xml
+test.bundle
