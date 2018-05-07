@@ -193,7 +193,7 @@ const _buildLegacyPackage = (fileContent) => {
 };
 
 const _buildPackage = (fileContent) => {
-    const jsContent = fileContent;
+    const jsContent = 'var window = window.document.defaultView;\nvar $ = window.$;\n var _ = window._;\n' + fileContent;
     const cssContent = compileSass();
     const icon = fs.readFileSync(pbivizJson.assets.icon);
     const iconType = pbivizJson.assets.icon.indexOf('.svg') >= 0 ? 'svg+xml' : 'png';

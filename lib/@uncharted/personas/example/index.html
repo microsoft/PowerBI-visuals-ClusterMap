@@ -43,8 +43,14 @@
     document.addEventListener("DOMContentLoaded", function() {
         var data = getSampleData();
         var tmp = 0;
+        var tmp2 = 0;
         var options = {
-
+            layout: {
+                viewportMaxZoomMultiplier: 2,
+                viewportMinZoomMultiplier: 0.1,
+                viewportBackground: true,
+                layoutAuraFillEnabled: true,
+            },
         };
 
         var personas = new Uncharted.Personas.Personas(document.getElementById('personas-panel'), options);
@@ -63,11 +69,16 @@
                     personas.personas[i].object.selected = false;
                 }
 
+                var data;
                 if (++tmp % 2) {
-                    personas.addDataLayer(getExtraSampleData(), sender);
+                    data = getExtraSampleData();
                 } else {
-                    personas.addDataLayer(getSampleData(), sender);
+                    data = getSampleData();
                 }
+
+                data.subLayouts = getOuterLayoutData(tmp++ % 3);
+
+                personas.addDataLayer(data, sender);
             }
         });
 

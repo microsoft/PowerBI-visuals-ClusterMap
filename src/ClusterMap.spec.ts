@@ -42,26 +42,63 @@ window['powerbi'] = {
             typedConstant: function () {},
             or: function () {},
         }
+    },
+    VisualUpdateType: {
+        Data: 1,
     }
 };
 
 import * as $ from 'jquery';
-import * as sinon from 'sinon';
-import { expect } from 'chai';
+global['$'] = global['jQuery'] = $;
 import ClusterMap from './ClusterMap';
-import VisualInitOptions = powerbi.VisualInitOptions;
-import VisualUpdateOptions = powerbi.VisualUpdateOptions;
-import VisualConstructorOptions = powerbi.extensibility.v110.VisualConstructorOptions;
-import DataViewObjects = powerbi.DataViewObjects;
-import SQExprBuilder = powerbi.data.SQExprBuilder;
-import * as _ from 'lodash';
 
+describe('ClusterMap Visual', () => {
+    let visual;
 
-describe('The ClusterMap Component', function () {
-    before(function() {
+    beforeAll(function () {
+        const element = $('<div></div>');
+        const parent = $('<div></div>');
+        parent.append(element);
+        const dummyHost = {
+            createSelectionManager: () => ({
+                hostServices: 'hostService',
+                registerOnSelectCallback: () => {}
+            }),
+        };
+        visual = new ClusterMap(<any>{
+            element: element[0],
+            host: dummyHost,
+        });
     });
 
+    it('exists', () => {
+        expect(ClusterMap).toBeTruthy();
+        expect(visual).toBeTruthy();
+    });
 
-    it('exists', function () {
+    it('update', () => {
+        const options = {};
+        visual.update(options);
+    });
+
+    it('enumerateObjectInstances', () => {
+        const options = {
+            objectName: 'presentation',
+        };
+        const instances = visual.enumerateObjectInstances(options);
+        expect(instances).toBeTruthy();
+        expect(instances.length).toBe(1);
+        const instanceProperties = instances[0].properties;
+        expect(instanceProperties.layout).toBe('cola');
+        expect(instanceProperties.initialCount).toBe(20);
+        expect(instanceProperties.imageCount).toBe(4);
+        expect(instanceProperties.loadMoreCount).toBe(5);
+        expect(instanceProperties.normalColor.solid.color).toBe('#41455e');
+        expect(instanceProperties.selectedColor.solid.color).toBe('#00bad3');
+        expect(instanceProperties.showNameLabels).toBe(true);
+    });
+
+    it('destroy', () => {
+        visual.destroy();
     });
 });

@@ -22,11 +22,13 @@
  */
 
 /// <reference path="../node_modules/powerbi-visuals/lib/powerbi-visuals.d.ts"/>
+/// <reference path='../node_modules/powerbi-visuals-utils-formattingutils/lib/index.d.ts'/>
 
 import IVisual = powerbi.extensibility.v110.IVisual;
 import VisualConstructorOptions = powerbi.extensibility.v110.VisualConstructorOptions;
 import VisualUpdateOptions = powerbi.VisualUpdateOptions;
 import ISelectionManager = powerbi.extensibility.ISelectionManager;
+import ISelectionId = powerbi.extensibility.ISelectionId;
 import ISelectionIdBuilder = powerbi.extensibility.ISelectionIdBuilder;
 import IVisualHost = powerbi.extensibility.v110.IVisualHost;
 import IVisualHostServices = powerbi.IVisualHostServices;
@@ -35,9 +37,6 @@ import VisualObjectInstance = powerbi.VisualObjectInstance;
 import EnumerateVisualObjectInstancesOptions = powerbi.EnumerateVisualObjectInstancesOptions;
 import SQExprBuilder = powerbi.data.SQExprBuilder;
 import InputManager from '../lib/@uncharted/personas/src/revi/plugins/input/InputManager.js';
-
-import * as $ from 'jquery';
-import * as _ from 'lodash';
 
 import { Personas, PersonaEvents, BreadcrumbEvents, LayoutEvents } from '../lib/@uncharted/personas/src/Personas.js';
 
@@ -105,7 +104,8 @@ export default class ClusterMap implements IVisual {
             imageCount: ClusterMap.MAX_IMAGES_DEFAULT,
             loadMoreCount: ClusterMap.LOAD_MORE_PERSONAS_STEP,
             normalColor: { solid: { color: ClusterMap.GAUGE_DEFAULT_COLOR } },
-            selectedColor: { solid: { color: ClusterMap.SELECTED_GAUGE_DEFAULT_COLOR } }
+            selectedColor: { solid: { color: ClusterMap.SELECTED_GAUGE_DEFAULT_COLOR } },
+            showNameLabels: true,
         },
         dataLoading: {
             maxDataRows: 20000
@@ -243,6 +243,15 @@ export default class ClusterMap implements IVisual {
         this.buildInfo.style.visibility = 'hidden';
 
         this.element.parentNode.appendChild(this.buildInfo);
+
+        this.selectionManager['registerOnSelectCallback'](
+            (ids: ISelectionId[]) => {
+                this.lastSelectionArgs = null;
+                if (ids.length) {
+                    this.lastSelectionArgs = ids;
+                    this.loadSelectionFromPowerBI();
+                }
+            });
     }
 
     /**
@@ -282,6 +291,7 @@ export default class ClusterMap implements IVisual {
             const newObjects: any = options.dataViews[0] && options.dataViews[0].metadata && options.dataViews[0].metadata.objects;
             if (newObjects && !_.isMatch(this.settings, newObjects)) {
                 const oldGaugeColor = this.settings.presentation.normalColor.solid.color;
+                const oldLabels = this.settings.presentation.showNameLabels;
                 $.extend(true, this.settings, newObjects);
                 this.settings.presentation.initialCount = Math.max(this.settings.presentation.initialCount, 1);
                 this.settings.presentation.imageCount = Math.max(this.settings.presentation.imageCount, 0);
@@ -297,6 +307,7 @@ export default class ClusterMap implements IVisual {
 
                 const normalColorChanged = (oldGaugeColor !== this.settings.presentation.normalColor.solid.color);
 
+                const labelsChanged = oldLabels !== this.settings.presentation.showNameLabels;
                 if (this.personas) {
                     /* set the layout type in personas */
                     this.personas.layoutType = this.hasLinks ? this.settings.presentation.layout : 'orbital';
@@ -304,7 +315,7 @@ export default class ClusterMap implements IVisual {
                     // this.personas.enableBlur(this.settings.presentation.imageBlur);
 
                     /* the update was triggered by a change in the settings, retrun if the max number of personas or the gauge color didn't change */
-                    if (!maxPersonasChanged && !normalColorChanged && !maxImagesChanged) {
+                    if (!maxPersonasChanged && !normalColorChanged && !maxImagesChanged && !labelsChanged) {
                         return;
                     }
                 }
@@ -314,6 +325,8 @@ export default class ClusterMap implements IVisual {
             this.updateDataView(dataView, append);
             this.initializePersonas(viewport);
             this.personas.layoutType = this.hasLinks ? this.settings.presentation.layout : 'orbital';
+
+            requestAnimationFrame(this.loadSelectionFromPowerBI.bind(this));
         }
     }
 
@@ -398,12 +411,14 @@ export default class ClusterMap implements IVisual {
                     this.personas.personas.forEach(wrapper => {
                         wrapper.object.selected = false;
                         wrapper.object.setFocus(Boolean(this.subSelectionData.personas.find(p => p.id === wrapper.id)), true);
+                        wrapper.object.label.showName = this.settings.presentation.showNameLabels;
                     });
                     this.personas.highlight(this.subSelectionData, true);
                 } else {
                     this.personas.personas.forEach(wrapper => {
                         wrapper.object.selected = false;
                         wrapper.object.setFocus(true, true);
+                        wrapper.object.label.showName = this.settings.presentation.showNameLabels;
                     });
                     this.personas.unhighlight(true);
                 }
@@ -467,13 +482,13 @@ export default class ClusterMap implements IVisual {
             this.hasLinks = Boolean(columnIndices.LinkTo.length);
             this.hasBuckets = Boolean(columnIndices.Bucket.length);
 
-            const viz: any = powerbi.visuals;
+            const formatting = powerbi.extensibility.utils.formatting;
             const labelFormat = metadata.columns[columnIndices.Name[0]].format;
             const countFormat = metadata.columns[columnIndices.Count[0]].format;
-            const defaultFormatter = labelFormat ? viz.valueFormatter.create({format: labelFormat}) : null;
-            const countFormatter = countFormat ? viz.valueFormatter.create({format: countFormat}) : null;
-            const smallFormatter = viz.valueFormatter.create({format: 'O', value: 0});
-            const bigFormatter = viz.valueFormatter.create({format: 'O', value: 1e6});
+            const defaultFormatter = labelFormat ? formatting.valueFormatter.create({format: labelFormat}) : null;
+            const countFormatter = countFormat ? formatting.valueFormatter.create({format: countFormat}) : null;
+            const smallFormatter = formatting.valueFormatter.create({format: 'O', value: 0});
+            const bigFormatter = formatting.valueFormatter.create({format: 'O', value: 1e6});
 
             const idColumnMetadata = metadata.columns[columnIndices.ID[0]] as any;
             const personaMap = {};
@@ -590,6 +605,27 @@ export default class ClusterMap implements IVisual {
                     });
                 }
             });
+
+            /* check links */
+            let linkedPersonas = 0;
+            Object.keys(personaMap).forEach(key => {
+                const persona = personaMap[key];
+                if (persona.links) {
+                    persona.links = persona.links.filter(link => {
+                        return personaMap.hasOwnProperty(link.target);
+                    });
+
+                    if (!persona.links.length) {
+                        persona.links = null;
+                    } else {
+                        ++linkedPersonas;
+                    }
+                }
+            });
+
+            if (linkedPersonas <= 0) {
+                this.hasLinks = false;
+            }
 
             this.buckets.sort();
 
@@ -797,67 +833,14 @@ export default class ClusterMap implements IVisual {
                     selectedBorderColor: '#000000',
                     backgroundColor: 'rgb(73,73,73)',
                     labelMinFontSize: 8,
+                    labelNameShow: this.settings.presentation.showNameLabels,
                 },
             };
 
             this.personas = new Personas(this.element, personasOptions);
 
             this.personas.on(PersonaEvents.PERSONA_CLICKED, sender => {
-                this.ignoreSelectionNextUpdate = Boolean(this.subSelectionData);
-                const shouldSelect = !sender.selected;
-
-                this.selectionManager.clear();
-                if (shouldSelect) {
-                    const personaData = this.dataLayerStack[this.dataLayerStack.length - 1].data.personas.find(p => p.id === sender.id);
-                    const properties = [];
-                    if (personaData) {
-                        const selectArgs = [personaData.select];
-                        this.selectionManager.select(selectArgs);
-                        this.lastSelectionArgs = selectArgs;
-                        this.personas.personas.forEach(wrapper => {
-                            if (wrapper.object !== sender) {
-                                wrapper.object.selected = false;
-                                wrapper.object.setFocus(false, true);
-                            }
-                        });
-                        sender.selected = true;
-                        sender.setFocus(true, true);
-
-                        if (this.hasBuckets) {
-                            personaData.properties.forEach(property => {
-                                properties.push({
-                                    count: property.count / personaData.totalCount,
-                                    color: property.selectedColor,
-                                });
-                            });
-                        } else {
-                            properties.push({
-                                count: 1,
-                                color: this.settings.presentation.selectedColor.solid.color,
-                            });
-                        }
-
-                        this.personas.highlight({
-                            personas: [
-                                {
-                                    id: sender.id,
-                                    totalCount: 1,
-                                    properties: properties,
-                                }
-                            ]
-                        });
-                    }
-                } else {
-                    this.personas.personas.forEach(wrapper => {
-                        wrapper.object.selected = false;
-                        wrapper.object.setFocus(true, true);
-                    });
-                    this.personas.unhighlight();
-                    if (this.dataLayerStack[this.dataLayerStack.length - 1].select) {
-                        this.selectionManager.select(this.dataLayerStack[this.dataLayerStack.length - 1].select);
-                        this.lastSelectionArgs = this.dataLayerStack[this.dataLayerStack.length - 1].select;
-                    }
-                }
+                this.handleSelection(sender);
             });
 
             this.personas.on(PersonaEvents.PERSONA_SUB_LEVEL_CLICKED, sender => {
@@ -1127,5 +1110,79 @@ export default class ClusterMap implements IVisual {
             const inputManager = InputManager.instanceForContext(this.personas.mCanvas.reviContext);
             inputManager.inputScale = this.isSandboxed ? 1 : viewport.scale;
         }
+    }
+
+    private loadSelectionFromPowerBI() {
+        if (this.lastSelectionArgs !== null) {
+            const key = this.lastSelectionArgs[0].key;
+            if (this.lastSelectionArgs) {
+                const personaData = this.dataLayerStack[this.dataLayerStack.length - 1].data.personas.find(p => p.select.key === key);
+                if (personaData) {
+                    const sender = this.personas.personas.find(p => p.id === personaData.id);
+                    if (sender) {
+                        this.handleSelection(sender.object);
+                    }
+                }
+            }
+        }
+    }
+
+    private handleSelection(sender) {
+        this.ignoreSelectionNextUpdate = Boolean(this.subSelectionData);
+        const shouldSelect = !sender.selected;
+
+        this.selectionManager.clear();
+        if (shouldSelect) {
+            const personaData = this.dataLayerStack[this.dataLayerStack.length - 1].data.personas.find(p => p.id === sender.id);
+            const properties = [];
+            if (personaData) {
+                const selectArgs = [personaData.select] as ISelectionId;
+                this.selectionManager.select(selectArgs);
+                this.lastSelectionArgs = selectArgs;
+                this.personas.personas.forEach(wrapper => {
+                    if (wrapper.object !== sender) {
+                        wrapper.object.selected = false;
+                        wrapper.object.setFocus(false, true);
+                    }
+                });
+                sender.selected = true;
+                sender.setFocus(true, true);
+
+                if (this.hasBuckets) {
+                    personaData.properties.forEach(property => {
+                        properties.push({
+                            count: property.count / personaData.totalCount,
+                            color: property.selectedColor,
+                        });
+                    });
+                } else {
+                    properties.push({
+                        count: 1,
+                        color: this.settings.presentation.selectedColor.solid.color,
+                    });
+                }
+
+                this.personas.highlight({
+                    personas: [
+                        {
+                            id: sender.id,
+                            totalCount: 1,
+                            properties: properties,
+                        }
+                    ]
+                });
+            }
+        } else {
+            this.personas.personas.forEach(wrapper => {
+                wrapper.object.selected = false;
+                wrapper.object.setFocus(true, true);
+            });
+            this.personas.unhighlight();
+            if (this.dataLayerStack[this.dataLayerStack.length - 1].select) {
+                this.selectionManager.select(this.dataLayerStack[this.dataLayerStack.length - 1].select);
+                this.lastSelectionArgs = this.dataLayerStack[this.dataLayerStack.length - 1].select;
+            }
+        }
+
     }
 }
