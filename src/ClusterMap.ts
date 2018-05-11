@@ -840,7 +840,7 @@ export default class ClusterMap implements IVisual {
             this.personas = new Personas(this.element, personasOptions);
 
             this.personas.on(PersonaEvents.PERSONA_CLICKED, sender => {
-                this.handleSelection(sender);
+                this.handleSelection(sender, !sender.selected);
             });
 
             this.personas.on(PersonaEvents.PERSONA_SUB_LEVEL_CLICKED, sender => {
@@ -1113,23 +1113,20 @@ export default class ClusterMap implements IVisual {
     }
 
     private loadSelectionFromPowerBI() {
-        if (this.lastSelectionArgs !== null) {
+        if (this.lastSelectionArgs && this.lastSelectionArgs[0]) {
             const key = this.lastSelectionArgs[0].key;
-            if (this.lastSelectionArgs) {
-                const personaData = this.dataLayerStack[this.dataLayerStack.length - 1].data.personas.find(p => p.select.key === key);
-                if (personaData) {
-                    const sender = this.personas.personas.find(p => p.id === personaData.id);
-                    if (sender) {
-                        this.handleSelection(sender.object);
-                    }
+            const personaData = this.dataLayerStack[this.dataLayerStack.length - 1].data.personas.find(p => p.select.key === key);
+            if (personaData) {
+                const sender = this.personas.personas.find(p => p.id === personaData.id);
+                if (sender) {
+                    this.handleSelection(sender.object, true);
                 }
             }
         }
     }
 
-    private handleSelection(sender) {
+    private handleSelection(sender, shouldSelect) {
         this.ignoreSelectionNextUpdate = Boolean(this.subSelectionData);
-        const shouldSelect = !sender.selected;
 
         this.selectionManager.clear();
         if (shouldSelect) {
@@ -1141,7 +1138,7 @@ export default class ClusterMap implements IVisual {
                 this.lastSelectionArgs = selectArgs;
                 this.personas.personas.forEach(wrapper => {
                     if (wrapper.object !== sender) {
-                        wrapper.object.selected = false;
+                        wrapper.object.selected = false ;
                         wrapper.object.setFocus(false, true);
                     }
                 });
