@@ -97,6 +97,6 @@
     "verbose": true
   },
   "privateSubmodules": {
-    "@uncharted/personas": "0.7.2"
+    "@uncharted/personas": "0.7.3"
   }
 }
